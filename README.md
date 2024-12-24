@@ -1,10 +1,12 @@
 # Auto Attendant and Call Queue Backup and Bulk Provisioning Tools
 
-These tools assist with the bulk provisioning of Teams Voice Applications:
+These tools assist with the bulk provisioning of Teams Voice Applications. Please see the individual README and INSTRUCTIONS files for each of the tools.
+
+For more information on Teams Voice Applications:
 
   - [Plan for Teams Auto attendants and Call queues](https://learn.microsoft.com/microsoftteams/plan-auto-attendant-call-queue)
     - [Set up a Microsoft Teams Auto attendant](https://learn.microsoft.com/microsoftteams/create-a-phone-system-auto-attendant)
-    - [Create a Call queue in Microsoft Teams](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue), and
+    - [Create a Call queue in Microsoft Teams](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue)
   - [Plan for Auto attendant and Call queue authorized users](https://learn.microsoft.com/en-us/microsoftteams/aa-cq-authorized-users-plan)
     - [Set up Auto attendant and Call queue authorized users](https://learn.microsoft.com/microsoftteams/aa-cq-authorized-users)
     - [Manage voice applications policies in Microsoft Teams](https://learn.microsoft.com/microsoftteams/manage-voice-applications-policies)
