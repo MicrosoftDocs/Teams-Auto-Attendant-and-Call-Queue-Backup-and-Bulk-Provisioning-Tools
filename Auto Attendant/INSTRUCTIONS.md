@@ -38,7 +38,8 @@ This step will download the existing resource account, auto attendant, call queu
 
 # Provisioning Instructions
 
-1. Open the BulkAAs.xlsm, and complete the follows tabs:
+1. Open the BulkAAs.xlsm, and enable macros if they have been disabled.
+1. Complete the follows tabs:
   - Config-BusinessHours
   - Config-Holidays
   - Config-Base
