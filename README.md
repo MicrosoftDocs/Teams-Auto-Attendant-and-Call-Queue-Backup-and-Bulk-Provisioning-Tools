@@ -1,5 +1,3 @@
-<base target="_blank">
-
 # Auto Attendant and Call Queue Backup and Bulk Provisioning Tools
 
 These tools assist with the bulk provisioning of Teams Voice Applications. Please see the individual README and INSTRUCTIONS files for each of the tools.
