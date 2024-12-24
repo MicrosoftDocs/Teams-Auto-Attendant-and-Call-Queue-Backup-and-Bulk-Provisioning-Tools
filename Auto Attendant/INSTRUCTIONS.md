@@ -3,6 +3,7 @@
 This step will download the existing resource account, auto attendant, call queue, Teams channels and, user configurations in the tenant so they can be referenced when provisioning new auto attendants.
 
 1. Login to Teams Admin Center and get the number of Auto Attendants and Call Queues configured in your tenant:
+   :::image type="content" source="/media/TAC-Number-AA-CQ.png" alt-text="Screenshot showing the Teams Admin Center summary table headers for Auto Attendants and Call Queues.":::
 1. Open a PowerShell 5.x window
    - Issue the command: $PsVersionTable.PSVersion if not sure
 1. In the PowerShell window, run the "BulkAAsPreparation.ps1" script.	
