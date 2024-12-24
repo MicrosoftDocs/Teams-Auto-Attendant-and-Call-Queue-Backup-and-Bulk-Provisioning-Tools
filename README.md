@@ -1,4 +1,4 @@
-# Teams Auto Attendant and Call Queue Backup and Bulk Provisioning Tools
+# Auto Attendant and Call Queue Backup and Bulk Provisioning Tools
 
 PUT DESCRIPTION HERE
 
