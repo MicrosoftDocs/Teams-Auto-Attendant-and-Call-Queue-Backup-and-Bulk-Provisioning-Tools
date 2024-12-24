@@ -1,3 +1,9 @@
+# Download the BulkAATool
+
+Download the files and sub-directories in the **BulkAATool** folder to a location on your workstation.
+
+Alternatively, from the main **Code** page, select *<> Code* and *Download ZIP* to download the entire repository as a zip file and then unzip the file.
+
 # Preparation Instructions
 
 This step will download the existing resource account, auto attendant, call queue, Teams channels and, user configurations in the tenant so they can be referenced when provisioning new auto attendants.
