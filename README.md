@@ -2,7 +2,7 @@
 
 These tools assist with the bulk provisioning of Teams Voice Applications:
 
-  - [Plan for Teams Auto attendants and Call queues](https://learn.microsoft.com/microsoftteams/plan-auto-attendant-call-queue)
+  - <a href="https://learn.microsoft.com/microsoftteams/plan-auto-attendant-call-queue", target="_blank">Plan for Teams Auto attendants and Call queues</a>
     - [Set up a Microsoft Teams Auto attendant](https://learn.microsoft.com/microsoftteams/create-a-phone-system-auto-attendant)
     - [Create a Call queue in Microsoft Teams](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue), and
   - [Plan for Auto attendant and Call queue authorized users](https://learn.microsoft.com/en-us/microsoftteams/aa-cq-authorized-users-plan)
