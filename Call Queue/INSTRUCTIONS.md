@@ -24,10 +24,10 @@ This step will download the existing resource account, auto attendant, call queu
 |:--------------------|----------------------------------------------------|
 | -AACount n          | Replace n with the number of Auto Attendants from Step 1. <br>*Only use when the number of Auto Attendants is greater than 100.*           |         
 | -CQCount n          | Replace n with the number of Call Queues from Step 1. <br>*Only use when the number of Call Queues is greater than 100*                    |
-| -ExcelFile filename | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsPreparation.ps1 file<br>Default: BulkAAs.xlsm |
+| -ExcelFile filename | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsPreparation.ps1 file<br>Default: BulkCQs.xlsm |
 | -Help               | This help message.                                                                                                                         |
 | -NoResourceAccounts | Do not download existing resource account information.                                                                                     |
-| -NoAutoAttendants   | Do not download existing auto attendant information. <br>*Automaticaly enables*  **-NoHolidays**                                           |
+| -NoAutoAttendants   | Do not download existing auto attendant information.                                                                                       |
 | -NoCallQueues       | Do not download existing call queue information.                                                                                           |
 | -NoUsers            | Do not download existing EV enabled users.                                                                                                 |
 | -NoTeamsChannels    | Do not download existing teams information.                                                                                                |
