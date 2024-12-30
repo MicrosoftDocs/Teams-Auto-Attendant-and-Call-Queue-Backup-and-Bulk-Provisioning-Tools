@@ -31,7 +31,7 @@ This step will download the existing resource account, auto attendant, call queu
 | -NoCallQueues       | Do not download existing call queue information.                                                                                           |
 | -NoUsers            | Do not download existing EV enabled users.                                                                                                 |
 | -NoTeamsChannels    | Do not download existing teams information.                                                                                                |
-| -NoOpen             | Do not open the spreadsheet when the BulkAAsPreparation.ps1 script is finished.                                                            |
+| -NoOpen             | Do not open the spreadsheet when the BulkCQsPreparation.ps1 script is finished.                                                            |
 | -Verbose            | Watch the spreadsheet get filled with information as the BulkAAsPreparation.psl1 script runs.<br>*Automaticaly disables*  **-NoOpen**      | 
 
 # Provisioning Instructions
