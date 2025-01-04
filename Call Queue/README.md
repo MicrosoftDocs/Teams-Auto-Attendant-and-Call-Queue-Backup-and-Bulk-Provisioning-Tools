@@ -48,7 +48,7 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkCQsPreparation.ps1
 
-- No known issues. 
+- No known issues 
 
 ### BulkCQsProvisioning
 
