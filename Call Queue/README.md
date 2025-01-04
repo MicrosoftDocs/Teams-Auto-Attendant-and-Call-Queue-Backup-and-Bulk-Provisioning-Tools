@@ -18,7 +18,7 @@
 | Users: 2000                 |                       |
 | Call Queues: 2000           |                       |
 
-Existing Items limits can be increased/removed by updated the spreadsheet accordingly.
+Existing Items limits can be increased/removed by updating the spreadsheet accordingly.
 
 ## Warnings
 
@@ -48,13 +48,20 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkCQsPreparation.ps1
 
-- Voice applications phone numbers are not downloaded
+- No known issues. 
 
 ### BulkCQsProvisioning
 
-- Can't assigne a phone number to a new resource account
+- Can't assign a phone number to a new resource account
 - It is not possible to assign multiple resource accounts to a Call Queue
 
 ### BulkCQs spreadsheet
+
+- **Existing-CallQueue** tab
+  - While all the resource accounts assigned to the call queue are downloaded, only the first one is shown under ***ResourceAccountName***
+  - While all the on-behalf-of outbound dialing numbers assigned to the call queue are downloaded, only the first 4 are shown under ***OutboundCLID01*** through ***OutboundCLID04***
+  - Once the ***Show All Existing Queues*** option is set to **No** and values in the ***Action*** or ***CallQueueName*** cells have been changed, switching ***Show All Existing Queues*** option back to **Yes** will not affect the cells that have been manually changed as the formula in these cells has been replaced.
+    - This is an issue with Excel.
+    - Manually copy the formulas from unaffected cells.
 
 - It is highly likely there are some conditional formatting errors. Please report these so they can be addressed.
