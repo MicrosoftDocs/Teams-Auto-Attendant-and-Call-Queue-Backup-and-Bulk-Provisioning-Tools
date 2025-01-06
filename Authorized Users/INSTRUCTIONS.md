@@ -30,9 +30,11 @@ This step will download the existing voice applications policies, users, auto at
 
 1. Open the BulkAuthUsers.xlsx spreadsheet.
 1. Complete the follows tabs:
+   
    - Config-PolicyToUser
    - Config-AA-AuthorizedUsers
    - Config-CQ-AuthorizedUsers
+     
 1. Save the BulkAuthUserss.xlsm spreadsheet and close Excel.
 1. Open a PowerShell 5.x window
    - Issue the command: $PsVersionTable.PSVersion if not sure
