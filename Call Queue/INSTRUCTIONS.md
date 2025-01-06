@@ -24,6 +24,7 @@ This step will download the existing resource account, auto attendant, call queu
 |:--------------------|----------------------------------------------------|
 | -AACount n          | Replace n with the number of Auto Attendants from Step 1. <br>*Only use when the number of Auto Attendants is greater than 100.*           |         
 | -CQCount n          | Replace n with the number of Call Queues from Step 1. <br>*Only use when the number of Call Queues is greater than 100*                    |
+| -Download           | Download all Call Queue data, including audio files.                                                                                       |
 | -ExcelFile filename | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsPreparation.ps1 file<br>Default: BulkCQs.xlsm |
 | -Help               | This help message.                                                                                                                         |
 | -NoResourceAccounts | Do not download existing resource account information.                                                                                     |
@@ -33,6 +34,12 @@ This step will download the existing resource account, auto attendant, call queu
 | -NoTeamsChannels    | Do not download existing teams information.                                                                                                |
 | -NoOpen             | Do not open the spreadsheet when the BulkCQsPreparation.ps1 script is finished.                                                            |
 | -Verbose            | Watch the spreadsheet get filled with information as the BulkAAsPreparation.psl1 script runs.<br>*Automaticaly disables*  **-NoOpen**      | 
+
+## -Download notes
+
+- All downloads for a call queue will be in the AudioFiles directory, in a sub-directories by the call queue ID. This is due to the fact that call queue names are not unique.
+- All audio file names will be prefixed with the unique file id and underscore. This is due to the fact that the same file name used within the same call queue may not actually have the same content.
+
 
 # Provisioning Instructions
 
