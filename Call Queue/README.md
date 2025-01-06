@@ -48,7 +48,8 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkCQsPreparation.ps1
 
-- No known issues 
+- Download option
+  - Possible issue when there are more than 20 agents in the call queue.
 
 ### BulkCQsProvisioning.ps1
 
