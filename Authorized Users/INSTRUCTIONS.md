@@ -20,7 +20,11 @@ This step will download the existing voice applications policies, users, auto at
 
 ## BulkAAsPreparation.ps1 command line options
 
-None. 
+| Option              | Description                                        |
+|:--------------------|----------------------------------------------------|
+| -AACount n          | Replace n with the number of Auto Attendants from Step 1. <br>*Only use when the number of Auto Attendants is greater than 100.*           |         
+| -CQCount n          | Replace n with the number of Call Queues from Step 1. <br>*Only use when the number of Call Queues is greater than 100*                    |
+
 
 # Provisioning Instructions
 
