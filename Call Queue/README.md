@@ -50,7 +50,7 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 - No known issues 
 
-### BulkCQsProvisioning
+### BulkCQsProvisioning.ps1
 
 - Can't assign a phone number to a new resource account
 - It is not possible to assign multiple resource accounts to a Call Queue
