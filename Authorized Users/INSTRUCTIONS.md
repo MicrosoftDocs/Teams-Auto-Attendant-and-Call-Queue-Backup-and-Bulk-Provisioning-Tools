@@ -14,8 +14,8 @@ This step will download the existing voice applications policies, users, auto at
 
 1. Open a PowerShell 5.x window
    - Issue the command: $PsVersionTable.PSVersion if not sure
-1. In the PowerShell window, run the "BulkAAsPreparation.ps1" script.	
-   - This will prepare and open the BulkAAs spreadsheet.
+1. In the PowerShell window, run the "BulkAuthUsersPreparation.ps1" script.	
+   - This will prepare and open the BulkAuthUser spreadsheet.
    - If your tenant has more than 100 Auto Attendants or Call Queues use the -AACount or -CQCount options as outlined below.
 
 ## BulkAAsPreparation.ps1 command line options
