@@ -5,6 +5,7 @@
 1.	PowerShell v5.x is installed on your computer.
     - Issue the command: $PSVersionTable.PSVersion
     - PowerShell 7.x is NOT supported
+1.  Auto Attendants and Call Queues have been created.
 1.	Enterprise Voice Enabled users have been created.
 1.	Voice Applications Policies have been created.
 
