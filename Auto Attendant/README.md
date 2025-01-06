@@ -60,7 +60,7 @@ Note: At the current time these permissions are requested even if Resource Accou
 - Can only retrieve holiday schedules that are assigned to an Auto Attendant
   - This is a system limitation and will not be addressed
 
-### BulkAAsProvisioning
+### BulkAAsProvisioning.ps1
 
 - It is not possible to self-reference a Resource Account or Auto Autoattendant created in the spreadsheet
 - It is not possible to assign multiple resource accounts to an Auto Attendant
