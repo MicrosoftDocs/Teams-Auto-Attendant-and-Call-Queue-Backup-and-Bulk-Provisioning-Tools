@@ -38,14 +38,16 @@ This step will download the existing resource account, auto attendant, call queu
 
 # Provisioning Instructions
 
-1. Open the BulkAAs.xlsm, and enable macros if they have been disabled.
+1. Open the BulkAAs.xlsm spreadsheet and enable macros if they have been disabled.
 1. Complete the follows tabs:
+   
    - Config-BusinessHours
    - Config-Holidays
    - Config-Base
    - Config-BusinessHoursMenu
    - Config-AfterHoursMenu
    - Config-HolidaysMenu
+  
 1. Save the BulkAAs.xlsm spreadsheet and close Excel.
 1. Place any referenced prompt files in the AudioFiles sub-directory.
 1. Open a PowerShell 5.x window
