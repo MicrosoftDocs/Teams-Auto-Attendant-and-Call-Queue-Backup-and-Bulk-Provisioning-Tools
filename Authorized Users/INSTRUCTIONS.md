@@ -1,4 +1,4 @@
-# Download the BulkAATool
+# Download the BulkAuthUsersTool
 
 Download the files and sub-directories in the **BulkAuthUsersTool** folder to a location on your workstation.
 
