@@ -303,7 +303,7 @@ if ( ! $NoResourceAccounts )
 		#
 		# Make sure resource account is not Deleted
 		#
-		$ResourceAccountUserDetails = (get-csonlineuser -identity $ResourceAccounts.ObjectId[$i]2
+		$ResourceAccountUserDetails = (get-csonlineuser -identity $ResourceAccounts.ObjectId[$i])
 		$ResourceAccountPriority = ( (get-csonlineapplicationinstanceassociation -identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> `$null  )
 		
 		if ( $ResourceAccountUserDetails.UsageLocation.length -eq 0 )
