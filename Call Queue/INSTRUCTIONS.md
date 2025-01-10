@@ -38,7 +38,7 @@ This step will download the existing resource account, auto attendant, call queu
 
 ## -Download notes
 
-- All downloads for a call queue will be in the AudioFiles directory, in a sub-directories by the call queue ID. This is due to the fact that call queue names are not unique.
+- All prompt downloads for a call queue will be in the AudioFiles directory, in a sub-directories by the call queue ID. This is due to the fact that call queue names are not unique.
 - All audio file names will be prefixed with the unique file id and underscore. This is due to the fact that the same file name used within the same call queue may not actually have the same content.
 
 
