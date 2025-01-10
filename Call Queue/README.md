@@ -9,6 +9,13 @@
 1.	There are enough spare Phone Resource Account Phone Licenses exist to assign to new Resource Accounts 
     - Provisioning of resource accounts and assigning licenses can be bypassed if necessary.	
 
+## Required PowerShell Modules
+Missing or outdated modules will be automatically installed or updated.
+
+- MicrosoftTeams - 6.7.0 or later
+- Microsoft.Graph - 2.24.0 or later
+- ImportExcel - 7.8.0 or later
+
 ## Limitations
 
 | Maximum Existing Items      | Maxium Create Items   |
