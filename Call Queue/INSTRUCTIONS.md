@@ -46,11 +46,15 @@ This step will download the existing resource account, auto attendant, call queu
 
 1. Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 1. Complete the follows tabs:
+   
    - Config-CallQueue
+     
 1. Save the BulkCQs.xlsm spreadsheet and close Excel.
 1. Place any referenced prompt files in the AudioFiles sub-directory.
 1. Open a PowerShell 5.x window
-   - Issue the command: $PsVersionTable.PSVersion if not sure
+   
+   - Issue the command: $PSVersionTable.PSVersion if not sure
+     
 1. In the PowerShell window, run the "BulkCQsProvisioning.ps1" script
 
 ## BulkCQsProvisioning.ps1 command line options
