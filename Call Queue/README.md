@@ -45,7 +45,7 @@ To perform resource accounts related activities, when prompted, login with an ac
 
 ### Microsoft Graph Scopes Requested
 
-The PowerShell scripts request the following Microsoft Graph scopes"
+The PowerShell scripts request the following Microsoft Graph scopes:
   - Organization.Read.All
   - User.ReadWrite.All
 
