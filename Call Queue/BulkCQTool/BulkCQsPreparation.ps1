@@ -42,10 +42,42 @@ function AudioFileExport
     return
 }
 
+#
+# PowerShell Streams
+#
+#Stream #	Description			Write Cmdlet		Variable				Default
+#1			Success stream		Write-Output
+#2			Error stream		Write-Error			$ErrorActionPreference	Continue
+#3			Warning stream		Write-Warning		$WarningPreference		Continue
+#4			Verbose stream		Write-Verbose		$VerbosePrefernce		SilentlyContinue
+#5			Debug stream		Write-Debug			$DebugPreference		SilentlyContinue
+#6			Information stream	Write-Information	$InformationPreference	SilentlyContinue
+#
+#Preference Variable Options
+# Use name or value
+#
+#Name				Value
+#Break				6
+#Suspend			5
+#Ignore				4
+#Inquire			3
+#Continue			2
+#Stop				1
+#SilentlyContinue	0
+#
 
+#
+# Confirm running in PowerShell v5.x
+#
+if ( $PSVersionTable.PSVersion.Major -ne 5 )
+{
+	Write-Error "This script is only supported in PowerShell v5.x"
+	exit
+}
 
-
-# processing arguments
+#
+# Process arguments
+#
 $args = @()
 $arguments = (Get-PSCallStack).Arguments
 $arguments = $arguments -replace '[{}]', ''
@@ -59,8 +91,12 @@ if ( $args -ne "" )
 	{
 		switch ( $args[$i] )
 		{
-			"-aacount"   			{ $AACount = $args[$i+1] }
-			"-cqcount"   			{ $CQCount = $args[$i+1] }
+			"-aacount"   			{ $AACount = $args[$i+1]
+									  $i++
+									}
+			"-cqcount"   			{ $CQCount = $args[$i+1]
+									  $i++
+									}
 			"-download"				{ $Download = $true }
 			"-excelfile" 			{ $ExcelFilename = $args[$i+1]
 									  $i++
@@ -75,7 +111,7 @@ if ( $args -ne "" )
 			"-noopen"               { $NoOpen = $true}
 			"-verbose"   			{ $Verbose = $true }
 			"-view"      			{ $View = $true }	  
-			Default      			{ Write-Host "Unknown argument passed: $args[$i]" }
+			Default      			{ Write-Warning "Unknown argument passed: $args[$i]" }
 		}
 	}
 	
@@ -135,17 +171,26 @@ if ( Test-Path -Path ".\List-Teams.csv" )
    Remove-Item -Path ".\List-Teams.csv" | Out-Null
 }
 
+#
+# Increase maximum variable and function count (function count for ImportExcel)
+#
+$MaximumVariableCount = 10000
+$MaximumFunctionCount = 32768
 
 #
 # Check that required modules are installed - install if not
 #
-Write-Host "Checking for MicrosoftTeams module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
+# MicrosoftTeams
+#
+Write-Host "Checking for MicrosoftTeams module 6.7.0 or later."
+$Version = ( (get-installedmodule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
+if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
 {
    Write-Host "Connecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
+   
    try
    { 
-      # Get-CsTenant -ErrorAction Stop 2>&1> $null
       Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
@@ -154,7 +199,6 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
    }
    try
    { 
-      # Get-CsTenant -ErrorAction Stop 2>&1> $null
       Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
@@ -167,9 +211,11 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
 else
 {
    Write-Host "Module MicrosoftTeams does not exist - installing."
-   Install-Module -Name MicrosoftTeams -Force -AllowClobber
+   Install-Module -Name MicrosoftTeams -MinimumVersion 6.7.0 -Force -AllowClobber
 
    Write-Host "Connecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
+   
    try
    { 
       # Get-CsTenant -ErrorAction Stop 2>&1> $null
@@ -192,63 +238,23 @@ else
    Write-Host "Connected to Microsoft Teams."
 }
 
-Write-Host "Checking for Microsoft.Graph module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "Microsoft.Graph" } )
-{
-   Write-Host "Connecting to Microsoft Graph."
-   Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
-
-   try
-   { 
-      # Get-MgSubscribedSKU -ErrorAction Stop 2>&1> $null
-      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-
-   } 
-   catch [System.UnauthorizedAccessException] 
-   { 
-      Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
-   }
-   try
-   { 
-      # Get-MgSubscribedSKU -ErrorAction Stop 2>&1> $null
-      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-   } 
-   catch [System.UnauthorizedAccessException] 
-   { 
-      Write-Error "Not signed into Microsoft Graph!" 
-      exit
-   }
-   Write-Host "Connected to Microsoft Graph."
-}
-else
-{
-   Write-Host "Module MgGraph does not exist - installing."
-   Install-Module -Name Microsoft.Graph -Force -AllowClobber
-   Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
-   try
-   { 
-      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-   } 
-   catch [System.UnauthorizedAccessException] 
-   { 
-      Write-Error "Not signed into Microsoft Graph!" 
-      exit
-   }
-   Write-Host "Connected to Microsoft Graph."
-}
-
-Write-Host "Checking for ImportExcel module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "ImportExcel" } )
+#
+# ImportExcel
+#
+Write-Host "Checking for ImportExcel module 7.8.0 or later."
+$Version = ( (get-installedmodule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
+if ( ( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 ) )
 {
    Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel
+   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
 }
 else
 {
    Write-Host "Module ImportExcel - installing."
-   Install-Module -Name ImportExcel -Force -AllowClobber
+   Install-Module -Name ImportExcel -MinimumVersion 7.8.0 -Force -AllowClobber
+   
    Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel
+   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
 }
 
 #
@@ -267,7 +273,7 @@ Write-Host "Accessing the $ExcelFilename worksheet (this may take some time, ple
 #
 if ( !( Test-Path -Path $ExcelFullPathFilename ) )
 {
-	Write-Host "ERROR: $ExcelFilename does not exist."
+	Write-Error "ERROR: $ExcelFilename does not exist."
 	exit
 }
 
@@ -304,15 +310,22 @@ if ( ! $NoResourceAccounts )
 		# Make sure resource account is not Deleted
 		#
 		$ResourceAccountUserDetails = (get-csonlineuser -identity $ResourceAccounts.ObjectId[$i])
-		$ResourceAccountPriority = ( (get-csonlineapplicationinstanceassociation -identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> `$null  )
 		
-		if ( $ResourceAccountUserDetails.UsageLocation.length -eq 0 )
-		{
-			$ResourceAccountUserDetails.UsageLocation = "US"
-		}
-
 		if ( $ResourceAccountUserDetails.SoftDeletionTimeStamp.length -eq 0 )
-		{	
+		{
+			if ( $Verbose )
+			{
+				Write-Host "`tResource Account : " $ResourceAccounts.DisplayName[$i]
+			}
+
+			if ( $ResourceAccountUserDetails.UsageLocation.length -eq 0 )
+			{
+				$ResourceAccountUserDetails.UsageLocation = "US"
+			}
+
+			# request will generate a "Correlation id for this request" message when the RA is not assigned to anything, also generates error so redirecting that to null
+			$ResourceAccountPriority = ( (get-csonlineapplicationinstanceassociation -identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> $null  )
+			
 			if ( $ResourceAccounts.ApplicationId[$i] -eq "ce933385-9390-45d1-9512-c8d228074e07" )
 			{
 				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-AA] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" + $ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation + "~" + $ResourceAccountPriority )
@@ -322,11 +335,6 @@ if ( ! $NoResourceAccounts )
 				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-CQ] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" +$ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation  + "~" + $ResourceAccountPriority )
 			}
 			$j++
-
-			if ( $Verbose )
-			{
-				Write-Host "`tResource Account : " $ResourceAccounts.DisplayName[$i]
-			}
 		}
 		else
 		{
@@ -334,7 +342,7 @@ if ( ! $NoResourceAccounts )
 			{
 				Write-Host "`tResource Account Not Added (Soft Deleted): " $ResourceAccounts.DisplayName[$i]
 			}
-		}	
+		}
 	}
 
 	#
@@ -379,7 +387,7 @@ if ( ! $NoAutoAttendants )
 	for ( $i = 0; $i -lt $loops; $i++ )
 	{
 		$j = $i * 100
-		Get-CsAutoAttendant -Skip $j 3> `$null | Export-csv -Path .\List-AA-$j.csv
+		Get-CsAutoAttendant -Skip $j 3> $null | Export-csv -Path .\List-AA-$j.csv
 	}
 
 	$command = "Get-Content "
@@ -393,6 +401,7 @@ if ( ! $NoAutoAttendants )
 
 	Invoke-Expression $command
 
+
 	for ( $i = 0; $i -lt $loops; $i++ )
 	{
 		$j = $i * 100
@@ -403,14 +412,14 @@ if ( ! $NoAutoAttendants )
 
 	for ($i=0; $i -lt  $AutoAttendants.length; $i++)
 	{
-		#$AssignedResourceAccounts = (Get-CsAutoAttendant -Identity $AutoAttendants.Identity[$i]).ApplicationInstances
-		#$ExcelWorkSheet.Cells.Item($i + 2,1) = ($AutoAttendants.Name[$i] + "~" + $AutoAttendants.Identity[$i] + "~" + ($AssignedResourceAccounts -join ","))
-		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($AutoAttendants.Name[$i] + "~" + $AutoAttendants.Identity[$i])
-
 		if ( $Verbose )
 		{
 			Write-Host "`tAuto Attendant : " $AutoAttendants.Name[$i]
 		}
+
+		#$AssignedResourceAccounts = (Get-CsAutoAttendant -Identity $AutoAttendants.Identity[$i]).ApplicationInstances
+		#$ExcelWorkSheet.Cells.Item($i + 2,1) = ($AutoAttendants.Name[$i] + "~" + $AutoAttendants.Identity[$i] + "~" + ($AssignedResourceAccounts -join ","))
+		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($AutoAttendants.Name[$i] + "~" + $AutoAttendants.Identity[$i])
 	}
 
 	#
@@ -448,7 +457,7 @@ if ( ! $NoCallQueues )
 	for ( $i = 0; $i -lt $loops; $i++ )
 	{
 		$j = $i * 100
-		Get-CsCallQueue -Skip $j 3> `$null | Export-csv -Path .\List-CQ-$j.csv
+		Get-CsCallQueue -Skip $j 3> $null | Export-csv -Path .\List-CQ-$j.csv
 	}
 
 	$command = "Get-Content "
@@ -491,7 +500,7 @@ if ( ! $NoCallQueues )
 		{
 			$ColumnOffset = 1
 			
-			$CQ = (Get-CsCallQueue -Identity $CallQueues.Identity[$i] 3> `$null)
+			$CQ = (Get-CsCallQueue -Identity $CallQueues.Identity[$i] 3> $null)
 
 			$ExcelWorkSheet.Cells.Item($i + $RowOffset, $ColumnOffset++) = $CQ.Name							# A
 			$ExcelWorkSheet.Cells.Item($i + $RowOffset, $ColumnOffset++) = $CQ.Identity						# B
@@ -914,13 +923,13 @@ if ( ! $NoCallQueues )
 
 	for ($i=0; $i -lt  $CallQueues.length; $i++)
 	{
-		$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues.Identity[$i]).ApplicationInstances 3> `$null )
-		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($CallQueues.Name[$i] + "~" + $CallQueues.Identity[$i] + "~" + ($AssignedResourceAccounts -join ","))
-
 		if ( $Verbose )
 		{
 			Write-Host "`tCall Queue : " $CallQueues.Name[$i]
 		}
+
+		$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues.Identity[$i]).ApplicationInstances 3> $null )
+		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($CallQueues.Name[$i] + "~" + $CallQueues.Identity[$i] + "~" + ($AssignedResourceAccounts -join ","))
 	}
 
 	#
@@ -959,12 +968,12 @@ if ( ! $NoPhoneNumbers )
 
 	for ($i=0; $i -lt  $PhoneNumbers.length; $i++)
 	{
-		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($PhoneNumbers.TelephoneNumber[$i] + "~" + $PhoneNumbers.NumberType[$i] + "~" + $PhoneNumbers.IsoSubdivision[$i] + "~" + $PhoneNumbers.IsoCountryCode[$i])
-
 		if ( $Verbose )
 		{
 			Write-Host "`tPhone Number : " $PhoneNumbers.TelephoneNumber[$i]
 		}
+
+		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($PhoneNumbers.TelephoneNumber[$i] + "~" + $PhoneNumbers.NumberType[$i] + "~" + $PhoneNumbers.IsoSubdivision[$i] + "~" + $PhoneNumbers.IsoCountryCode[$i])
 	}
 
 	#
@@ -1081,12 +1090,12 @@ if ( ! $NoUsers )
 
 	for ( $i = 0; $i -lt $Users.length; $i++)
 	{
-		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($Users.UserPrincipalName[$i] + "~" + $Users.Identity[$i])
-
 		if ( $Verbose )
 		{
 			Write-Host "`tUser : " $Users.UserPrincipalName[$i]
 		}
+
+		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($Users.UserPrincipalName[$i] + "~" + $Users.Identity[$i])
 	}
 
 	#
@@ -1126,7 +1135,8 @@ if ( Test-Path -Path ".\`$null" )
 
 if ( ! $NoOpen )
 {
-	Write-Host "Preparation complete.  Opening $ExcelFilename.  Please complete the configuration, save and exit the spreadsheet and then run the BulkCQsConfig script."
+	Write-Host "Preparation complete.  Opening $ExcelFilename.  "
+	Write-Host "Please complete the configuration, save and exit the spreadsheet and then run the BulkCQsConfig script."
 	Write-Host -NoNewLine "Press any key to continue..."
 	$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
 
