@@ -21,8 +21,8 @@ This step will download the existing resource account, auto attendant, call queu
 
 ## BulkCQsPreparation.ps1 command line options
 
-| Option              | Description                                        |
-|:--------------------|----------------------------------------------------|
+| Option              | Description                                                                                                                                |
+|:--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
 | -AACount n          | Replace n with the number of Auto Attendants from Step 1. <br>*Only use when the number of Auto Attendants is greater than 100.*           |         
 | -CQCount n          | Replace n with the number of Call Queues from Step 1. <br>*Only use when the number of Call Queues is greater than 100*                    |
 | -Download           | Download all Call Queue data, including audio files.                                                                                       |
@@ -51,47 +51,48 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 
 | Field                           | Description                                                        |
 |:--------------------------------|--------------------------------------------------------------------|
-| Action                          | Select New to create a new call queue                              |
+| Action                          | Select *New* to create a new call queue                              |
 | NewCallQueueName                | This is the name that will be assigned to the call queue           |
-| ResourceAccount                 | Existing: Assign an existing Resource Account to the call queue<br>New: Create a new resource account and assign to the call queue<br>Blank: Do not perform any resource account actitivies for this call queue |
-| ExistingResourceAccountName     | Select the existing Resource Account to assign to the call queue<br>Note: Only available if `ResourceAccount` field is set to **Existing**                  |
-| NewResourceAccountPrincipalName | The Resource Account UPN<br>Note: Only available if `ResourceAccount` field is set to *New*                                                               |
-| NewResourceAccountDisplayName   | The Resource Account display name<br>Note: Onlyavailable if `ResourceAccount` field is set to *New*                                                       |
-| NewResourceAccountLocation      | The Resource Account location. This will restrict which phone numbers can be assigned.<br>Note: Onlyavailable if `ResourceAccount` field is set to *New*  |
-| NewResourceAccountPhoneNumber   | The Resource Account phone number.<br>Note: Onlyavailable if `ResourceAccount` field is set to *New*                                                      |
+| ResourceAccount                 | <ul><li>*Existing:* Assign an existing Resource Account to the call queue</li><li>*New:* Create a new resource account and assign to the call queue</li><li>*Blank:* Do not perform any resource account actitivies for this call queue</li></ul> |
+| ExistingResourceAccountName     | Select the existing Resource Account to assign to the call queue<br>Note: Only available if `ResourceAccount`  is set to *Existing*                  |
+| NewResourceAccountPrincipalName | The Resource Account UPN<br>Note: Only available if `ResourceAccount`  is set to *New*                                                               |
+| NewResourceAccountDisplayName   | The Resource Account display name<br>Note: Only available if `ResourceAccount`  is set to *New*                                                       |
+| NewResourceAccountLocation      | The Resource Account location. This will restrict which phone numbers can be assigned.<br>Note: Only available if `ResourceAccount`  is set to *New*  |
+| NewResourceAccountPhoneNumber   | The Resource Account phone number.<br>Note: Only available if `ResourceAccount`  is set to *New*                                                      |
 | NewResourceAccountPriority      | *Only availble for VoiceApps TAP customers at this time*                                                                                                    |
 | OutboundCLID01-OutboundCLID04   | The outbound calling line IDs that can be used by agents when making outbound calls                                                                         |
 | Language                        | The language for all Text To Speech (TTS) and system prompts                                                                                                |
 | ServiceLevelThreshold           | The time threshold to be used for calculating the service level for real-time displays                                                                      |
-| GreetingOptions                 | No Greeting (Default): No greeting message<br>Play an audio file: Use an audio file for the greeting<br>Add a greeting message: Use TTS for the greeting message |
+| GreetingOptions                 | <ul><li>*No Greeting (Default):* No greeting message</li><li>*Play an audio file:* Use an audio file for the greeting</li><li>*Add a greeting message:* Use TTS for the greeting message</li></ul> |
 | Greeting                        | Name of audio file or the text message for TTS                                                                                                              |
-| MusicOnHold                     | Play default music (Default): Play the system default music for callers waiting in queue<br>Play and audio file: Use an audio file for the music            |
+| MusicOnHold                     | <ul><li>*Play default music (Default):* Play the system default music for callers waiting in queue</li><li>*Play and audio file:* Use an audio file for the music</li></ul>            |
 | MusicOnHoldAudioFilename        | Name of the audio file to use for Music on Hold<br>Note: Only available if `MusicOnHold` is set to *Play an audio file*                                   |
 | RoutingMethod                   | The [agent routing](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#step-4-select-your-agent-routing-options) method that will be used to present calls to agents |
 | PresenceBasedRouting            | Is [presence-based call routing](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#presence-based-call-routing) on or off |
 | AllowOptOut                     | Agents [can opt in/out of taking calls](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#call-agents-can-opt-out-of-taking-calls) |
 | AgentAlertTime                  | [Agent alert time](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#agent-alert-time)                       |
 | OverflowThreshold               | The maximum number of simultaneous calls that can be in queue at one time before [Overflow](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-exception-handling#overflow-set-how-to-handle-call-overflow) occurs |
-| OverflowAction                  | Calls above the `OverflowThreshold` will be:<br>Disconnect (Default): Disconnected<br>Redirect - Person in organization: Redirected to a Teams user in the tenant<br>Redirect - Voice app: Redirected to another Auto Attendant or Call Queue through a resource account or direction<sup>1</sup><br>Redirect - External phone number: Redirected to the PSTN<sup>2</sup><br>Redirect - Voicemail personal: Redirected to a Teams user's voicemail<br>Redirect - Voicemail (shared): Redirected to a shared voicemail |
-| OverflowActionTarget            | The target of the `OverflowAction`<br>Note: Only available if `OverflowAction` is not *Disconnect (Default)*   NEED MORE DETAIL HERE                                             |
-| OverflowActionTargetCountry     | The country to overflow calls to<br>Note: Only available if `OverflowAction` is *Redirect - External phone number* and `OverflowActionTarget` is *Calling Plan*   |
-| OverflowActionTargetNumber      | The phone number of overflow calls to<br>Note: Only available if `OverflowAction` is *Redirect - External phone number*   |
+| OverflowAction                  | Action to take once the `OverflowThreshold` is reached:<br><ul><li>*Disconnect (Default):* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>1</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>2</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
+| OverflowActionTarget            | The target of the `OverflowAction`<br>Note:1. Only available if `OverflowAction` is not *Disconnect (Default)*<br>.2. When `OverflowAction` is *Redirect - External phone number* the values here will be<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
+| OverflowActionTargetCountry     | The country calls will be routed to<br>Note: Only available if `OverflowAction` is *Redirect - External phone number* and `OverflowActionTarget` is *Calling Plan*   |
+| OverflowActionTargetNumber      | The phone number calls will be routed to<br>Note: Only available if `OverflowAction` is *Redirect - External phone number*   |
 | OverflowActionCallPriority      | *Only availble for VoiceApps TAP customers at this time* |
-| OverflowTreatment               | The message that is played when overflow occurs<br>No Greeting (Default): No message will be played<br>Play an audio file: Use an audio file for the message<br>Add a greeting message: Use TTS for the message |
+| OverflowTreatment               | The message that is played when overflow occurs<br><ul><li>*No Greeting (Default):* No message will be played</li><li>*Play an audio file:* Use an audio file for the message</li><li>*Add a greeting message:* Use TTS for the message</li></ul> |
 | OverflowTreatmentPrompt         | Name of audio file or the text message for TTS                                                                                                              |
 | OverflowSharedVoicemailSystemPromptSuppression | Supress the system greeting message for shared voicemail<br>Note: Only available when `OverflowAction` is *Redirect - Voicemail (shared)*    |
 | OverflowSharedVoicemailTranscription | Enable voicemail transcription for shared voicemail<br>Note: Only available when `OverflowAction` is *Redirect - Voicemail (shared)*    |
 
-- TimeoutThreshold
-- TimeoutAction
-- TimeoutActionTarget
-- TimeoutActionTargetCountry
-- TimeoutActionTargetNumber
-- TimeoutActionCallPriority
-- TimeoutTreatment
-- TimeoutTreatmentPrompt
-- TimeoutSharedVoicemailSystemPromptSuppression
-- TimeoutSharedVoicemailTranscription
+| TimeoutThreshold                | The maximum amount fo time a caller can remain in queue before [Timeout](https://learn.microsoft.commicrosoftteams/create-a-phone-system-call-queue?tabs=call-exception-handling#call-timeout-set-how-to-handle-call-timeouts) occurs |
+| TimeoutAction                   | Action to take once the `TimeoutThreshold` is reached:<br><ul><li>*Disconnect (Default):* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>1</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>2</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
+| TimeoutActionTarget             | The target of the `TimeoutAction`<br>Note:1. Only available if `TimeoutAction` is not *Disconnect (Default)*<br>.2. When `TimeoutAction` is *Redirect - External phone number* the values here will be<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
+| TimeoutActionTargetCountry      | The country calls will be routed to<br>Note: Only available if `TimeoutAction` is *Redirect - External phone number* and `TimeoutActionTarget` is *Calling Plan*   |
+| TimeoutActionTargetNumber       | The phone number calls will be routed to<br>Note: Only available if `TimeoutAction` is *Redirect - External phone number*   |
+| TimeoutActionCallPriority       | *Only availble for VoiceApps TAP customers at this time* |
+| TimeoutTreatment                | The message that is played when timeout occurs<br><ul><li>*No Greeting (Default):* No message will be played</li><li>*Play an audio file:* Use an audio file for the message</li><li>*Add a greeting message:* Use TTS for the message</li></ul> |
+| TimeoutTreatmentPrompt          | Name of audio file or the text message for TTS                                                                                               |
+| TimeoutSharedVoicemailSystemPromptSuppression | Supress the system greeting message for shared voicemail<br>Note: Only available when `TimeoutAction` is *Redirect - Voicemail (shared)*    |
+| TimeoutSharedVoicemailTranscription | Enable voicemail transcription for shared voicemail<br>Note: Only available when `TimeoutAction` is *Redirect - Voicemail (shared)*    |
+ 
 - NoAgentsApplyTo
 - NoAgentAction
 - NoAgentActionTarget
@@ -102,6 +103,7 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 - NoAgentTreatmentPrompt
 - NoAgentSharedVoicemailSystemPromptSuppression
 - NoAgentSharedVoicemailTranscription
+- 
 - IsCallbackEnabled
 - CallbackRequestDTMF
 - WaitTimeBeforeOfferingCallbackInSecond
@@ -110,6 +112,7 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 - CallbackOfferTreatment
 - CallbackOfferPrompt
 - CallbackEmailNotificationTarget
+- 
 - Team-Channel
 - DistributionList01-DistributionList04
 - Agent01-Agent20
@@ -128,11 +131,11 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 
 ## BulkCQsProvisioning.ps1 command line options
 
-| Option                     | Description                                        |
-|:---------------------------|----------------------------------------------------|
-| -ExcelFile filename        | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsProvisioning.ps1 file<br>Default: BulkAAs.xlsm |
-| -Help                      | This help message.                                                                                                                          |
+| Option                     | Description                                                                                                                                                                         |
+|:---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -ExcelFile filename        | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsProvisioning.ps1 file<br>Default: BulkAAs.xlsm                                         |
+| -Help                      | This help message.                                                                                                                                                                  |
 | -NoResourceAccounts        | Do not perform any resource account related steps. <br>*Automaticaly enables*  **-NoResourceAccountCreation**, **-NoResourceAccountLicensing**, **-NoResourceAccountPhoneNumbers**  |
-| -NoResourceAccountCreation | Do not provision any new resource accounts.<br>*Automaticaly enables*  **-NoResourceAccountLicensing**, **-NoResourceAccountPhoneNumbers**  |
-| -NoResourceAccountLicensing| Do not license any new resource accounts.<br>*Automaticaly enables*  **-NoResourceAccountPhoneNumbers**                                     |
-| -Verbose                   | Detailed output.                                                                                                                            |
+| -NoResourceAccountCreation | Do not provision any new resource accounts.<br>*Automaticaly enables*  **-NoResourceAccountLicensing**, **-NoResourceAccountPhoneNumbers**                                          |
+| -NoResourceAccountLicensing| Do not license any new resource accounts.<br>*Automaticaly enables*  **-NoResourceAccountPhoneNumbers**                                                                             |
+| -Verbose                   | Detailed output.                                                                                                                                                                    |
