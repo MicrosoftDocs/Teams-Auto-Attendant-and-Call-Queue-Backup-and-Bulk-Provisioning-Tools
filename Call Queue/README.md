@@ -65,6 +65,9 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkCQs spreadsheet
 
+- **Config-CallQueue** tab
+  - There is a conditional formatting issue that results in the Agent01 - Agent20 fields being incorrectly highlighted in red. This can be ignored at this time.
+
 - **Existing-CallQueue** tab
   - While all the resource accounts assigned to the call queue are downloaded, only the first one is shown under ***ResourceAccountName***
   - While all the on-behalf-of outbound dialing numbers assigned to the call queue are downloaded, only the first 4 are shown under ***OutboundCLID01*** through ***OutboundCLID04***
