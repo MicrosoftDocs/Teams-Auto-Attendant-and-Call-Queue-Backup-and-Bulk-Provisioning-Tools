@@ -264,25 +264,34 @@ function NewCallQueue
       {
          if ( $OverflowActionTarget -ne "" )
          {
-            $command += "-OverflowAction Forward -OverflowActionTarget $OverflowActionTarget "
-
-            if ( $OverflowTreatment -eq "FILE" )
-            {
-               $audioFileID = AudioFileImport $OverflowTreatmentPrompt
-
-               $command += "-OverflowRedirectVoiceAppAudioFilePrompt $audioFileID "
-            }
-            if ( $OverflowTreatment -eq "TEXT" )
-            {
-               $command += "-OverflowRedirectVoiceAppTextToSpeechPrompt $OverflowTreatmentPrompt "
-            }
-
-			# will be blank if not flighted
-			if ( $OverflowActionCallPriority -ne "" )
+			if ( $OverflowActionTarget.Substring(0, 4) -eq "NEW:" )
 			{
-				$command += "-OverflowActionCallPriority $OverflowActionCallPriority "
+				$referenceCQName =  $OverflowActionTarget.Substring(4)
+				$OverflowActionTarget = (Get-CsCallQueue -NameFilter "$referenceCQName").Identity
 			}
-         }
+				
+			if ( $OverflowActionTarget -ne "" )
+			{
+				$command += "-OverflowAction Forward -OverflowActionTarget $OverflowActionTarget "
+
+				if ( $OverflowTreatment -eq "FILE" )
+				{
+					$audioFileID = AudioFileImport $OverflowTreatmentPrompt
+
+					$command += "-OverflowRedirectVoiceAppAudioFilePrompt $audioFileID "
+				}
+				if ( $OverflowTreatment -eq "TEXT" )
+				{
+					$command += "-OverflowRedirectVoiceAppTextToSpeechPrompt $OverflowTreatmentPrompt "
+				}
+
+				# will be blank if not flighted
+				if ( $OverflowActionCallPriority -ne "" )
+				{
+					$command += "-OverflowActionCallPriority $OverflowActionCallPriority "
+				}
+			}
+		}
       }
 
       "Forward-External"
@@ -403,23 +412,32 @@ function NewCallQueue
       {
          if ( $TimeoutActionTarget -ne "" )
          {
-            $command += "-TimeoutAction Forward -TimeoutActionTarget $TimeoutActionTarget "
-
-            if ( $TimeoutTreatment -eq "FILE" )
-            {
-               $audioFileID = AudioFileImport $TimeoutTreatmentPrompt
-
-               $command += "-TimeoutRedirectVoiceAppAudioFilePrompt $audioFileID "
-            }
-            if ( $TimeoutTreatment -eq "TEXT" )
-            {
-               $command += "-TimeoutRedirectVoiceAppTextToSpeechPrompt $TimeoutTreatmentPrompt "
-            }
-
-			# will be blank if not flighted
-			if ( $TimeoutActionCallPriority -ne "" )
+			if ( $TimeoutActionTarget.Substring(0, 4) -eq "NEW:" )
 			{
-				$command += "-TimeoutActionCallPriority $TimeoutActionCallPriority "
+				$referenceCQName =  $TimeoutActionTarget.Substring(4)
+				$TimeoutActionTarget = (Get-CsCallQueue -NameFilter "$referenceCQName").Identity
+			}
+ 
+			if ( $TimeoutActionTarget -ne "" )
+			{
+				$command += "-TimeoutAction Forward -TimeoutActionTarget $TimeoutActionTarget "
+
+				if ( $TimeoutTreatment -eq "FILE" )
+				{
+					$audioFileID = AudioFileImport $TimeoutTreatmentPrompt
+
+					$command += "-TimeoutRedirectVoiceAppAudioFilePrompt $audioFileID "
+				}
+				if ( $TimeoutTreatment -eq "TEXT" )
+				{
+					$command += "-TimeoutRedirectVoiceAppTextToSpeechPrompt $TimeoutTreatmentPrompt "
+				}
+
+				# will be blank if not flighted
+				if ( $TimeoutActionCallPriority -ne "" )
+				{
+					$command += "-TimeoutActionCallPriority $TimeoutActionCallPriority "
+				}
 			}
          }
       }
@@ -542,23 +560,32 @@ function NewCallQueue
       {
          if ( $NoAgentActionTarget -ne "" )
          {
-            $command += "-NoAgentAction Forward -NoAgentActionTarget $NoAgentActionTarget "
-
-            if ( $NoAgentTreatment -eq "FILE" )
-            {
-               $audioFileID = AudioFileImport $NoAgentTreatmentPrompt
-
-               $command += "-NoAgentRedirectVoiceAppAudioFilePrompt $audioFileID "
-            }
-            if ( $NoAgentTreatment -eq "TEXT" )
-            {
-               $command += "-NoAgentRedirectVoiceAppTextToSpeechPrompt $NoAgentTreatmentPrompt "
-            }
-
-			# will be blank if not flighted
-			if ( $NoAgentActionCallPriority -ne "" )
+			if ( $NoAgentActionTarget.Substring(0, 4) -eq "NEW:" )
 			{
-				$command += "-NoAgentActionCallPriority $NoAgentActionCallPriority "
+				$referenceCQName =  $NoAgentActionTarget.Substring(4)
+				$NoAgentActionTarget = (Get-CsCallQueue -NameFilter "$referenceCQName").Identity
+			}
+ 
+			if ( $NoAgentActionTarget -ne "" )
+			{
+				$command += "-NoAgentAction Forward -NoAgentActionTarget $NoAgentActionTarget "
+
+				if ( $NoAgentTreatment -eq "FILE" )
+				{
+					$audioFileID = AudioFileImport $NoAgentTreatmentPrompt
+
+					$command += "-NoAgentRedirectVoiceAppAudioFilePrompt $audioFileID "
+				}
+				if ( $NoAgentTreatment -eq "TEXT" )
+				{
+					$command += "-NoAgentRedirectVoiceAppTextToSpeechPrompt $NoAgentTreatmentPrompt "
+				}
+
+				# will be blank if not flighted
+				if ( $NoAgentActionCallPriority -ne "" )
+				{
+					$command += "-NoAgentActionCallPriority $NoAgentActionCallPriority "
+				}
 			}
          }
       }
@@ -856,17 +883,45 @@ function NewCallQueue
 
 
 
-
-
-
-
-
-
+#
+# PowerShell Streams
+#
+#Stream #	Description			Write Cmdlet		Variable				Default
+#1			Success stream		Write-Output
+#2			Error stream		Write-Error			$ErrorActionPreference	Continue
+#3			Warning stream		Write-Warning		$WarningPreference		Continue
+#4			Verbose stream		Write-Verbose		$VerbosePrefernce		SilentlyContinue
+#5			Debug stream		Write-Debug			$DebugPreference		SilentlyContinue
+#6			Information stream	Write-Information	$InformationPreference	SilentlyContinue
+#
+#Preference Variable Options
+# Use name or value
+#
+#Name				Value
+#Break				6
+#Suspend			5
+#Ignore				4
+#Inquire			3
+#Continue			2
+#Stop				1
+#SilentlyContinue	0
+#
 
 #
 # Main 
 #
-# processing arguments
+#
+# Confirm running in PowerShell v5.x
+#
+if ( $PSVersionTable.PSVersion.Major -ne 5 )
+{
+	Write-Host "This script is only supported in PowerShell v5.x"
+	exit
+}
+
+#
+# Process arguments
+#
 $args = @()
 $arguments = (Get-PSCallStack).Arguments
 $arguments = $arguments -replace '[{}]', ''
@@ -913,17 +968,25 @@ if ( Test-Path -Path ".\PS-CQ.csv" )
    Remove-Item -Path ".\PS-CQ.csv" | Out-Null
 }
 
+#
+# Increase maximum variable and function count (function count for ImportExcel)
+#
+$MaximumVariableCount = 10000
+$MaximumFunctionCount = 32768
 
 #
 # Check that required modules are installed - install if not
 #
-Write-Host "Checking for MicrosoftTeams module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
+Write-Host "Checking for MicrosoftTeams module 6.7.0 or later."
+$Version = ( (get-installedmodule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
+if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
 {
    Write-Host "Connecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
+   
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -931,7 +994,7 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
    }
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -943,12 +1006,15 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
 else
 {
    Write-Host "Module MicrosoftTeams does not exist - installing."
-   Install-Module -Name MicrosoftTeams -Force -AllowClobber
+   Install-Module -Name MicrosoftTeams -MinimumVersion 6.7.0 -Force -AllowClobber
 
    Write-Host "Connecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
+   
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      # Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -956,7 +1022,8 @@ else
    }
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      # Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -966,17 +1033,17 @@ else
    Write-Host "Connected to Microsoft Teams."
 }
 
-Write-Host "Checking for Microsoft.Graph module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "Microsoft.Graph" } )
+Write-Host "Checking for Microsoft.Graph module 2.24.0 or later."
+$Version = ( (get-installedmodule -Name Microsoft.Graph -MinimumVersion "2.24.0").Version 2> $null)
+if ( ( $Version.Major -ge 2 ) -and ( $Version.minor -ge 24 ) )
 {
    Write-Host "Connecting to Microsoft Graph."
+   
    Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
 
    try
    { 
-      # Get-MgSubscribedSKU -ErrorAction Stop 2>&1> $null
       Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -984,7 +1051,6 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "Microsoft.Graph" } )
    }
    try
    { 
-      # Get-MgSubscribedSKU -ErrorAction Stop 2>&1> $null
       Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
@@ -997,8 +1063,18 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "Microsoft.Graph" } )
 else
 {
    Write-Host "Module MgGraph does not exist - installing."
-   Install-Module -Name Microsoft.Graph -Force -AllowClobber
+   Install-Module -Name Microsoft.Graph -MinimumVersion 2.24.0 -Force -AllowClobber
+
    Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+
+   try
+   { 
+      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+   } 
+   catch [System.UnauthorizedAccessException] 
+   { 
+      Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+   }
    try
    { 
       Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
@@ -1011,20 +1087,21 @@ else
    Write-Host "Connected to Microsoft Graph."
 }
 
-Write-Host "Checking for ImportExcel module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "ImportExcel" } )
+Write-Host "Checking for ImportExcel module 7.8.0 or later."
+$Version = ( (get-installedmodule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
+if ( ( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 ) )
 {
    Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel
+   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
 }
 else
 {
    Write-Host "Module ImportExcel - installing."
-   Install-Module -Name ImportExcel -Force -AllowClobber
+   Install-Module -Name ImportExcel -MinimumVersion 7.8.0 -Force -AllowClobber
+   
    Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel
+   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
 }
-
 
 #
 # setup filename
