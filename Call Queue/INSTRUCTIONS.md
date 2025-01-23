@@ -41,16 +41,86 @@ This step will download the existing resource account, auto attendant, call queu
 - All prompt downloads for a call queue will be in the AudioFiles directory, in a sub-directories by the call queue ID. This is due to the fact that call queue names are not unique.
 - All audio file names will be prefixed with the unique file id and underscore. This is due to the fact that the same file name used within the same call queue may not actually have the same content.
 
+# Filling In The Spreadsheet
 
-# Provisioning Instructions
+Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 
-1. Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 1. Complete the follows tabs:
    
    - Config-CallQueue
-     
-1. Save the BulkCQs.xlsm spreadsheet and close Excel.
-1. Place any referenced prompt files in the AudioFiles sub-directory.
+
+| Field                           | Description                                                        |
+|:--------------------------------|--------------------------------------------------------------------|
+| Action                          | Select New to create a new call queue                              |
+| NewCallQueueName                | This is the name that will be assigned to the call queue           |
+| ResourceAccount                 | Existing: Assign an existing Resource Account to the call queue<br>New: Create a new resource account and assign to the call queue<br>Blank: Do not perform any resource account actitivies for this call queue                                                        |
+| ExistingResourceAccountName     | Select the existing Resource Account to assign to the call queue<br>Note: Only available if `ResourceAccount` field is set to **Existing**                  |
+| NewResourceAccountPrincipalName | The Resource Account UPN<br>Note: Only available if `ResourceAccount` field is set to **New**                                                               |
+| NewResourceAccountDisplayName   | The Resource Account display name<br>Note: Onl available if `ResourceAccount` field is set to **New**                                                       |
+| NewResourceAccountLocation      | The Resource Account location. This will restrict which phone numbers can be assigned.<br>Note: Onl available if `ResourceAccount` field is set to **New**  |
+| NewResourceAccountPhoneNumber   | The Resource Account phone number.<br>Note: Onl available if `ResourceAccount` field is set to **New**                                                      |
+| NewResourceAccountPriority      | *Only availble for VoiceApps TAP customers at this time*                                                                                                    |
+| OutboundCLID01-OutboundCLID04   | The outbound calling line IDs that can be used by agents when making outbound calls                                                                         |
+| Language                        | The language for all Text To Speech (TTS) and system prompts                                                                                                |
+| ServiceLevelThreshold           | The time threshold to be used for calculating the service level for real-time displays                                                                      |
+| GreetingOptions                 | No Greeting (Default): No greeting message<br>Play an audio file: Use an audio file for the greeting<br>Add a greeting message: Use TTS for the greeting message |
+| Greeting                        | Name of audio file or the text message for TTS                                                                                                              |
+| MusicOnHold                     | Play default music (Default): Play the system default music for callers waiting in queue<br>Play and audio file: Use an audio file for the music            |
+| MusicOnHoldAudioFilename        | Name of the audio file to use for Music on Hold<br>Note: Only available if `MusicOnHold` is set to **Play an audio file**                                   |
+| RoutingMethod                   | The [agent routing](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#step-4-select-your-agent-routing-options) method that will be used to present calls to agents                                                                                                                                             |
+| PresenceBasedRouting            | Is [presence-based call routing](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#presence-based-call-routing) on or off                                                                                                                                                                                             |
+| AllowOptOut                     | Agents [can opt in/out of taking calls](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#call-agents-can-opt-out-of-taking-calls)                                                                                                                                                                                   |
+ | AgentAlertTime                 | [Agent alert time](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#agent-alert-time)                       |
+| OverflowThreshold               | The maximum number of simultaneous calls that can be in queue at one time before [Overflow](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-exception-handling#overflow-set-how-to-handle-call-overflow) occurs                                                                                                             
+| OverflowAction                  | Calls above teh `OverflowThreshold` will be:<br>Disconnect (Default): Disconnected<br>Redirect - Person in organization: Redirected to a Teams user in the tenant<br>Redirect - Voice app: Redirected to another Auto Attendant or Call Queue through a resource account or direction<sup>1</sup><br>Redirect - External phone number: Redirected to the PSTN<sup>2</sup><br>Redirect - Voicemail personal: Redirected to a Teams user's voicemail<br>Redirect - Voicemail (shared): Redirected to a shared voicemail                                    |
+| OverflowActionTarget            | The target of the `OverflowAction`<br>Note: Only available if `OverflowAction` is not **Disconnect (Default)                                                |
+
+
+- OverflowActionTargetCountry
+- OverflowActionTargetNumber
+- OverflowActionCallPriority
+- OverflowTreatment
+- OverflowTreatmentPrompt
+- OverflowSharedVoicemailSystemPromptSuppression
+- OverflowSharedVoicemailTranscription
+- TimeoutThreshold
+- TimeoutAction
+- TimeoutActionTarget
+- TimeoutActionTargetCountry
+- TimeoutActionTargetNumber
+- TimeoutActionCallPriority
+- TimeoutTreatment
+- TimeoutTreatmentPrompt
+- TimeoutSharedVoicemailSystemPromptSuppression
+- TimeoutSharedVoicemailTranscription
+- NoAgentsApplyTo
+- NoAgentAction
+- NoAgentActionTarget
+- NoAgentActionTargetCountry
+- NoAgentActionTargetNumber
+- NoAgentActionCallPriority
+- NoAgentTreatment
+- NoAgentTreatmentPrompt
+- NoAgentSharedVoicemailSystemPromptSuppression
+- NoAgentSharedVoicemailTranscription
+- IsCallbackEnabled
+- CallbackRequestDTMF
+- WaitTimeBeforeOfferingCallbackInSecond
+- NumberOfCallsInQueueBeforeOfferingCallback
+- CallToAgentRatioThresholdBeforeOfferingCallback
+- CallbackOfferTreatment
+- CallbackOfferPrompt
+- CallbackEmailNotificationTarget
+- Team-Channel
+- DistributionList01-DistributionList04
+- Agent01-Agent20
+
+
+
+# Provisioning Instructions
+
+1. Make sure the BulkCQs.xlsm spreadsheet is closed.
+1. Make sure any referenced prompt files are in the AudioFiles sub-directory.
 1. Open a PowerShell 5.x window
    
    - Issue the command: $PSVersionTable.PSVersion if not sure
