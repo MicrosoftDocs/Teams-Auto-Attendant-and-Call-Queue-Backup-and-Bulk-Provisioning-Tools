@@ -45,9 +45,7 @@ This step will download the existing resource account, auto attendant, call queu
 
 Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 
-1. Complete the follows tabs:
-   
-   - Config-CallQueue
+1. Complete the follows tabs: **Config-CallQueue**
 
 | Field                           | Description                                                        |
 |:--------------------------------|--------------------------------------------------------------------|
