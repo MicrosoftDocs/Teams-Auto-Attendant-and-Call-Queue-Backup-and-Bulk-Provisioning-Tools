@@ -60,9 +60,9 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | NewResourceAccountLocation      | The Resource Account location. This will restrict which phone numbers can be assigned.<br>Note: Only available if `ResourceAccount`  is set to *New*  |
 | NewResourceAccountPhoneNumber   | The Resource Account phone number.<br>Note: Only available if `ResourceAccount`  is set to *New*                                                      |
 | NewResourceAccountPriority      | *Only availble for VoiceApps TAP customers at this time*                                                                                                    |
-| OutboundCLID01-OutboundCLID04   | The outbound calling line IDs that can be used by agents when making outbound calls                                                                         |
-| Language                        | The language for all Text To Speech (TTS) and system prompts                                                                                                |
-| ServiceLevelThreshold           | The time threshold to be used for calculating the service level for real-time displays                                                                      |
+| OutboundCLID01-OutboundCLID04   | The outbound [calling IDs](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=general-info#assign-a-calling-id-optional) that can be used by agents when making outbound calls<sup>1</sup>  |
+| Language                        | The [language](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=general-info#set-the-call-queue-language) for all Text To Speech (TTS) and system prompts |
+| ServiceLevelThreshold           | The [service level threshold](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=general-info#set-the-service-level-threshold) time used for calculating the service level for real-time displays  |
 | GreetingOptions                 | <ul><li>*No Greeting (Default):* No greeting message</li><li>*Play an audio file:* Use an audio file for the greeting</li><li>*Add a greeting message:* Use TTS for the greeting message</li></ul> |
 | Greeting                        | Name of audio file or the text message for TTS                                                                                                              |
 | MusicOnHold                     | <ul><li>*Play default music (Default):* Play the system default music for callers waiting in queue</li><li>*Play and audio file:* Use an audio file for the music</li></ul>            |
@@ -72,8 +72,8 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | AllowOptOut                     | Agents [can opt in/out of taking calls](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#call-agents-can-opt-out-of-taking-calls) |
 | AgentAlertTime                  | [Agent alert time](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=agent-selection#agent-alert-time)                       |
 | OverflowThreshold               | The maximum number of simultaneous calls that can be in queue at one time before [Overflow](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-exception-handling#overflow-set-how-to-handle-call-overflow) occurs |
-| OverflowAction                  | Action to take once the `OverflowThreshold` is reached:<br><ul><li>*Disconnect (Default):* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>1</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>2</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
-| OverflowActionTarget            | The target of the `OverflowAction`<br>Note:1. Only available if `OverflowAction` is not *Disconnect (Default)*<br>.2. When `OverflowAction` is *Redirect - External phone number* the values here will be<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
+| OverflowAction                  | Action to take once the `OverflowThreshold` is reached:<br><ul><li>*Disconnect (Default):* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>2</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>3</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
+| OverflowActionTarget            | The target of the `OverflowAction`<br>Note:<br>1. Only available if `OverflowAction` is not *Disconnect (Default)*<br>2. When `OverflowAction` is *Redirect - External phone number* the values here will be:<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
 | OverflowActionTargetCountry     | The country calls will be routed to<br>Note: Only available if `OverflowAction` is *Redirect - External phone number* and `OverflowActionTarget` is *Calling Plan*   |
 | OverflowActionTargetNumber      | The phone number calls will be routed to<br>Note: Only available if `OverflowAction` is *Redirect - External phone number*   |
 | OverflowActionCallPriority      | *Only availble for VoiceApps TAP customers at this time* |
@@ -81,10 +81,9 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | OverflowTreatmentPrompt         | Name of audio file or the text message for TTS                                                                                                              |
 | OverflowSharedVoicemailSystemPromptSuppression | Supress the system greeting message for shared voicemail<br>Note: Only available when `OverflowAction` is *Redirect - Voicemail (shared)*    |
 | OverflowSharedVoicemailTranscription | Enable voicemail transcription for shared voicemail<br>Note: Only available when `OverflowAction` is *Redirect - Voicemail (shared)*    |
-
 | TimeoutThreshold                | The maximum amount fo time a caller can remain in queue before [Timeout](https://learn.microsoft.commicrosoftteams/create-a-phone-system-call-queue?tabs=call-exception-handling#call-timeout-set-how-to-handle-call-timeouts) occurs |
-| TimeoutAction                   | Action to take once the `TimeoutThreshold` is reached:<br><ul><li>*Disconnect (Default):* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>1</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>2</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
-| TimeoutActionTarget             | The target of the `TimeoutAction`<br>Note:1. Only available if `TimeoutAction` is not *Disconnect (Default)*<br>.2. When `TimeoutAction` is *Redirect - External phone number* the values here will be<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
+| TimeoutAction                   | Action to take once the `TimeoutThreshold` is reached:<br><ul><li>*Disconnect (Default):* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>2</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>3</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
+| TimeoutActionTarget             | The target of the `TimeoutAction`<br>Note:<br>1. Only available if `TimeoutAction` is not *Disconnect (Default)*<br>2. When `TimeoutAction` is *Redirect - External phone number* the values here will be:<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
 | TimeoutActionTargetCountry      | The country calls will be routed to<br>Note: Only available if `TimeoutAction` is *Redirect - External phone number* and `TimeoutActionTarget` is *Calling Plan*   |
 | TimeoutActionTargetNumber       | The phone number calls will be routed to<br>Note: Only available if `TimeoutAction` is *Redirect - External phone number*   |
 | TimeoutActionCallPriority       | *Only availble for VoiceApps TAP customers at this time* |
@@ -92,32 +91,45 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | TimeoutTreatmentPrompt          | Name of audio file or the text message for TTS                                                                                               |
 | TimeoutSharedVoicemailSystemPromptSuppression | Supress the system greeting message for shared voicemail<br>Note: Only available when `TimeoutAction` is *Redirect - Voicemail (shared)*    |
 | TimeoutSharedVoicemailTranscription | Enable voicemail transcription for shared voicemail<br>Note: Only available when `TimeoutAction` is *Redirect - Voicemail (shared)*    |
- 
-- NoAgentsApplyTo
-- NoAgentAction
-- NoAgentActionTarget
-- NoAgentActionTargetCountry
-- NoAgentActionTargetNumber
-- NoAgentActionCallPriority
-- NoAgentTreatment
-- NoAgentTreatmentPrompt
-- NoAgentSharedVoicemailSystemPromptSuppression
-- NoAgentSharedVoicemailTranscription
-- 
-- IsCallbackEnabled
-- CallbackRequestDTMF
-- WaitTimeBeforeOfferingCallbackInSecond
-- NumberOfCallsInQueueBeforeOfferingCallback
-- CallToAgentRatioThresholdBeforeOfferingCallback
-- CallbackOfferTreatment
-- CallbackOfferPrompt
-- CallbackEmailNotificationTarget
-- 
-- Team-Channel
-- DistributionList01-DistributionList04
-- Agent01-Agent20
+| NoAgentsApplyTo                 | The No agents configuration applies to:<br><ul><li>*All calls (Default):* Calls already in queue and new calls arriving to the queue</li><li>*New calls:* Only new calls that arrive once the No Agents condition occurs, existing calls in queue remain in queue |
+| NoAgentAction                    | Action to take once the No Agents condition occurs:<br><ul><li>*Queue call (Default):* The No Agents treatment is ignored and calls are queued<ul><li>*Disconnect:* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>2</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>3</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
+| NoAgentActionTarget             | The target of the `NoAgentAction`<br>Note:<br>1. Only available if `NoAgentAction` is not *Disconnect (Default)*<br>2. When `NoAgentAction` is *Redirect - External phone number* the values here will be:<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
+| NoAgentActionTargetCountry      | The country calls will be routed to<br>Note: Only available if `NoAgentAction` is *Redirect - External phone number* and `NoAgentActionTarget` is *Calling Plan*   |
+| NoAgentActionTargetNumber       | The phone number calls will be routed to<br>Note: Only available if `NoAgentAction` is *Redirect - External phone number*   |
+| NoAgentActionCallPriority       | *Only availble for VoiceApps TAP customers at this time* |
+| NoAgentTreatment                | The message that is played when no agents occurs<br><ul><li>*No Greeting (Default):* No message will be played</li><li>*Play an audio file:* Use an audio file for the message</li><li>*Add a greeting message:* Use TTS for the message</li></ul> |
+| NoAgentTreatmentPrompt          | Name of audio file or the text message for TTS                                                                                               |
+| NoAgentSharedVoicemailSystemPromptSuppression | Supress the system greeting message for shared voicemail<br>Note: Only available when `NoAgentAction` is *Redirect - Voicemail (shared)*    |
+| NoAgentSharedVoicemailTranscription | Enable voicemail transcription for shared voicemail<br>Note: Only available when `NoAgentAction` is *Redirect - Voicemail (shared)*    |
+| IsCallbackEnabled                   | <ul><li>*Yes:* Callback is enabled</li><li>*No:* Default: Callback is not enabled |
+| CallbackRequestDTMF                 | The key a caller need to press to request a callback. This should match what callers are told in the `CallbackOfferPrompt`<br>Note: Only available if `IsCallbackEnabled` is *Yes*   |
+| WaitTimeBeforeOfferingCallbackInSecond | The number of seconds a caller must want before becoming *eligibe* for callback<br>Note: Only available if `IsCallbackEnabled` is *Yes*  |
+| NumberOfCallsInQueueBeforeOfferingCallback | The number of calls that must be in queue before new callers become *eligibe* for callback<br>Note: Only available if `IsCallbackEnabled` is *Yes*  |
+| CallToAgentRatioThresholdBeforeOfferingCallback | The ratio of calls to agents that must be exceeded before new callers become *eligibe* for callback<br>Note: Only available if `IsCallbackEnabled` is *Yes*  |
+| CallbackOfferTreatment     | The type of message that is played tp offer callback<br><ul><li>*Play an audio file:* Use an audio file for the message</li><li>*Add a greeting message:* Use TTS for the message</li></ul>Note: Only available if `IsCallbackEnabled` is *Yes*  |
+| CallbackOfferPrompt        | Name of audio file or the text message for TTS<br>Note: Only available if `IsCallbackEnabled` is *Yes*                                                   |
+| CallbackEmailNotificationTarget | The distribution list to send emails to about callbacks that timeout<br>Note: Only available if `IsCallbackEnabled` is *Yes* 
+| Team-Channel                          | The Teams Channel to assign to the queue |
+| DistributionList01-DistributionList04 | The distribution lists of agents to assign to the queue |
+| Agent01-Agent20               | The agents to assign to the queue |
 
-
+Notes: 
+1. If you're using a resource account for calling line ID purposes in Call queues, the resource account must have a Teams Phone Resource Account license and one of the following assigned:
+    - A [Calling Plan](https://learn.microsoft.com/microsoftteams/calling-plans-for-office-365) license and a phone number assigned.
+    - An [Operator Connect](https://learn.microsoft.com/microsoftteams/operator-connect-plan) phone number assigned.
+    - An [online voice routing policy](https://learn.microsoft.com/microsoftteams/manage-voice-routing-policies).
+      - Phone number assignment is optional when using Direct Routing.
+1. In Teams Admin Center, redirects to Voice apps and Resource accounts are shown as separate options. In this spreadsheet, all redirects are to Voice apps. The [prefix] in front of the Auto Attendant or Call Queue name indicate how the transfer will be done:
+    - [RA-AA]: Transfer will be via the Resource Account assigned to the Auto Attendant
+    - [RA-CQ]: Transfer will be via the Resource Account assigned to the Call Queue
+    - [AA]: Transfer will be directly to the Auto Attendant
+    - [CQ]: Transfer will be directly to the Call Queue
+    - No prefix: Transfer will be directly to the Call Queue that is being created 
+1. In addition to the Teams Phone Resource Account license, when a nested auto attendant or call queue transfers calls to an external number, the last resource account that was part of the call flow must also have one of the following assigned:
+      - A [Calling Plan](https://learn.microsoft.com/microsoftteams/calling-plans-for-office-365) license and a phone number.
+      - An [Operator Connect](https://learn.microsoft.com/microsoftteams/operator-connect-plan) phone number.
+      - An [online voice routing policy](https://learn.microsoft.com/microsoftteams/manage-voice-routing-policies).
+        - Phone number assignment is optional when using Direct Routing.
 
 # Provisioning Instructions
 
