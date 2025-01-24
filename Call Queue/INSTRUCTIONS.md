@@ -129,6 +129,11 @@ Notes:
       - An [online voice routing policy](https://learn.microsoft.com/microsoftteams/manage-voice-routing-policies).
         - Phone number assignment is optional when using Direct Routing.
 
+>[!IMPORTANT]
+> Entries that become highlighted in red after entering data indicate errors<sup>*</sup>. These need to be addressed before running the provisioning script.
+>
+> \* - with the exception of [known issues](./README.md#known-issues)
+
 # Provisioning Instructions
 
 1. Make sure the BulkCQs.xlsm spreadsheet is closed.
