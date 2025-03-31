@@ -77,3 +77,18 @@ Note: At the current time these permissions are requested even if Resource Accou
     - Manually copy the formulas from unaffected cells.
 
 - It is highly likely there are some conditional formatting errors. Please report these so they can be addressed.
+
+## Roadmap
+
+### BulkCQsPreparation.ps1
+
+- Investigate Resource Account priority lookup when resource account type is AA
+- Investigate Teams Channel logic
+
+### BulkCQsProvisioning.ps1
+
+- Assign a phone number to a new resource account
+
+### BulkCQs spreadsheet
+
+- Address conditional formatting isue with the Agent01 - Agent20 fields
