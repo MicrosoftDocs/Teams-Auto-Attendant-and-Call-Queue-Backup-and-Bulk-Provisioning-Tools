@@ -13,8 +13,8 @@
 Missing or outdated modules will be automatically installed or updated.
 
 - MicrosoftTeams - 6.7.0 or later
-- Microsoft.Graph - 2.24.0 or later
-- ImportExcel - 7.8.0 or later
+- Microsoft.Graph - 2.24.0
+- ImportExcel - 7.8.0
 
 ## Limitations
 
