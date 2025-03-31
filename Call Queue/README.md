@@ -84,6 +84,7 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 - Investigate Resource Account priority lookup when resource account type is AA
 - Investigate Teams Channel logic
+- Introduce configurable limits
 
 ### BulkCQsProvisioning.ps1
 
