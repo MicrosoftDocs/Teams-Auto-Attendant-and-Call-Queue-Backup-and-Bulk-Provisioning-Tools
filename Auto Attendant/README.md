@@ -72,3 +72,20 @@ Note: At the current time these permissions are requested even if Resource Accou
   - A future version will move this to Config-Base
  
 - It is highly likely there are some conditional formatting errors. Please report these so they can be addressed.
+
+## Roadmap
+
+### BulkAAsPreparation.ps1
+
+- Update to support MicrosoftTeams 6.9.0
+- Remove use of temporary spreadsheets
+- Add counters to items in verbose mode
+- Stop processing when an invalid parameter is passed
+
+### BulkAAsProvisioning.ps1
+
+- Reference an Auto Attendant created in the spreadsheet
+
+### BulkAAs spreadsheet
+
+- Move Dial Scope to the Config-Base tab
