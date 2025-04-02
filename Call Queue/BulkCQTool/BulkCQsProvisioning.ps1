@@ -1,3 +1,8 @@
+# Version: 1.0.1
+# Date: 2025.04.01
+
+
+
 ###########################
 #  AudioFileImport
 ###########################
@@ -935,8 +940,8 @@ for ( $i = 0; $i -lt $args.length; $i++ )
    {
 		"-help"             			{ $Help = $true }
 		"-excelfile"        			{ 
-											$ExcelFilename = $args[$i+1]
-											$i++
+										  $ExcelFilename = $args[$i+1]
+										  $i++
 										}
 		"-nocallback"       	 		{ $NoCallback = $true }
 		"-noresourceaccounts" 			{ $NoResourceAccounts = $true }
@@ -945,12 +950,22 @@ for ( $i = 0; $i -lt $args.length; $i++ )
 		"-noresourceaccountlicensing" 	{ $NoResourceAccountLicensing = $true }
 
 
-       "-verbose"            			{ $Verbose = $true }
-       Default               			{ Write-Host "Unknown argument passed: $args[$i]" }
+		"-verbose"            			{ $Verbose = $true }
+		Default      					{ $ArgError = $true
+										  $arg = $args[$i]
+										  Write-Warning  "Unknown argument passed: $arg" 
+										}
    }
 }
 
-if ( $Help )
+if ( $ArgError )
+{
+	Write-Host "An unknown argument was encountered. Processing has been halted." -f Red
+	Write-Host ""
+}
+
+
+if ( ( $Help ) -or ( $ArgError ) )
 {
    Write-Host "The following options are avaialble:"
    Write-Host "`t-Help - shows the options that are available (this help message)"
@@ -1062,7 +1077,7 @@ if ( ( $Version.Major -ge 2 ) -and ( $Version.minor -ge 24 ) )
 }
 else
 {
-   Write-Host "Module MgGraph does not exist - installing."
+   Write-Host "Module Microsoft.Graph does not exist - installing."
    Install-Module -Name Microsoft.Graph -MinimumVersion 2.24.0 -Force -AllowClobber
 
    Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
