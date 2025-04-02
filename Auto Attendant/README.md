@@ -86,7 +86,8 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkAAsProvisioning.ps1
 
-- Reference an Auto Attendant created in the spreadsheet
+- Self-reference an Auto Attendant created in the spreadsheet
+- Self-reference a Resource Account created in the spreadsheet
 
 ### BulkAAs spreadsheet
 
