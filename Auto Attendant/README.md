@@ -81,6 +81,8 @@ Note: At the current time these permissions are requested even if Resource Accou
 - Remove use of temporary spreadsheets
 - Add counters to items in verbose mode
 - Stop processing when an invalid parameter is passed
+- Suppress CQ warnings
+- Download Auto Attendant configurations
 
 ### BulkAAsProvisioning.ps1
 
