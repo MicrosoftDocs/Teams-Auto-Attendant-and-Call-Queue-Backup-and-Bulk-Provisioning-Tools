@@ -54,7 +54,7 @@ To perform resource accounts related activities, when prompted, login with an ac
 
 ### Microsoft Graph Scopes Requested
 
-The BulkAAsProvisioning.ps1 PowerShell scripts request the following Microsoft Graph scopes:
+The BulkAAsProvisioning.ps1 PowerShell script requests the following Microsoft Graph scopes:
   - Organization.Read.All
   - User.ReadWrite.All
 
