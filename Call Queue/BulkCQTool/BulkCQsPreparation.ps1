@@ -1,6 +1,28 @@
-# Version: 1.0.1
-# Date: 2025.04.01
-
+# Version: 1.0.2
+# Date: 2025.04.10
+#
+# PowerShell Streams
+#
+#Stream #	Description			Write Cmdlet		Variable				Default
+#1			Success stream		Write-Output
+#2			Error stream		Write-Error			$ErrorActionPreference	Continue
+#3			Warning stream		Write-Warning		$WarningPreference		Continue
+#4			Verbose stream		Write-Verbose		$VerbosePrefernce		SilentlyContinue
+#5			Debug stream		Write-Debug			$DebugPreference		SilentlyContinue
+#6			Information stream	Write-Information	$InformationPreference	SilentlyContinue
+#
+#Preference Variable Options
+# Use name or value
+#
+#Name				Value
+#Break				6
+#Suspend			5
+#Ignore				4
+#Inquire			3
+#Continue			2
+#Stop				1
+#SilentlyContinue	0
+#
 
 
 ###########################
@@ -44,30 +66,6 @@ function AudioFileExport
 }
 
 #
-# PowerShell Streams
-#
-#Stream #	Description			Write Cmdlet		Variable				Default
-#1			Success stream		Write-Output
-#2			Error stream		Write-Error			$ErrorActionPreference	Continue
-#3			Warning stream		Write-Warning		$WarningPreference		Continue
-#4			Verbose stream		Write-Verbose		$VerbosePrefernce		SilentlyContinue
-#5			Debug stream		Write-Debug			$DebugPreference		SilentlyContinue
-#6			Information stream	Write-Information	$InformationPreference	SilentlyContinue
-#
-#Preference Variable Options
-# Use name or value
-#
-#Name				Value
-#Break				6
-#Suspend			5
-#Ignore				4
-#Inquire			3
-#Continue			2
-#Stop				1
-#SilentlyContinue	0
-#
-
-#
 # Confirm running in PowerShell v5.x
 #
 if ( $PSVersionTable.PSVersion.Major -ne 5 )
@@ -92,10 +90,10 @@ if ( $args -ne "" )
 	{
 		switch ( $args[$i] )
 		{
-			"-aacount"   			{ $AACount = $args[$i+1]
+			"-aacount"   			{ $AACount = [int]$args[$i+1]
 									  $i++
 									}
-			"-cqcount"   			{ $CQCount = $args[$i+1]
+			"-cqcount"   			{ $CQCount = [int]$args[$i+1]
 									  $i++
 									}
 			"-download"				{ $Download = $true }
@@ -168,12 +166,23 @@ $MaximumVariableCount = 10000
 $MaximumFunctionCount = 32768
 
 #
+# Set range variables
+#
+$Range_ResourceAccounts = "A2:A2001"
+$Range_AutoAttendants = "A2:A2001"
+$Range_CallQueues = "A2:A2001"
+$Range_CallQueueDownload = "A3:ZZ2002"
+$Range_PhoneNumbers = "A2:A2001"
+$Range_TeamsChannels = "A2:A2001"
+$Range_Users = "A2:A2001"
+
+#
 # Check that minimum verion of required modules are installed - install if not
 #
 # MicrosoftTeams
 #
 Write-Host "Checking for MicrosoftTeams module 6.7.0 or later."
-$Version = ( (get-installedmodule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
+$Version = ( (Get-InstalledModule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
 if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
 {
    Write-Host "Connecting to Microsoft Teams."
@@ -230,7 +239,7 @@ else
 # ImportExcel
 #
 Write-Host "Checking for ImportExcel module 7.8.0 or later."
-$Version = ( (get-installedmodule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
+$Version = ( (Get-InstalledModule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
 if ( ( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 ) )
 {
    Write-Host "Importing ImportExcel."
@@ -270,7 +279,7 @@ $ExcelWorkBook = $ExcelObj.Workbooks.Open($ExcelFullPathFilename)
 
 if ( $View )
 {
-	$ExcelObj.visible = $true
+	$ExcelObj.Visible = $true
 }
 
 #
@@ -280,14 +289,19 @@ $ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("ResourceAccountsAll")
 
 if ( $View )
 {
-   $ExcelWorkSheet.activate()
+   $ExcelWorkSheet.Activate()
 }
 
 if ( ! $NoResourceAccounts )
 {
+	#
+	# Blank out existing
+	#
+	$ExcelWorkSheet.Range($Range_ResourceAccounts).Value = ""
+
 	Write-Host "Getting list of Resource Accounts."
 
-	$ResourceAccounts = @(get-csonlineapplicationinstance | Sort-Object ApplicationId, DisplayName)
+	$ResourceAccounts = @(Get-CsOnlineApplicationInstance | Sort-Object ApplicationId, DisplayName)
 
 	$j = 2
 	for ( $i = 0; $i -lt $ResourceAccounts.length; $i++)
@@ -295,7 +309,7 @@ if ( ! $NoResourceAccounts )
 		#
 		# Make sure resource account is not Deleted
 		#
-		$ResourceAccountUserDetails = (get-csonlineuser -identity $ResourceAccounts.ObjectId[$i])
+		$ResourceAccountUserDetails = (Get-CsOnlineUser -Identity $ResourceAccounts.ObjectId[$i])
 		
 		if ( $ResourceAccountUserDetails.SoftDeletionTimeStamp.length -eq 0 )
 		{
@@ -311,7 +325,6 @@ if ( ! $NoResourceAccounts )
 					Write-Host ( "`t({0,4}) [RA-AA] Resource Account : {1,-50}" -f ($i + 1), $ResourceAccounts.DisplayName[$i] )
 				}
 
-				# $ExcelWorkSheet.Cells.Item($j,1) = ("[RA-AA] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" + $ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation + "~" + $ResourceAccountPriority )
 				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-AA] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" + $ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation )
 
 			}
@@ -323,7 +336,7 @@ if ( ! $NoResourceAccounts )
 				}
 
 				# request will generate a "Correlation id for this request" message when the RA is not assigned to anything, also generates error so redirecting that to null
-				$ResourceAccountPriority = ( (get-csonlineapplicationinstanceassociation -identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> $null  )
+				$ResourceAccountPriority = ( (Get-CsOnlineApplicationInstanceAssociation -Identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> $null  )
 				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-CQ] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" +$ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation  + "~" + $ResourceAccountPriority )
 			}
 			$j++
@@ -336,12 +349,6 @@ if ( ! $NoResourceAccounts )
 			}
 		}
 	}
-
-	#
-	# Blank out remaining rows
-	#
-	$Range = "A" + $j + ":A2001"
-	$ExcelWorkSheet.Range($Range).value = ""
 }
 else
 {
@@ -355,11 +362,16 @@ $ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("AutoAttendants")
 
 if ( $View )
 {
-   $ExcelWorkSheet.activate()
+   $ExcelWorkSheet.Activate()
 }
 
 if ( ! $NoAutoAttendants )
 {
+	#
+	# Blank out existing
+	#
+	$ExcelWorkSheet.Range($Range_AutoAttendants).Value = ""
+
 	Write-Host "Getting list of Auto Attendants."
 
 	if ( $AACount -gt 0 )
@@ -375,11 +387,31 @@ if ( ! $NoAutoAttendants )
 	{
 		$j = $i * 100
 		
+		if ( $AACount -le 100 )
+		{
+			$First = $AACount
+		}
+		elseif ( $j -le ( $AACount - $j ) )
+		{
+			$First = 100
+		}
+		else
+		{
+			$First = $AACount % 100
+		}
+		
 		if ( $Verbose )
 		{
-			Write-Host "`tRetrieving list of auto attendants $($j+1) to $($j+100)"
+			if ( $First -eq 100 )
+			{
+				Write-Host "`tRetrieving list of auto attendants $($j+1) to $($j+100) of $AACount"
+			}
+			else
+			{
+				Write-Host "`tRetrieving list of auto attendants $($j+1) to $($j+$First) of $AACount"
+			}
 		}
-	
+			
 		$AutoAttendants = @(Get-CsAutoAttendant -Skip $j -First 100)
 
 		for ($k=0; $k -lt  $AutoAttendants.length; $k++)
@@ -393,13 +425,6 @@ if ( ! $NoAutoAttendants )
 			$ExcelWorkSheet.Cells.Item($Row,1) = ($AutoAttendants.Name[$k] + "~" + $AutoAttendants.Identity[$k])
 		}
 	}
-
-	#
-	# Blank out remaining rows
-	#
-	$Row += 1
-	$Range = "A" + ($Row) + ":A2001"
-	$ExcelWorkSheet.Range($Range).value = ""
 }
 else
 {
@@ -426,33 +451,66 @@ if ( ! $NoCallQueues )
 	{
 		$j = $i * 100
 
+		if ( $CQCount -le 100 )
+		{
+			$First = $CQCount
+		}
+		elseif ( $j -le ( $CQCount - $j ) )
+		{
+			$First = 100
+		}
+		else
+		{
+			$First = $CQCount % 100
+		}
+
 		if ( $Verbose )
 		{
-			Write-Host "`tRetrieving list of call queues $($j+1) to $($j+100)"
+			if ( $First -eq 100 )
+			{
+				Write-Host "`tRetrieving list of call queues $($j+1) to $($j+100) of $CQCount"
+			}
+			else
+			{
+				Write-Host "`tRetrieving list of call queues $($j+1) to $($j+$First) of $CQCount"
+			}
 		}
 
 		$CallQueues = @(Get-CsCallQueue -Skip $j -First 100 3> $null )
+		
+		#
+		# Blank out existing rows
+		#
+		$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
+		
+		if ( $View )
+		{
+			$ExcelWorkSheet.Activate()
+		}
+		
+		$ExcelWorkSheet.Range($Range_CallQueues).Value = ""
 
 		if ( $Download )
 		{
 			$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueuesDownload")
-			
-			#
-			# Blank out any existing data if first time through
-			#
-			if ( $i -eq 0 )
+
+			if ( $View )
 			{
-				$Range = "A3:ZZ2002"
-				$ExcelWorkSheet.Range($Range).value = ""
+				$ExcelWorkSheet.Activate()
 			}
 			
+			$ExcelWorkSheet.Range($Range_CallQueueDownload).Value = ""
+		}
+		
+		if ( $Download )
+		{
 			for ($k=0; $k -lt  $CallQueues.length; $k++)
 			{
 				$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueuesDownload")
 
 				if ( $View )
 				{
-					$ExcelWorkSheet.activate()
+					$ExcelWorkSheet.Activate()
 				}
 
 				$RowOffset = $k + $j + 3
@@ -864,51 +922,27 @@ if ( ! $NoCallQueues )
 					}
 				}
 				
-				
+				#
+				# Write out CallQueue information
 				$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
 		
 				if ( $View )
 				{
-					$ExcelWorkSheet.activate()
+					$ExcelWorkSheet.Activate()
 				}
 				
 				$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues.Identity[$k]).ApplicationInstances 3> $null )
 				$ExcelWorkSheet.Cells.Item($RowOffset - 1,1) = ($CallQueues.Name[$k] + "~" + $CallQueues.Identity[$k] + "~" + ($AssignedResourceAccounts -join ","))
 			}
-			
-			#
-			# Blank out remaining rows
-			#
-			$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
-		
-			if ( $View )
-			{
-				$ExcelWorkSheet.activate()
-			}
-			
-			$Range = "A" + ($RowOffset) + ":A2001"
-			$ExcelWorkSheet.Range($Range).value = ""
-			
-			$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueuesDownload")
-
-			if ( $View )
-			{
-				$ExcelWorkSheet.activate()
-			}
-
-			$RowOffset += 1
-			$Range = "A" + ($RowOffset) + ":ZZ2002"
-			$ExcelWorkSheet.Range($Range).value = ""
 		} # Download
 
 		if ( ! $Download )
 		{
-			
 			$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
 		
 			if ( $View )
 			{
-				$ExcelWorkSheet.activate()
+				$ExcelWorkSheet.Activate()
 			}
 
 			for ($k=0; $k -lt  $CallQueues.length; $k++)
@@ -923,13 +957,6 @@ if ( ! $NoCallQueues )
 				$ExcelWorkSheet.Cells.Item($RowOffset,1) = ($CallQueues.Name[$k] + "~" + $CallQueues.Identity[$k] + "~" + ($AssignedResourceAccounts -join ","))
 			}
 		}
-
-		#
-		# Blank out remaining rows
-		#
-		$RowOffset += 1
-		$Range = "A" + ($RowOffset) + ":A2001"
-		$ExcelWorkSheet.Range($Range).value = ""
 	}
 }
 else
@@ -944,14 +971,19 @@ $ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("PhoneNumbers")
 
 if ( $View )
 {
-   $ExcelWorkSheet.activate()
+   $ExcelWorkSheet.Activate()
 }
 
 if ( ! $NoPhoneNumbers )
 {
+	#
+	# Blank out existing
+	#
+	$ExcelWorkSheet.Range($Range_PhoneNumbers).Value = ""
+
 	Write-Host "Getting list of existing voice application phone numbers"
 
-	$PhoneNumbers = @(get-csphonenumberassignment -CapabilitiesContain "VoiceApplicationAssignment" -PstnAssignmentStatus "Unassigned")
+	$PhoneNumbers = @(Get-CsPhoneNumberAssignment -CapabilitiesContain "VoiceApplicationAssignment" -PstnAssignmentStatus "Unassigned")
 
 	for ($i=0; $i -lt  $PhoneNumbers.length; $i++)
 	{
@@ -962,12 +994,6 @@ if ( ! $NoPhoneNumbers )
 
 		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($PhoneNumbers.TelephoneNumber[$i] + "~" + $PhoneNumbers.NumberType[$i] + "~" + $PhoneNumbers.IsoSubdivision[$i] + "~" + $PhoneNumbers.IsoCountryCode[$i])
 	}
-
-	#
-	# Blank out remaining rows
-	#
-	$Range = "A" + ($i + 2) + ":A2001"
-	$ExcelWorkSheet.Range($Range).value = ""
 }
 else
 {
@@ -981,19 +1007,24 @@ $ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("TeamsChannels")
 
 if ( $View )
 {
-   $ExcelWorkSheet.activate()
+   $ExcelWorkSheet.Activate()
 }
 
 if ( ! $NoTeamsChannels )
 {
+	#
+	# Blank out existing rows
+	#
+	$ExcelWorkSheet.Range($Range_TeamsChannels).Value = ""
+
 	Write-Host "Geting list of existing Teams and Channels."
 
-	$Teams = @(get-team | Sort-Object DisplayName)
+	$Teams = @(Get-Team | Sort-Object DisplayName)
 
 	$row = 1
 	for ($i=0; $i -lt $Teams.length; $i++)
 	{
-		$TeamsChannels = @(get-teamchannel -groupId $Teams.GroupId[$i] | Where {$_.MembershipType -EQ "Standard"} | Sort-Object DisplayName)
+		$TeamsChannels = @(Get-TeamChannel -GroupId $Teams.GroupId[$i] | Where {$_.MembershipType -EQ "Standard"} | Sort-Object DisplayName)
 
 		if ( $Verbose )
 		{
@@ -1025,12 +1056,6 @@ if ( ! $NoTeamsChannels )
 			}
 		}
 	}
-
-	#
-	# Blank out remaining rows
-	#
-	$Range = "A" + ($row + 1) + ":A2001"
-	$ExcelWorkSheet.Range($Range).value = ""
 }
 else
 {
@@ -1044,14 +1069,19 @@ $ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("Users")
 
 if ( $View )
 {
-   $ExcelWorkSheet.activate()
+   $ExcelWorkSheet.Activate()
 }
 
 if ( ! $NoUsers )
 {
+	#
+	# Blank out existing rows
+	#
+	$ExcelWorkSheet.Range($Range_Users).Value = ""
+
 	Write-Host "Getting list of enterprise voice enabled users."
 
-	$Users = @(get-csonlineuser -Filter {EnterpriseVoiceEnabled -eq $true -and AccountEnabled -eq $true} | Sort-Object Alias)
+	$Users = @(Get-CsOnlineUser -Filter {EnterpriseVoiceEnabled -eq $true -and AccountEnabled -eq $true} | Sort-Object Alias)
 
 	for ( $i = 0; $i -lt $Users.length; $i++)
 	{
@@ -1062,12 +1092,6 @@ if ( ! $NoUsers )
 
 		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($Users.UserPrincipalName[$i] + "~" + $Users.Identity[$i])
 	}
-
-	#
-	# Blank out remaining rows
-	#
-	$Range = "A" + ($i + 2) + ":A2001"
-	$ExcelWorkSheet.Range($Range).value = ""
 }
 else
 {
@@ -1080,11 +1104,11 @@ else
 if ( $View )
 {
    $ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("Config-CallQueue")
-   $ExcelWorkSheet.activate()
+   $ExcelWorkSheet.Activate()
 }
 
 $ExcelWorkBook.Save()
-$ExcelWorkBook.close($true)
+$ExcelWorkBook.Close($true)
 $ExcelObj.Quit()
 
 if ( Test-Path -Path ".\`$null" )

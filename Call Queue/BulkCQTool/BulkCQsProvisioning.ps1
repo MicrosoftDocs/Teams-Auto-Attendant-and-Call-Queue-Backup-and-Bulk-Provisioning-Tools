@@ -1,5 +1,28 @@
-# Version: 1.0.1
-# Date: 2025.04.01
+# Version: 1.0.2
+# Date: 2025.04.10
+#
+# PowerShell Streams
+#
+#Stream #	Description			Write Cmdlet		Variable				Default
+#1			Success stream		Write-Output
+#2			Error stream		Write-Error			$ErrorActionPreference	Continue
+#3			Warning stream		Write-Warning		$WarningPreference		Continue
+#4			Verbose stream		Write-Verbose		$VerbosePrefernce		SilentlyContinue
+#5			Debug stream		Write-Debug			$DebugPreference		SilentlyContinue
+#6			Information stream	Write-Information	$InformationPreference	SilentlyContinue
+#
+#Preference Variable Options
+# Use name or value
+#
+#Name				Value
+#Break				6
+#Suspend			5
+#Ignore				4
+#Inquire			3
+#Continue			2
+#Stop				1
+#SilentlyContinue	0
+#
 
 
 
