@@ -1,3 +1,29 @@
+# Version: 1.0.2
+# Date: 2025.04.0x
+#
+# PowerShell Streams
+#
+#Stream #	Description			Write Cmdlet		Variable				Default
+#1			Success stream		Write-Output
+#2			Error stream		Write-Error			$ErrorActionPreference	Continue
+#3			Warning stream		Write-Warning		$WarningPreference		Continue
+#4			Verbose stream		Write-Verbose		$VerbosePrefernce		SilentlyContinue
+#5			Debug stream		Write-Debug			$DebugPreference		SilentlyContinue
+#6			Information stream	Write-Information	$InformationPreference	SilentlyContinue
+#
+#Preference Variable Options
+# Use name or value
+#
+#Name				Value
+#Break				6
+#Suspend			5
+#Ignore				4
+#Inquire			3
+#Continue			2
+#Stop				1
+#SilentlyContinue	0
+#
+
 #
 #  AudioFileImport
 #
@@ -44,12 +70,12 @@ function CheckFileExists
 #
 # VerboseOutputMenuOption
 #
-function VerboseOutputMenuOption ([string]$Key, [string]$Redirect, [string]$VoiceCommand, [string]$RedirectTarget, [string]$RedirectPriority, [string]$RedirectComment, [string]$SharedVoicemailTranscription, [string]$SharedVoicemailSuppress, [string]$CallPriority)
+function VerboseOutputMenuOption ([string]$MenuType, [string]$Key, [string]$Redirect, [string]$VoiceCommand, [string]$RedirectTarget, [string]$RedirectPriority, [string]$RedirectComment, [string]$SharedVoicemailTranscription, [string]$SharedVoicemailSuppress, [string]$CallPriority)
 {	
 	if ( $Key -eq "0" )
 	{
-		Write-Host ("`t`t{0,-3}`t{1,-20}`t{2,-20}`t{3,-36}`t`t{4,-30}" -f "Key", "B_x_VoiceCommand",     "B_x_Redirect",                   "B_x_RedirectTarget",                "Additional Information")
-		Write-Host ("`t`t{0,-3}`t{1,-20}`t{2,-20}`t{3,-36}`t{4,-30}" -f "---", "--------------------", "--------------------", "------------------------------------","-----------------------------------------------------------")
+		Write-Host ("`t`t{0,-3}`t{1,-20}`t{2,-20}`t{3,-36}`t{4,-30}" -f "Key", "$($MenuType)_x_VoiceCommand",     "$($MenuType)_x_Redirect",                   "$($MenuType)_x_RedirectTarget",          "Additional Information")
+		Write-Host ("`t`t{0,-3}`t{1,-20}`t{2,-20}`t{3,-36}`t{4,-30}" -f "---", "--------------------", "---------------------", "------------------------------------","----------------------")
 	}
 
 	switch ( $Redirect )
@@ -242,20 +268,19 @@ function VerboseOutput
 
         Write-Host "`t`tB_MenuGreetingOption : $B_MenuGreetingOption"
         Write-Host "`t`tB_MenuGreeting : $B_MenuGreeting"
-	   
 
-		VerboseOutputMenuOption "0" $B_0_Redirect $B_0_VoiceCommand $B_0_RedirectTarget $B_0_Redirect_Call_Priority $B_0_Redirect_Comment $B_0_SharedVoicemailTranscription $B_0_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "1" $B_1_Redirect $B_1_VoiceCommand $B_1_RedirectTarget $B_1_Redirect_Call_Priority $B_1_Redirect_Comment $B_1_SharedVoicemailTranscription $B_1_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "2" $B_2_Redirect $B_2_VoiceCommand $B_2_RedirectTarget $B_2_Redirect_Call_Priority $B_2_Redirect_Comment $B_2_SharedVoicemailTranscription $B_2_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "3" $B_3_Redirect $B_3_VoiceCommand $B_3_RedirectTarget $B_3_Redirect_Call_Priority $B_3_Redirect_Comment $B_3_SharedVoicemailTranscription $B_3_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "4" $B_4_Redirect $B_4_VoiceCommand $B_4_RedirectTarget $B_4_Redirect_Call_Priority $B_4_Redirect_Comment $B_4_SharedVoicemailTranscription $B_4_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "5" $B_5_Redirect $B_5_VoiceCommand $B_5_RedirectTarget $B_5_Redirect_Call_Priority $B_5_Redirect_Comment $B_5_SharedVoicemailTranscription $B_5_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "6" $B_6_Redirect $B_6_VoiceCommand $B_6_RedirectTarget $B_6_Redirect_Call_Priority $B_6_Redirect_Comment $B_6_SharedVoicemailTranscription $B_6_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "7" $B_7_Redirect $B_7_VoiceCommand $B_7_RedirectTarget $B_7_Redirect_Call_Priority $B_7_Redirect_Comment $B_7_SharedVoicemailTranscription $B_7_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "8" $B_8_Redirect $B_8_VoiceCommand $B_8_RedirectTarget $B_8_Redirect_Call_Priority $B_8_Redirect_Comment $B_8_SharedVoicemailTranscription $B_8_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "9" $B_9_Redirect $B_9_VoiceCommand $B_9_RedirectTarget $B_9_Redirect_Call_Priority $B_9_Redirect_Comment $B_9_SharedVoicemailTranscription $B_9_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "*" $B_Star_Redirect $B_Star_VoiceCommand $B_Star_RedirectTarget $B_Star_Redirect_Call_Priority $B_Star_Redirect_Comment $B_Star_SharedVoicemailTranscription $B_Star_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "#" $B_Pound_Redirect $B_Pound_VoiceCommand $B_Pound_RedirectTarget $B_Pound_Redirect_Call_Priority $B_Pound_Redirect_Comment $B_Pound_SharedVoicemailTranscription $B_Pound_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "0" $B_0_Redirect $B_0_VoiceCommand $B_0_RedirectTarget $B_0_Redirect_Call_Priority $B_0_Redirect_Comment $B_0_SharedVoicemailTranscription $B_0_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "1" $B_1_Redirect $B_1_VoiceCommand $B_1_RedirectTarget $B_1_Redirect_Call_Priority $B_1_Redirect_Comment $B_1_SharedVoicemailTranscription $B_1_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "2" $B_2_Redirect $B_2_VoiceCommand $B_2_RedirectTarget $B_2_Redirect_Call_Priority $B_2_Redirect_Comment $B_2_SharedVoicemailTranscription $B_2_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "3" $B_3_Redirect $B_3_VoiceCommand $B_3_RedirectTarget $B_3_Redirect_Call_Priority $B_3_Redirect_Comment $B_3_SharedVoicemailTranscription $B_3_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "4" $B_4_Redirect $B_4_VoiceCommand $B_4_RedirectTarget $B_4_Redirect_Call_Priority $B_4_Redirect_Comment $B_4_SharedVoicemailTranscription $B_4_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "5" $B_5_Redirect $B_5_VoiceCommand $B_5_RedirectTarget $B_5_Redirect_Call_Priority $B_5_Redirect_Comment $B_5_SharedVoicemailTranscription $B_5_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "6" $B_6_Redirect $B_6_VoiceCommand $B_6_RedirectTarget $B_6_Redirect_Call_Priority $B_6_Redirect_Comment $B_6_SharedVoicemailTranscription $B_6_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "7" $B_7_Redirect $B_7_VoiceCommand $B_7_RedirectTarget $B_7_Redirect_Call_Priority $B_7_Redirect_Comment $B_7_SharedVoicemailTranscription $B_7_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "8" $B_8_Redirect $B_8_VoiceCommand $B_8_RedirectTarget $B_8_Redirect_Call_Priority $B_8_Redirect_Comment $B_8_SharedVoicemailTranscription $B_8_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "9" $B_9_Redirect $B_9_VoiceCommand $B_9_RedirectTarget $B_9_Redirect_Call_Priority $B_9_Redirect_Comment $B_9_SharedVoicemailTranscription $B_9_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "*" $B_Star_Redirect $B_Star_VoiceCommand $B_Star_RedirectTarget $B_Star_Redirect_Call_Priority $B_Star_Redirect_Comment $B_Star_SharedVoicemailTranscription $B_Star_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "B" "#" $B_Pound_Redirect $B_Pound_VoiceCommand $B_Pound_RedirectTarget $B_Pound_Redirect_Call_Priority $B_Pound_Redirect_Comment $B_Pound_SharedVoicemailTranscription $B_Pound_SharedVoicemailSuppress $CallPriority
 		
 
     Write-Host "`tAfter Hours Menu"
@@ -334,21 +359,21 @@ function VerboseOutput
         Write-Host "`t`tA_MenuGreetingOption : $A_MenuGreetingOption"
         Write-Host "`t`tA_MenuGreeting : $A_MenuGreeting"
 
-		VerboseOutputMenuOption "0" $A_0_Redirect $A_0_VoiceCommand $A_0_RedirectTarget $A_0_Redirect_Call_Priority $A_0_Redirect_Comment $A_0_SharedVoicemailTranscription $A_0_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "1" $A_1_Redirect $A_1_VoiceCommand $A_1_RedirectTarget $A_1_Redirect_Call_Priority $A_1_Redirect_Comment $A_1_SharedVoicemailTranscription $A_1_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "2" $A_2_Redirect $A_2_VoiceCommand $A_2_RedirectTarget $A_2_Redirect_Call_Priority $A_2_Redirect_Comment $A_2_SharedVoicemailTranscription $A_2_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "3" $A_3_Redirect $A_3_VoiceCommand $A_3_RedirectTarget $A_3_Redirect_Call_Priority $A_3_Redirect_Comment $A_3_SharedVoicemailTranscription $A_3_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "4" $A_4_Redirect $A_4_VoiceCommand $A_4_RedirectTarget $A_4_Redirect_Call_Priority $A_4_Redirect_Comment $A_4_SharedVoicemailTranscription $A_4_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "5" $A_6_Redirect $A_6_VoiceCommand $A_6_RedirectTarget $A_6_Redirect_Call_Priority $A_6_Redirect_Comment $A_6_SharedVoicemailTranscription $A_6_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "6" $A_6_Redirect $A_6_VoiceCommand $A_6_RedirectTarget $A_6_Redirect_Call_Priority $A_6_Redirect_Comment $A_6_SharedVoicemailTranscription $A_6_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "7" $A_7_Redirect $A_7_VoiceCommand $A_7_RedirectTarget $A_7_Redirect_Call_Priority $A_7_Redirect_Comment $A_7_SharedVoicemailTranscription $A_7_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "8" $A_8_Redirect $A_8_VoiceCommand $A_8_RedirectTarget $A_8_Redirect_Call_Priority $A_8_Redirect_Comment $A_8_SharedVoicemailTranscription $A_8_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "9" $A_9_Redirect $A_9_VoiceCommand $A_9_RedirectTarget $A_9_Redirect_Call_Priority $A_9_Redirect_Comment $A_9_SharedVoicemailTranscription $A_9_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "*" $A_Star_Redirect $A_Star_VoiceCommand $A_Star_RedirectTarget $A_Star_Redirect_Call_Priority $A_Star_Redirect_Comment $A_Star_SharedVoicemailTranscription $A_Star_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "#" $A_Pound_Redirect $A_Pound_VoiceCommand $A_Pound_RedirectTarget $A_Pound_Redirect_Call_Priority $A_Pound_Redirect_Comment $A_Pound_SharedVoicemailTranscription $A_Pound_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "0" $A_0_Redirect $A_0_VoiceCommand $A_0_RedirectTarget $A_0_Redirect_Call_Priority $A_0_Redirect_Comment $A_0_SharedVoicemailTranscription $A_0_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "1" $A_1_Redirect $A_1_VoiceCommand $A_1_RedirectTarget $A_1_Redirect_Call_Priority $A_1_Redirect_Comment $A_1_SharedVoicemailTranscription $A_1_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "2" $A_2_Redirect $A_2_VoiceCommand $A_2_RedirectTarget $A_2_Redirect_Call_Priority $A_2_Redirect_Comment $A_2_SharedVoicemailTranscription $A_2_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "3" $A_3_Redirect $A_3_VoiceCommand $A_3_RedirectTarget $A_3_Redirect_Call_Priority $A_3_Redirect_Comment $A_3_SharedVoicemailTranscription $A_3_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "4" $A_4_Redirect $A_4_VoiceCommand $A_4_RedirectTarget $A_4_Redirect_Call_Priority $A_4_Redirect_Comment $A_4_SharedVoicemailTranscription $A_4_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "5" $A_5_Redirect $A_5_VoiceCommand $A_5_RedirectTarget $A_5_Redirect_Call_Priority $A_5_Redirect_Comment $A_5_SharedVoicemailTranscription $A_5_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "6" $A_6_Redirect $A_6_VoiceCommand $A_6_RedirectTarget $A_6_Redirect_Call_Priority $A_6_Redirect_Comment $A_6_SharedVoicemailTranscription $A_6_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "7" $A_7_Redirect $A_7_VoiceCommand $A_7_RedirectTarget $A_7_Redirect_Call_Priority $A_7_Redirect_Comment $A_7_SharedVoicemailTranscription $A_7_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "8" $A_8_Redirect $A_8_VoiceCommand $A_8_RedirectTarget $A_8_Redirect_Call_Priority $A_8_Redirect_Comment $A_8_SharedVoicemailTranscription $A_8_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "9" $A_9_Redirect $A_9_VoiceCommand $A_9_RedirectTarget $A_9_Redirect_Call_Priority $A_9_Redirect_Comment $A_9_SharedVoicemailTranscription $A_9_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "*" $A_Star_Redirect $A_Star_VoiceCommand $A_Star_RedirectTarget $A_Star_Redirect_Call_Priority $A_Star_Redirect_Comment $A_Star_SharedVoicemailTranscription $A_Star_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "A" "#" $A_Pound_Redirect $A_Pound_VoiceCommand $A_Pound_RedirectTarget $A_Pound_Redirect_Call_Priority $A_Pound_Redirect_Comment $A_Pound_SharedVoicemailTranscription $A_Pound_SharedVoicemailSuppress $CallPriority
 	  
 	  
-    Write-Host "`tHolidays Menu"
+		Write-Host "`tHolidays Menu"
 	    Write-Host "`t`tHolidays : $Holidays"
         Write-Host "`t`tH_DirectorySearch : $H_DirectorySearch"
 
@@ -425,18 +450,18 @@ function VerboseOutput
         Write-Host "`t`tH_MenuGreetingOption : $H_MenuGreetingOption"
         Write-Host "`t`tH_MenuGreeting : $H_MenuGreeting"
 
-		VerboseOutputMenuOption "0" $H_0_Redirect $H_0_VoiceCommand $H_0_RedirectTarget $H_0_Redirect_Call_Priority $H_0_Redirect_Comment $H_0_SharedVoicemailTranscription $H_0_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "1" $H_1_Redirect $H_1_VoiceCommand $H_1_RedirectTarget $H_1_Redirect_Call_Priority $H_1_Redirect_Comment $H_1_SharedVoicemailTranscription $H_1_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "2" $H_2_Redirect $H_2_VoiceCommand $H_2_RedirectTarget $H_2_Redirect_Call_Priority $H_2_Redirect_Comment $H_2_SharedVoicemailTranscription $H_2_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "3" $H_3_Redirect $H_3_VoiceCommand $H_3_RedirectTarget $H_3_Redirect_Call_Priority $H_3_Redirect_Comment $H_3_SharedVoicemailTranscription $H_3_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "4" $H_4_Redirect $H_4_VoiceCommand $H_4_RedirectTarget $H_4_Redirect_Call_Priority $H_4_Redirect_Comment $H_4_SharedVoicemailTranscription $H_4_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "5" $H_5_Redirect $H_5_VoiceCommand $H_5_RedirectTarget $H_5_Redirect_Call_Priority $H_5_Redirect_Comment $H_5_SharedVoicemailTranscription $H_5_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "6" $H_6_Redirect $H_6_VoiceCommand $H_6_RedirectTarget $H_6_Redirect_Call_Priority $H_6_Redirect_Comment $H_6_SharedVoicemailTranscription $H_6_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "7" $H_7_Redirect $H_7_VoiceCommand $H_7_RedirectTarget $H_7_Redirect_Call_Priority $H_7_Redirect_Comment $H_7_SharedVoicemailTranscription $H_7_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "8" $H_8_Redirect $H_8_VoiceCommand $H_8_RedirectTarget $H_8_Redirect_Call_Priority $H_8_Redirect_Comment $H_8_SharedVoicemailTranscription $H_8_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "9" $H_9_Redirect $H_9_VoiceCommand $H_9_RedirectTarget $H_9_Redirect_Call_Priority $H_9_Redirect_Comment $H_9_SharedVoicemailTranscription $H_9_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "*" $H_Star_Redirect $H_Star_VoiceCommand $H_Star_RedirectTarget $H_Star_Redirect_Call_Priority $H_Star_Redirect_Comment $H_Star_SharedVoicemailTranscription $H_Star_SharedVoicemailSuppress $CallPriority
-		VerboseOutputMenuOption "#" $H_Pound_Redirect $H_Pound_VoiceCommand $H_Pound_RedirectTarget $H_Pound_Redirect_Call_Priority $H_Pound_Redirect_Comment $H_Pound_SharedVoicemailTranscription $H_Pound_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "0" $H_0_Redirect $H_0_VoiceCommand $H_0_RedirectTarget $H_0_Redirect_Call_Priority $H_0_Redirect_Comment $H_0_SharedVoicemailTranscription $H_0_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "1" $H_1_Redirect $H_1_VoiceCommand $H_1_RedirectTarget $H_1_Redirect_Call_Priority $H_1_Redirect_Comment $H_1_SharedVoicemailTranscription $H_1_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "2" $H_2_Redirect $H_2_VoiceCommand $H_2_RedirectTarget $H_2_Redirect_Call_Priority $H_2_Redirect_Comment $H_2_SharedVoicemailTranscription $H_2_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "3" $H_3_Redirect $H_3_VoiceCommand $H_3_RedirectTarget $H_3_Redirect_Call_Priority $H_3_Redirect_Comment $H_3_SharedVoicemailTranscription $H_3_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "4" $H_4_Redirect $H_4_VoiceCommand $H_4_RedirectTarget $H_4_Redirect_Call_Priority $H_4_Redirect_Comment $H_4_SharedVoicemailTranscription $H_4_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "5" $H_5_Redirect $H_5_VoiceCommand $H_5_RedirectTarget $H_5_Redirect_Call_Priority $H_5_Redirect_Comment $H_5_SharedVoicemailTranscription $H_5_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "6" $H_6_Redirect $H_6_VoiceCommand $H_6_RedirectTarget $H_6_Redirect_Call_Priority $H_6_Redirect_Comment $H_6_SharedVoicemailTranscription $H_6_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "7" $H_7_Redirect $H_7_VoiceCommand $H_7_RedirectTarget $H_7_Redirect_Call_Priority $H_7_Redirect_Comment $H_7_SharedVoicemailTranscription $H_7_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "8" $H_8_Redirect $H_8_VoiceCommand $H_8_RedirectTarget $H_8_Redirect_Call_Priority $H_8_Redirect_Comment $H_8_SharedVoicemailTranscription $H_8_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "9" $H_9_Redirect $H_9_VoiceCommand $H_9_RedirectTarget $H_9_Redirect_Call_Priority $H_9_Redirect_Comment $H_9_SharedVoicemailTranscription $H_9_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "*" $H_Star_Redirect $H_Star_VoiceCommand $H_Star_RedirectTarget $H_Star_Redirect_Call_Priority $H_Star_Redirect_Comment $H_Star_SharedVoicemailTranscription $H_Star_SharedVoicemailSuppress $CallPriority
+		VerboseOutputMenuOption "H" "#" $H_Pound_Redirect $H_Pound_VoiceCommand $H_Pound_RedirectTarget $H_Pound_Redirect_Call_Priority $H_Pound_Redirect_Comment $H_Pound_SharedVoicemailTranscription $H_Pound_SharedVoicemailSuppress $CallPriority
 
     Write-Host "-----------------------------------------------------------------"
 }
@@ -502,15 +527,12 @@ function NewAutoAttendant
     #
     if ( $Operator -ne "None" )
     {
-		write-host "operator: $Operator"
 		if ( ( $Operator -eq "ApplicationEndpoint" -or $Operator -eq "ConfigurationEndpoint" ) -AND $CallPriority )
 		{
-			write-host "operator priority: $Operator_Call_Priority"
 			$OperatorCallableEntity = New-CsAutoAttendantCallableEntity -Identity $OperatorTarget -Type $Operator -CallPriority $Operator_Call_Priority
 		}
 		else
 		{
-			write-host "operator no priority"
 			$OperatorCallableEntity = New-CsAutoAttendantCallableEntity -Identity $OperatorTarget -Type $Operator
 		}
 
@@ -680,7 +702,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-0-ERROR"
+                Write-Host "B-0-ERROR"
            } 
         }
 
@@ -763,7 +785,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-1-ERROR"
+                Write-Host "B-1-ERROR"
             }
         }
 
@@ -845,7 +867,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-2-ERROR"
+                Write-Host "B-2-ERROR"
             }
 	    }
 
@@ -928,7 +950,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-3-ERROR"
+                Write-Host "B-3-ERROR"
             }
         }
 
@@ -1012,7 +1034,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-4-ERROR"
+                Write-Host "B-4-ERROR"
             }
         }
 
@@ -1095,7 +1117,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-5-ERROR"
+                Write-Host "B-5-ERROR"
             }
         }
 
@@ -1178,7 +1200,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-6-ERROR"
+                Write-Host "B-6-ERROR"
              }
         }
 
@@ -1261,7 +1283,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-7-ERROR"
+                Write-Host "B-7-ERROR"
             }
         }
 
@@ -1344,7 +1366,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-8-ERROR"
+                Write-Host "B-8-ERROR"
             }
         }
 
@@ -1427,7 +1449,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-9-ERROR"
+                Write-Host "B-9-ERROR"
             }
         }
 
@@ -1510,7 +1532,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-Star-ERROR"
+                Write-Host "B-Star-ERROR"
             }
         }
 
@@ -1593,7 +1615,7 @@ function NewAutoAttendant
             }
             else
             {
-                write-host "B-Pound-ERROR"
+                Write-Host "B-Pound-ERROR"
             }
         }
 		
@@ -1627,7 +1649,7 @@ function NewAutoAttendant
     }
     else
     {
-        write-host "BLANK - can't build default call flow.  Fix error and start again."
+        Write-Host "BLANK - can't build default call flow.  Fix error and start again."
         exit
     }
 
@@ -1746,18 +1768,38 @@ function NewAutoAttendant
                 "0" {  
                         $BH_Monday_Time_1 = New-CsOnlineTimeRange -Start $BH_Monday[$i] -End $BH_Monday[$i+1]
                         $BH_Schedule_List += "`$BH_Monday_Time_1"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tMonday Start Time 1:`t$($BH_Monday[$i])`tEnd Time 1:`t$($BH_Monday[$i+1])"
+						}
                     }
                 "2" {  
                         $BH_Monday_Time_2 = New-CsonlineTimeRange -Start $BH_Monday[$i] -End $BH_Monday[$i+1]
                         $BH_Schedule_List += ",`$BH_Monday_Time_2"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tMonday Start Time 2:`t$($BH_Monday[$i])`tEnd Time 2:`t$($BH_Monday[$i+1])"
+						}
                     }
                 "4" {  
                         $BH_Monday_Time_3 = New-CsOnlineTimeRange -Start $BH_Monday[$i] -End $BH_Monday[$i+1]
                         $BH_Schedule_List += ",`$BH_Monday_Time_3"
+
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tMonday Start Time 3:`t$($BH_Monday[$i])`tEnd Time 3:`t$($BH_Monday[$i+1])"
+						}
                     }
                 "6" {  
                         $BH_Monday_Time_4 = New-CsOnlineTimeRange -Start $BH_Monday[$i] -End $BH_Monday[$i+1]
                         $BH_Schedule_List += ",`$BH_Monday_Time_4"
+
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tMonday Start Time 4:`t$($BH_Monday[$i])`tEnd Time 4:`t$($BH_Monday[$i+1])"
+						}
                     }
             }
         }
@@ -1783,18 +1825,38 @@ function NewAutoAttendant
                 "0" {  
                         $BH_Tuesday_Time_1 = New-CsOnlineTimeRange -Start $BH_Tuesday[$i] -End $BH_Tuesday[$i+1]
                         $BH_Schedule_List += "`$BH_Tuesday_Time_1"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tTuesday Start Time 1:`t$($BH_Tuesday[$i])`tEnd Time 1:`t$($BH_Tuesday[$i+1])"
+						}
                     }
                 "2" {  
                         $BH_Tuesday_Time_2 = New-CsonlineTimeRange -Start $BH_Tuesday[$i] -End $BH_Tuesday[$i+1]
                         $BH_Schedule_List += ",`$BH_Tuesday_Time_2"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tTuesday Start Time 2:`t$($BH_Tuesday[$i])`tEnd Time 2:`t$($BH_Tuesday[$i+1])"
+						}
                     }
                 "4" {  
                         $BH_Tuesday_Time_3 = New-CsOnlineTimeRange -Start $BH_Tuesday[$i] -End $BH_Tuesday[$i+1]
                         $BH_Schedule_List += ",`$BH_Tuesday_Time_3"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tTuesday Start Time 3:`t$($BH_Tuesday[$i])`tEnd Time 3:`t$($BH_Tuesday[$i+1])"
+						}
                     }
                 "6" {  
                         $BH_Tuesday_Time_4 = New-CsOnlineTimeRange -Start $BH_Tuesday[$i] -End $BH_Tuesday[$i+1]
                         $BH_Schedule_List += ",`$BH_Tuesday_Time_4"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tTuesday Start Time 4:`t$($BH_Tuesday[$i])`tEnd Time 4:`t$($BH_Tuesday[$i+1])"
+						}
                     }
             }
         }
@@ -1820,18 +1882,43 @@ function NewAutoAttendant
                 "0" {  
                         $BH_Wednesday_Time_1 = New-CsOnlineTimeRange -Start $BH_Wednesday[$i] -End $BH_Wednesday[$i+1]
                         $BH_Schedule_List += "`$BH_Wednesday_Time_1"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tWednesday Start Time 1:`t$($BH_Wednesday[$i])`tEnd Time 1:`t$($BH_Wednesday[$i+1])"
+						}
                     }
                 "2" {  
                         $BH_Wednesday_Time_2 = New-CsonlineTimeRange -Start $BH_Wednesday[$i] -End $BH_Wednesday[$i+1]
                         $BH_Schedule_List += ",`$BH_Wednesday_Time_2"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tWednesday Start Time 2:`t$($BH_Wednesday[$i])`tEnd Time 2:`t$($BH_Wednesday[$i+1])"
+						}
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tWednesday Start Time 2:`t$($BH_Wednesday[$i])`tEnd Time 2:`t$($BH_Wednesday[$i+1])"
+						}
                     }
                 "4" {  
                         $BH_Wednesday_Time_3 = New-CsOnlineTimeRange -Start $BH_Wednesday[$i] -End $BH_Wednesday[$i+1]
                         $BH_Schedule_List += ",`$BH_Wednesday_Time_3"
-                    }
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tWednesday Start Time 3:`t$($BH_Wednesday[$i])`tEnd Time 3:`t$($BH_Wednesday[$i+1])"
+						}
+                   }
                 "6" {  
                         $BH_Wednesday_Time_4 = New-CsOnlineTimeRange -Start $BH_Wednesday[$i] -End $BH_Wednesday[$i+1]
                         $BH_Schedule_List += ",`$BH_Wednesday_Time_4"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tWednesday Start Time 4:`t$($BH_Wednesday[$i])`tEnd Time 4:`t$($BH_Wednesday[$i+1])"
+						}
                     }
             }
         }
@@ -1858,18 +1945,38 @@ function NewAutoAttendant
                 "0" {  
                         $BH_Thursday_Time_1 = New-CsOnlineTimeRange -Start $BH_Thursday[$i] -End $BH_Thursday[$i+1]
                         $BH_Schedule_List += "`$BH_Thursday_Time_1"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tThursday Start Time 1:`t$($BH_Thursday[$i])`tEnd Time 1:`t$($BH_Thursday[$i+1])"
+						}
                     }
                 "2" {  
                         $BH_Thursday_Time_2 = New-CsonlineTimeRange -Start $BH_Thursday[$i] -End $BH_Thursday[$i+1]
                         $BH_Schedule_List += ",`$BH_Thursday_Time_2"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tThursday Start Time 2:`t$($BH_Thursday[$i])`tEnd Time 2:`t$($BH_Thursday[$i+1])"
+						}
                     }
                 "4" {  
                         $BH_Thursday_Time_3 = New-CsOnlineTimeRange -Start $BH_Thursday[$i] -End $BH_Thursday[$i+1]
                         $BH_Schedule_List += ",`$BH_Thursday_Time_3"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tThursday Start Time 3:`t$($BH_Thursday[$i])`tEnd Time 3:`t$($BH_Thursday[$i+1])"
+						}
                     }
                  "6" {  
                         $BH_Thursday_Time_4 = New-CsOnlineTimeRange -Start $BH_Thursday[$i] -End $BH_Thursday[$i+1]
                         $BH_Schedule_List += ",`$BH_Thursday_Time_4"
+						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tThursday Start Time 4:`t$($BH_Thursday[$i])`tEnd Time 4:`t$($BH_Thursday[$i+1])"
+						}
                     }
             }
         }
@@ -1895,18 +2002,38 @@ function NewAutoAttendant
                 "0" {  
                         $BH_Friday_Time_1 = New-CsOnlineTimeRange -Start $BH_Friday[$i] -End $BH_Friday[$i+1]
                         $BH_Schedule_List += "`$BH_Friday_Time_1"
-                    }
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tFriday Start Time 1:`t$($BH_Friday[$i])`tEnd Time 1:`t$($BH_Friday[$i+1])"
+						}
+                   }
                 "2" {  
                         $BH_Friday_Time_2 = New-CsonlineTimeRange -Start $BH_Friday[$i] -End $BH_Friday[$i+1]
                         $BH_Schedule_List += ",`$BH_Friday_Time_2"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tFriday Start Time 2:`t$($BH_Friday[$i])`tEnd Time 2:`t$($BH_Friday[$i+1])"
+						}
                     }
                 "4" {  
                         $BH_Friday_Time_3 = New-CsOnlineTimeRange -Start $BH_Friday[$i] -End $BH_Friday[$i+1]
                         $BH_Schedule_List += ",`$BH_Friday_Time_3"
-                    }
+  						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tFriday Start Time 3:`t$($BH_Friday[$i])`tEnd Time 3:`t$($BH_Friday[$i+1])"
+						}
+                   }
                 "6" {  
                         $BH_Friday_Time_4 = New-CsOnlineTimeRange -Start $BH_Friday[$i] -End $BH_Friday[$i+1]
                         $BH_Schedule_List += ",`$BH_Friday_Time_4"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tFriday Start Time 4:`t$($BH_Friday[$i])`tEnd Time 4:`t$($BH_Friday[$i+1])"
+						}
                     }
             }
         }
@@ -1932,18 +2059,38 @@ function NewAutoAttendant
                 "0" {  
                         $BH_Saturday_Time_1 = New-CsOnlineTimeRange -Start $BH_Saturday[$i] -End $BH_Saturday[$i+1]
                         $BH_Schedule_List += "`$BH_Saturday_Time_1"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSaturday Start Time 1:`t$($BH_Saturday[$i])`tEnd Time 1:`t$($BH_Saturday[$i+1])"
+						}
                     }
                 "2" {  
                         $BH_Saturday_Time_2 = New-CsonlineTimeRange -Start $BH_Saturday[$i] -End $BH_Saturday[$i+1]
                         $BH_Schedule_List += ",`$BH_Saturday_Time_2"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSaturday Start Time 2:`t$($BH_Saturday[$i])`tEnd Time 2:`t$($BH_Saturday[$i+1])"
+						}
                     }
                 "4" {  
                         $BH_Saturday_Time_3 = New-CsOnlineTimeRange -Start $BH_Saturday[$i] -End $BH_Saturday[$i+1]
                         $BH_Schedule_List += ",`$BH_Saturday_Time_3"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSaturday Start Time 3:`t$($BH_Saturday[$i])`tEnd Time 3:`t$($BH_Saturday[$i+1])"
+						}
                     }
                 "6" {  
                         $BH_Saturday_Time_4 = New-CsOnlineTimeRange -Start $BH_Saturday[$i] -End $BH_Saturday[$i+1]
                         $BH_Schedule_List += ",`$BH_Saturday_Time_4"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSaturday Start Time 4:`t$($BH_Saturday[$i])`tEnd Time 4:`t$($BH_Saturday[$i+1])"
+						}
                     }
             }
         }
@@ -1969,18 +2116,38 @@ function NewAutoAttendant
                 "0" {  
                         $BH_Sunday_Time_1 = New-CsOnlineTimeRange -Start $BH_Sunday[$i] -End $BH_Sunday[$i+1]
                         $BH_Schedule_List += "`$BH_Sunday_Time_1"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSunday Start Time 1:`t$($BH_Sunday[$i])`tEnd Time 1:`t$($BH_Sunday[$i+1])"
+						}
                     }
                 "2" {  
                         $BH_Sunday_Time_2 = New-CsonlineTimeRange -Start $BH_Sunday[$i] -End $BH_Sunday[$i+1]
                         $BH_Schedule_List += ",`$BH_Sunday_Time_2"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSunday Start Time 2:`t$($BH_Sunday[$i])`tEnd Time 2:`t$($BH_Sunday[$i+1])"
+						}
                     }
                 "4" {  
                         $BH_Sunday_Time_3 = New-CsOnlineTimeRange -Start $BH_Sunday[$i] -End $BH_Sunday[$i+1]
                         $BH_Schedule_List += ",`$BH_Sunday_Time_3"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSunday Start Time 3:`t$($BH_Sunday[$i])`tEnd Time 3:`t$($BH_Sunday[$i+1])"
+						}
                     }
                 "6" {  
                         $BH_Sunday_Time_4 = New-CsOnlineTimeRange -Start $BH_Sunday[$i] -End $BH_Sunday[$i+1]
                         $BH_Schedule_List += ",`$BH_Sunday_Time_4"
+ 						
+						if ( $Verbose )
+						{
+							Write-Host "`t`t`tSunday Start Time 4:`t$($BH_Sunday[$i])`tEnd Time 4:`t$($BH_Sunday[$i+1])"
+						}
                     }
             }
         }
@@ -2018,7 +2185,6 @@ function NewAutoAttendant
 
         if ( $A_GreetingRouting -eq "Disconnect" )
         {
-			write-host "a-disconnect"
             $afterhoursMenuOption = New-CsAutoAttendantMenuOption -Action DisconnectCall -DtmfResponse Automatic
             $afterhoursMenu = New-CsAutoAttendantMenu -Name "After Hours Menu" -MenuOptions @($afterhoursMenuOption)
 
@@ -2058,7 +2224,6 @@ function NewAutoAttendant
 			
 			if ( $Holidays -eq "" )
 			{
-				Write-Host "holidays is blank"
 				$command += "-CallFlows @(`$afterhoursCallFlow) -CallHandlingAssociations @(`$afterhoursCallHandlingAssociation)"
 			}
         }
@@ -2089,7 +2254,6 @@ function NewAutoAttendant
 
             if ( $Holidays -eq "" )
 			{
-				Write-Host "holidays is blank"
                 $command += "-CallFlows @(`$afterhoursCallFlow) -CallHandlingAssociations @(`$afterhoursCallHandlingAssociation)"
 			}
         }
@@ -2187,7 +2351,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-0-ERROR"
+                    Write-Host "A-0-ERROR"
                 }
             } # A_0_Redirect
 
@@ -2270,7 +2434,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-1-ERROR"
+                    Write-Host "A-1-ERROR"
                 }
             }
 
@@ -2352,7 +2516,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-2-ERROR"
+                    Write-Host "A-2-ERROR"
                 }
             }
 
@@ -2435,7 +2599,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-3-ERROR"
+                    Write-Host "A-3-ERROR"
                 }
             }
 
@@ -2518,7 +2682,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-4-ERROR"
+                    Write-Host "A-4-ERROR"
                 }
             }
 
@@ -2526,82 +2690,82 @@ function NewAutoAttendant
             #
             # option 5
             #
-            if ( $A_6_Redirect -ne "NONE" )
+            if ( $A_5_Redirect -ne "NONE" )
             {
-                if ( $A_6_Redirect -eq "Operator" )
+                if ( $A_5_Redirect -eq "Operator" )
                 {
                     # don't need VoiceResponses option as "Operator" will be set automatically if voice response is enabled
-                    $A_6_MenuOption = New-CsAutoAttendantMenuOption -Action TransferCallToOperator -DtmfResponse Tone5
+                    $A_5_MenuOption = New-CsAutoAttendantMenuOption -Action TransferCallToOperator -DtmfResponse Tone5
                 }
-                elseif ( $A_6_Redirect -eq "User" -OR $A_6_Redirect -eq "ApplicationEndpoint" -OR $A_6_Redirect -eq "ConfigurationEndpoint" -OR $A_6_Redirect -eq "SharedVoicemail" -OR $A_6_Redirect -eq "ExternalPSTN" )
+                elseif ( $A_5_Redirect -eq "User" -OR $A_5_Redirect -eq "ApplicationEndpoint" -OR $A_5_Redirect -eq "ConfigurationEndpoint" -OR $A_5_Redirect -eq "SharedVoicemail" -OR $A_5_Redirect -eq "ExternalPSTN" )
                 {
-                    if ( $A_6_Redirect -eq "SharedVoicemail" )
+                    if ( $A_5_Redirect -eq "SharedVoicemail" )
                     {
-                        if ( $A_6_SharedVoicemailTranscription -AND $A_6_SharedVoicemailSuppress )
+                        if ( $A_5_SharedVoicemailTranscription -AND $A_5_SharedVoicemailSuppress )
                         {
-                            $A_6_Entity = New-CsAutoAttendantCallableEntity -Identity $A_6_RedirectTarget -Type $A_6_Redirect -EnableTranscription -EnableSharedVoicemailSystemPromptSuppression
+                            $A_5_Entity = New-CsAutoAttendantCallableEntity -Identity $A_5_RedirectTarget -Type $A_5_Redirect -EnableTranscription -EnableSharedVoicemailSystemPromptSuppression
                         }
-                        elseif ( $A_6_SharedVoicemailTranscription )
+                        elseif ( $A_5_SharedVoicemailTranscription )
                         {
-                            $A_6_Entity = New-CsAutoAttendantCallableEntity -Identity $A_6_RedirectTarget -Type $A_6_Redirect -EnableTranscription
+                            $A_5_Entity = New-CsAutoAttendantCallableEntity -Identity $A_5_RedirectTarget -Type $A_5_Redirect -EnableTranscription
                         }
-                        elseif ( $A_6_SharedVoicemailSuppress )
+                        elseif ( $A_5_SharedVoicemailSuppress )
                         {
-                            $A_6_Entity = New-CsAutoAttendantCallableEntity -Identity $A_6_RedirectTarget -Type $A_6_Redirect -EnableSharedVoicemailSystemPromptSuppression
+                            $A_5_Entity = New-CsAutoAttendantCallableEntity -Identity $A_5_RedirectTarget -Type $A_5_Redirect -EnableSharedVoicemailSystemPromptSuppression
                         }
                         else
                         {
-                            $A_6_Entity = New-CsAutoAttendantCallableEntity -Identity $A_6_RedirectTarget -Type $A_6_Redirect
+                            $A_5_Entity = New-CsAutoAttendantCallableEntity -Identity $A_5_RedirectTarget -Type $A_5_Redirect
                         }
                     }
-					elseif ( ( $A_6_Redirect -eq "ApplicationEndpoint" -OR $A_6_Redirect -eq "ConfigurationEndpoint" ) -AND $CallPriority )
+					elseif ( ( $A_5_Redirect -eq "ApplicationEndpoint" -OR $A_5_Redirect -eq "ConfigurationEndpoint" ) -AND $CallPriority )
 					{
-						$A_6_Entity = New-CsAutoAttendantCallableEntity -Identity $A_6_RedirectTarget -Type $A_6_Redirect -CallPriority $A_6_Redirect_Call_Priority
+						$A_5_Entity = New-CsAutoAttendantCallableEntity -Identity $A_5_RedirectTarget -Type $A_5_Redirect -CallPriority $A_5_Redirect_Call_Priority
 					}
                     else
                     {
-                        $A_6_Entity = New-CsAutoAttendantCallableEntity -Identity $A_6_RedirectTarget -Type $A_6_Redirect
+                        $A_5_Entity = New-CsAutoAttendantCallableEntity -Identity $A_5_RedirectTarget -Type $A_5_Redirect
                     }
  
-                    if ( $A_6_VoiceCommand -eq "" )
+                    if ( $A_5_VoiceCommand -eq "" )
                     {
-                        $A_6_MenuOption = New-CsAutoAttendantMenuOption -Action TransferCallToTarget -DtmfResponse Tone5 -CallTarget $A_6_Entity
+                        $A_5_MenuOption = New-CsAutoAttendantMenuOption -Action TransferCallToTarget -DtmfResponse Tone5 -CallTarget $A_5_Entity
                     }
                     else
                     {
-                        $A_6_MenuOption = New-CsAutoAttendantMenuOption -Action TransferCallToTarget -DtmfResponse Tone5 -CallTarget $A_6_Entity -VoiceResponses $A_6_VoiceCommand
+                        $A_5_MenuOption = New-CsAutoAttendantMenuOption -Action TransferCallToTarget -DtmfResponse Tone5 -CallTarget $A_5_Entity -VoiceResponses $A_5_VoiceCommand
                     }
                 }
-                elseif ( $A_6_Redirect -eq "FILE" )
+                elseif ( $A_5_Redirect -eq "FILE" )
                 {
-                    $audioFile = AudioFileImport $A_6_RedirectTarget
-                    $A_6_MenuOptionPrompt = New-CsAutoAttendantPrompt -AudioFilePrompt $audioFile
+                    $audioFile = AudioFileImport $A_5_RedirectTarget
+                    $A_5_MenuOptionPrompt = New-CsAutoAttendantPrompt -AudioFilePrompt $audioFile
  
-                    if ( $A_6_VoiceCommand -eq "" )
+                    if ( $A_5_VoiceCommand -eq "" )
                     {                        
-                        $A_6_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_6_MenuOptionPrompt
+                        $A_5_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_5_MenuOptionPrompt
                     }
                     else
                     {
-                        $A_6_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_6_MenuOptionPrompt -VoiceResponses $A_6_VoiceCommand
+                        $A_5_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_5_MenuOptionPrompt -VoiceResponses $A_5_VoiceCommand
                     }
                 }
-                elseif ( $A_6_Redirect -eq "TEXT" )
+                elseif ( $A_5_Redirect -eq "TEXT" )
                 {
-                    $A_6_MenuOptionPrompt = New-CsAutoAttendantPrompt -TextToSpeechPrompt $A_6_RedirectTarget
+                    $A_5_MenuOptionPrompt = New-CsAutoAttendantPrompt -TextToSpeechPrompt $A_5_RedirectTarget
  
-                    if ( $A_6_VoiceCommand -eq "" )
+                    if ( $A_5_VoiceCommand -eq "" )
                     {                        
-                        $A_6_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_6_MenuOptionPrompt
+                        $A_5_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_5_MenuOptionPrompt
                     }
                     else
                     {
-                        $A_6_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_6_MenuOptionPrompt -VoiceResponses $A_6_VoiceCommand
+                        $A_5_MenuOption = New-CsAutoAttendantMenuOption -Action Announcement -DtmfResponse Tone5 -Prompt $A_5_MenuOptionPrompt -VoiceResponses $A_5_VoiceCommand
                     }
                 }
                 else
                 {
-                    write-host "A-5-ERROR"
+                    Write-Host "A-5-ERROR"
                 }
             }
 
@@ -2684,7 +2848,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-6-ERROR"
+                    Write-Host "A-6-ERROR"
                 }
             }
 
@@ -2767,7 +2931,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-7-ERROR"
+                    Write-Host "A-7-ERROR"
                 }
            }
 
@@ -2850,7 +3014,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-8-ERROR"
+                    Write-Host "A-8-ERROR"
                 }
             }
 
@@ -2933,7 +3097,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-9-ERROR"
+                    Write-Host "A-9-ERROR"
                 }
             }
 
@@ -3016,7 +3180,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-Star-ERROR"
+                    Write-Host "A-Star-ERROR"
                 }
             }
 
@@ -3099,7 +3263,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "A-Pound-ERROR"
+                    Write-Host "A-Pound-ERROR"
                 }
             }
 
@@ -3107,7 +3271,7 @@ function NewAutoAttendant
             #
             # build after hours menu
             #
-            $afterhoursMenu = New-CsAutoAttendantMenu -Name "After Hours Menu" -MenuOptions @($A_0_MenuOption,$A_1_MenuOption,$A_2_MenuOption,$A_3_MenuOption,$A_4_MenuOption,$A_6_MenuOption,$A_6_MenuOption,$A_7_MenuOption,$A_8_MenuOption,$A_9_MenuOption,$A_Star_MenuOption,$A_Pound_MenuOption) -Prompts $A_MenuGreetingPrompt -DirectorySearchMethod $A_DirectorySearch
+            $afterhoursMenu = New-CsAutoAttendantMenu -Name "After Hours Menu" -MenuOptions @($A_0_MenuOption,$A_1_MenuOption,$A_2_MenuOption,$A_3_MenuOption,$A_4_MenuOption,$A_5_MenuOption,$A_6_MenuOption,$A_7_MenuOption,$A_8_MenuOption,$A_9_MenuOption,$A_Star_MenuOption,$A_Pound_MenuOption) -Prompts $A_MenuGreetingPrompt -DirectorySearchMethod $A_DirectorySearch
 
             if ( $A_GreetingPromptConfigured )
             {
@@ -3136,13 +3300,12 @@ function NewAutoAttendant
 
             if ( $Holidays -eq "" )
 			{
-				write-host "holidays was blank"
                 $command += "-CallFlows @(`$afterhoursCallFlow) -CallHandlingAssociations @(`$afterhoursCallHandlingAssociation)"
 			}
         }  # Menu 
         else
         {
-            write-host "BLANK - can't build after hours call flow.  Fix error and start again."
+            Write-Host "BLANK - can't build after hours call flow.  Fix error and start again."
             exit
         }
     } # afterhours
@@ -3165,24 +3328,17 @@ function NewAutoAttendant
 
 		if ( $Holiday[0].Substring(0,3) -eq "[N]" )
 		{
-			if ( $global:NewHolidaysProvisioned -contains $Holiday[0].SubString(4) )
+			#if ( $global:NewHolidaysProvisioned -contains $Holiday[0].SubString(4) )
+			
+			
+			$NewHolidaysProvisionedIndex = [Array]::IndexOf($global:NewHolidaysProvisioned.ScheduleName, $Holiday[0])
+			if ( $NewHolidaysProvisionedIndex -ne -1 )
 			{
 				# becomes an existing holiday
-				$Holiday_Schedule_Temp = Get-CsOnlineSchedule | Where {$_.Type -eq "Fixed" -AND $_.Name -eq $($Holiday[0].SubString(4))}
-				
-				if ( $Holiday_Schedule_Temp.length -gt 1 )
-				{
-					$Holiday_Schedule = $Holiday_Schedule_Temp[0]
-				}
-				else
-				{
-					$Holiday_Schedule = $Holiday_Schedule_Temp
-				}
+				$Holiday_Schedule = $global:NewHolidaysProvisioned[$NewHolidaysProvisionedIndex].ScheduleId
 			}
 			else
 			{
-				$global:NewHolidaysProvisioned += @($Holiday[0].SubString(4))
-			
 				$HolidayDateTimeRange = @()
 				for ( $i = 1; $i -lt $Holiday.length; $i +=2 )
 				{
@@ -3192,25 +3348,17 @@ function NewAutoAttendant
 					}
 					$HolidayDateTimeRange += New-CsOnlineDateTimeRange -Start "$($Holiday[$i])" -End "$($Holiday[$i+1])"
 				}
-				$Holiday_Schedule_Temp = New-CsOnlineSchedule -Name $Holiday[0].Substring(4) -FixedSchedule -DateTimeRanges @($HolidayDateTimeRange)		
+				$Holiday_Schedule = (New-CsOnlineSchedule -Name $Holiday[0].Substring(4) -FixedSchedule -DateTimeRanges @($HolidayDateTimeRange)).Id
+				
+				$global:NewHolidaysProvisioned += [PSCustomObject]@{ScheduleID = $Holiday_Schedule; ScheduleName = $Holiday[0]}
 			}
 		}
 		else
 		{
 			# existing holiday		
-			$Holiday_Schedule_Temp = Get-CsOnlineSchedule | Where {$_.Type -eq "Fixed" -AND $_.Name -eq $($Holiday[0].SubString(4))}			
+			$Holiday_Schedule = $Holiday[0]
 		}
 
-		if ( $Holiday_Schedule_Temp.length -gt 1 )
-		{
-			$Holiday_Schedule = $Holiday_Schedule_Temp[0]
-		}
-		else
-		{
-			$Holiday_Schedule = $Holiday_Schedule_Temp
-		}		
-
-		
         #
         #  Holiday Call Flow
         #
@@ -3231,7 +3379,6 @@ function NewAutoAttendant
 
         if ( $H_GreetingRouting -eq "Disconnect" )
         {
-			write-host "h-disconnect"
             $holidayMenuOption = New-CsAutoAttendantMenuOption -Action DisconnectCall -DtmfResponse Automatic
             $holidayMenu = New-CsAutoAttendantMenu -Name "Holiday Menu" -MenuOptions @($holidayMenuOption)
 
@@ -3407,7 +3554,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-0-ERROR"
+                    Write-Host "H-0-ERROR"
                 }
             } # H_0_Redirect
 
@@ -3490,7 +3637,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-1-ERROR"
+                    Write-Host "H-1-ERROR"
                 }
             }
 
@@ -3572,7 +3719,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-2-ERROR"
+                    Write-Host "H-2-ERROR"
                 }
             }
 
@@ -3655,7 +3802,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-3-ERROR"
+                    Write-Host "H-3-ERROR"
                 }
             }
 
@@ -3738,7 +3885,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-4-ERROR"
+                    Write-Host "H-4-ERROR"
                 }
             }
 
@@ -3821,7 +3968,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-5-ERROR"
+                    Write-Host "H-5-ERROR"
                 }
             }
 
@@ -3904,7 +4051,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-6-ERROR"
+                    Write-Host "H-6-ERROR"
                 }
             }
 
@@ -3987,7 +4134,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-7-ERROR"
+                    Write-Host "H-7-ERROR"
                 }
            }
 
@@ -4070,7 +4217,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-8-ERROR"
+                    Write-Host "H-8-ERROR"
                 }
             }
 
@@ -4153,7 +4300,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-9-ERROR"
+                    Write-Host "H-9-ERROR"
                 }
             }
 
@@ -4236,7 +4383,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-Star-ERROR"
+                    Write-Host "H-Star-ERROR"
                 }
             }
 
@@ -4319,7 +4466,7 @@ function NewAutoAttendant
                 }
                 else
                 {
-                    write-host "H-Pound-ERROR"
+                    Write-Host "H-Pound-ERROR"
                 }
             }
 
@@ -4331,14 +4478,28 @@ function NewAutoAttendant
 
             if ( $H_GreetingPromptConfigured )
             {
-                if ( $H_Force )
-                {
-                    $holidayCallFlow = New-CsAutoAttendantCallFlow -Name "Holiday Call Flow" -Greetings @($H_GreetingPrompt) -Menu $holidayMenu -ForceListenMenuEnabled
-                }
-                else
-                {
-                     $holidayCallFlow = New-CsAutoAttendantCallFlow -Name "Holiday Call Flow" -Greetings @($H_GreetingPrompt) -Menu $holidayMenu
-                }
+				if ( $H_MenuGreetingOption -eq "TEXT" )
+				{
+					if ( $H_Force )
+					{
+						$holidayCallFlow = New-CsAutoAttendantCallFlow -Name "Holiday Call Flow" -Greetings @("""$H_GreetingPrompt""") -Menu $holidayMenu -ForceListenMenuEnabled
+					}
+					else
+					{
+						$holidayCallFlow = New-CsAutoAttendantCallFlow -Name "Holiday Call Flow" -Greetings @("""$H_GreetingPrompt""") -Menu $holidayMenu
+					}
+				}
+				else
+				{
+					if ( $H_Force )
+					{
+						$holidayCallFlow = New-CsAutoAttendantCallFlow -Name "Holiday Call Flow" -Greetings @($H_GreetingPrompt) -Menu $holidayMenu -ForceListenMenuEnabled
+					}
+					else
+					{
+						$holidayCallFlow = New-CsAutoAttendantCallFlow -Name "Holiday Call Flow" -Greetings @($H_GreetingPrompt) -Menu $holidayMenu
+					}
+				}					
             }
             else
             {
@@ -4352,7 +4513,7 @@ function NewAutoAttendant
                 }
             }
 
-            $holidayCallHandlingAssociation = New-CsAutoAttendantCallHandlingAssociation -Type Holiday -ScheduleId $Holiday_Schedule.Id -CallFlowId $holidayCallFlow.Id
+            $holidayCallHandlingAssociation = New-CsAutoAttendantCallHandlingAssociation -Type Holiday -ScheduleId $Holiday_Schedule -CallFlowId $holidayCallFlow.Id
 		
 		    if ( ! $Hours24 )
 		    {
@@ -4534,19 +4695,30 @@ $args += $arguments
 
 for ( $i = 0; $i -lt $args.length; $i++ )
 {
-   switch ( $args[$i] )
-   {
-      "-excelfile"                 		{ $ExcelFilename = $args[$i+1] }
-	   "-help"                      	{ $Help = $true }
-	   "-noresourceaccounts"        	{ $NoResourceAccounts = $true }
-	   "-noresourceaccountcreation" 	{ $NoResourceAccountCreation = $true }
-	   "-noresourceaccountlicensing" 	{ $NoResourceAccountLicensing = $true }
-	   "-noresourceaccountphonenumbers"	{ $NoResourceAccountPhoneNumbers = $true }
-       "-verbose"                    	{ $Verbose = $true }
-   }
+	switch ( $args[$i] )
+	{
+		"-excelfile"                 		{ $ExcelFilename = $args[$i+1]
+											  $i++
+											}
+		"-help"                      		{ $Help = $true }
+		"-noresourceaccounts"        		{ $NoResourceAccounts = $true }
+		"-noresourceaccountcreation" 		{ $NoResourceAccountCreation = $true }
+		"-noresourceaccountlicensing"	 	{ $NoResourceAccountLicensing = $true }
+		"-noresourceaccountphonenumbers"	{ $NoResourceAccountPhoneNumbers = $true }
+		"-verbose"              	      	{ $Verbose = $true }
+		Default      						{ $ArgError = $true
+											  $arg = $args[$i]
+											  Write-Host "Unknown argument passed: $arg" }   
+	}
 }
 
-if ( $Help )
+if ( $ArgError )
+{
+	Write-Host "An unknown argument was encountered. Processing has been halted." -f Red
+	Write-Host ""
+}
+
+if ( ( $Help ) -or ( $ArgError ) )
 {
 	Write-Host "The following options are avaialble:"
 	Write-Host "`t-ExcelFile - specify an alternative Excel Spreadsheet to use.  Default is BulkAAs.xlsm"
@@ -4568,22 +4740,26 @@ if ( Test-Path -Path ".\PS-AA.csv" )
    Remove-Item -Path ".\PS-AA.csv" | Out-Null
 }
 
-if ( Test-Path -Path ".\PS-Holidays.csv" )
-{
-   Remove-Item -Path ".\PS-Holidays.csv" | Out-Null
-}
+#
+# Increase maximum variable and function count (function count for ImportExcel)
+#
+$MaximumVariableCount = 10000
+$MaximumFunctionCount = 32768
 
 
 #
 # Check that required modules are installed - install if not
 #
-Write-Host "Checking for MicrosoftTeams module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
+Write-Host "Checking for MicrosoftTeams module 6.7.0 or later."
+$Version = ( (Get-InstalledModule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
+if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
 {
    Write-Host "Connecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
+   
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -4591,7 +4767,7 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
    }
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -4603,12 +4779,14 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "MicrosoftTeams" } )
 else
 {
    Write-Host "Module MicrosoftTeams does not exist - installing."
-   Install-Module -Name MicrosoftTeams -Force -AllowClobber
+   Install-Module -Name MicrosoftTeams -MinimumVersion 6.7.0 -Force -AllowClobber
 
    Write-Host "Connecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
+   
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -4616,7 +4794,7 @@ else
    }
    try
    { 
-      Get-CsTenant -ErrorAction Stop 2>&1> $null
+      Get-CsTenant -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -4626,17 +4804,20 @@ else
    Write-Host "Connected to Microsoft Teams."
 }
 
-Write-Host "Checking for Microsoft.Graph module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "Microsoft.Graph" } )
+#
+# Microsoft Graph
+#
+Write-Host "Checking for Microsoft.Graph module 2.24.0 or later."
+$Version = ( (get-installedmodule -Name Microsoft.Graph -MinimumVersion "2.24.0").Version 2> $null)
+if ( ( $Version.Major -ge 2 ) -and ( $Version.minor -ge 24 ) )
 {
    Write-Host "Connecting to Microsoft Graph."
+   
    Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
 
    try
    { 
-      # Get-MgSubscribedSKU -ErrorAction Stop 2>&1> $null
       Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-
    } 
    catch [System.UnauthorizedAccessException] 
    { 
@@ -4644,7 +4825,6 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "Microsoft.Graph" } )
    }
    try
    { 
-      # Get-MgSubscribedSKU -ErrorAction Stop 2>&1> $null
       Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
    } 
    catch [System.UnauthorizedAccessException] 
@@ -4656,9 +4836,19 @@ if ( Get-InstalledModule | Where-Object { $_.Name -eq "Microsoft.Graph" } )
 }
 else
 {
-   Write-Host "Module MgGraph does not exist - installing."
-   Install-Module -Name Microsoft.Graph -Force -AllowClobber
+   Write-Host "Module Microsoft.Graph does not exist - installing."
+   Install-Module -Name Microsoft.Graph -MinimumVersion 2.24.0 -Force -AllowClobber
+
    Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+
+   try
+   { 
+      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+   } 
+   catch [System.UnauthorizedAccessException] 
+   { 
+      Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+   }
    try
    { 
       Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
@@ -4671,20 +4861,24 @@ else
    Write-Host "Connected to Microsoft Graph."
 }
 
-Write-Host "Checking for ImportExcel module."
-if ( Get-InstalledModule | Where-Object { $_.Name -eq "ImportExcel" } )
+#
+# ImportExcel
+#
+Write-Host "Checking for ImportExcel module 7.8.0 or later."
+$Version = ( (get-installedmodule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
+if ( ( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 ) )
 {
    Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel
+   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
 }
 else
 {
    Write-Host "Module ImportExcel - installing."
-   Install-Module -Name ImportExcel -Force -AllowClobber
+   Install-Module -Name ImportExcel -MinimumVersion 7.8.0 -Force -AllowClobber
+   
    Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel
+   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
 }
-
 
 #
 # setup filename
@@ -4719,6 +4913,7 @@ $data | Export-Csv -Path $ExcelCSVFilename -NoTypeInformation
 
 # track new holiday provisioning
 $global:NewHolidaysProvisioned = @()
+$global:NewHolidaysProvisioned += [PSCustomObject]@{ScheduleID = "0"; ScheduleName = "0"}
 
 # track phone number assignments to resource Accounts
 $PhoneNumbersAssignedToResourceAccounts = @()
@@ -4745,15 +4940,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
         $NewResourceAccountLocation = $PSAAConfig.NewResourceAccountLocation[$i]
 		$NewResourceAccountPhoneNumber = $PSAAConfig.NewResourceAccountPhoneNumber[$i]
 		
-		if ( $PhoneNumbersAssignedToResourceAccounts -contains $NewResourceAccountPhoneNumber )
+		if ( $NewResourceAccountPhoneNumber -ne "ERROR" )
 		{
-			$NewResourceAccountPhoneNumber_Comment = "ERROR: Phone number has been previously assigned"
-			$StopProcessing = $true
-			$VerboseStopProcessing = $true
-		}
-		else
-		{
-			$PhoneNumbersAssignedToResourceAccounts += $NewResourceAccountPhoneNumber
+			if ( $PhoneNumbersAssignedToResourceAccounts -contains $NewResourceAccountPhoneNumber )
+			{
+				$NewResourceAccountPhoneNumber_Comment = "ERROR: Phone number has been previously assigned"
+				$StopProcessing = $true
+				$VerboseStopProcessing = $true
+			}
+			else
+			{
+				$PhoneNumbersAssignedToResourceAccounts += $NewResourceAccountPhoneNumber
+			}
 		}
 
         $Operator = $PSAAConfig.Operator[$i]
@@ -4886,21 +5084,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_GreetingRoutingTarget -ne "ERROR" )
+		}
+
+		if ( $B_GreetingRouting -match "ConfigurationEndpoint" )
+        {
+			if ( $B_GreetingRouting.length -gt 21 )
 			{
-				switch ( $B_GreetingRoutingTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_GreetingRouting = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_GreetingRouting = "ConfigurationEndpoint"
-							}						
-				}
-				$B_GreetingRoutingTarget = $B_GreetingRoutingTarget.Substring(5)
+				$B_GreetingRouting_Call_Priority = $B_GreetingRouting.Substring(22,1)
+				$B_GreetingRouting = $B_GreetingRouting.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_GreetingRoutingTarget -eq "ERROR" )
 		{
@@ -4956,22 +5151,19 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_0_RedirectTarget -ne "ERROR" )
-			{
-				switch ( $B_0_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_0_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_0_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_0_RedirectTarget = $B_0_RedirectTarget.Substring(5)			
-			}
-        }
+		}
 
+		if ( $B_0_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_0_Redirect.length -gt 21 )
+			{
+				$B_0_Redirect_Call_Priority = $B_0_Redirect.Substring(22,1)
+				$B_0_Redirect = $B_0_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
+			}
+		}
+		
 		#
 		# check if FILE exists
 		#
@@ -5001,7 +5193,6 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 		#
 		if ( $B_0_RedirectTarget -eq "ERROR" )
 		{
-			write-host "HERE i AM"
 			$B_0_Redirect_Comment = "ERROR: Check B_0_RedirectTarget on Config-BusinessHoursMenu"
 			$StopProcessing = $true
 			$VerboseStopProcessing = $true
@@ -5044,21 +5235,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_1_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_1_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_1_Redirect.length -gt 21 )
 			{
-				switch ( $B_1_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_1_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_1_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_1_RedirectTarget = $B_1_RedirectTarget.Substring(5)			
+				$B_1_Redirect_Call_Priority = $B_1_Redirect.Substring(22,1)
+				$B_1_Redirect = $B_1_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
         
 		if ( $B_1_Redirect -EQ "FILE" )
 		{
@@ -5130,21 +5318,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_2_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_2_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_2_Redirect.length -gt 21 )
 			{
-				switch ( $B_2_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_2_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_2_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_2_RedirectTarget = $B_2_RedirectTarget.Substring(5)			
+				$B_2_Redirect_Call_Priority = $B_2_Redirect.Substring(22,1)
+				$B_2_Redirect = $B_2_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_2_Redirect -EQ "FILE" )
 		{
@@ -5216,21 +5401,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_3_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_3_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_3_Redirect.length -gt 21 )
 			{
-				switch ( $B_3_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_3_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_3_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_3_RedirectTarget = $B_3_RedirectTarget.Substring(5)			
+				$B_3_Redirect_Call_Priority = $B_3_Redirect.Substring(22,1)
+				$B_3_Redirect = $B_3_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
  
 		if ( $B_3_Redirect -EQ "FILE" )
 		{
@@ -5302,21 +5484,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_4_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_4_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_4_Redirect.length -gt 21 )
 			{
-				switch ( $B_4_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_4_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_4_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_4_RedirectTarget = $B_4_RedirectTarget.Substring(5)			
+				$B_4_Redirect_Call_Priority = $B_4_Redirect.Substring(22,1)
+				$B_4_Redirect = $B_4_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_4_Redirect -EQ "FILE" )
 		{
@@ -5388,21 +5567,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_5_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_5_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_5_Redirect.length -gt 21 )
 			{
-				switch ( $B_5_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_5_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_5_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_5_RedirectTarget = $B_5_RedirectTarget.Substring(5)			
+				$B_5_Redirect_Call_Priority = $B_5_Redirect.Substring(22,1)
+				$B_5_Redirect = $B_5_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_5_Redirect -EQ "FILE" )
 		{
@@ -5474,21 +5650,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_6_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_6_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_6_Redirect.length -gt 21 )
 			{
-				switch ( $B_6_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_6_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_6_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_6_RedirectTarget = $B_6_RedirectTarget.Substring(5)			
+				$B_6_Redirect_Call_Priority = $B_6_Redirect.Substring(22,1)
+				$B_6_Redirect = $B_6_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_6_Redirect -EQ "FILE" )
 		{
@@ -5560,21 +5733,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_7_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_7_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_7_Redirect.length -gt 21 )
 			{
-				switch ( $B_7_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_7_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_7_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_7_RedirectTarget = $B_7_RedirectTarget.Substring(5)			
+				$B_7_Redirect_Call_Priority = $B_7_Redirect.Substring(22,1)
+				$B_7_Redirect = $B_7_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_7_Redirect -EQ "FILE" )
 		{
@@ -5646,21 +5816,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_8_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_8_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_8_Redirect.length -gt 21 )
 			{
-				switch ( $B_8_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_8_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_8_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_8_RedirectTarget = $B_8_RedirectTarget.Substring(5)			
+				$B_8_Redirect_Call_Priority = $B_8_Redirect.Substring(22,1)
+				$B_8_Redirect = $B_8_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_8_Redirect -EQ "FILE" )
 		{
@@ -5732,21 +5899,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_9_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_9_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_9_Redirect.length -gt 21 )
 			{
-				switch ( $B_9_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_9_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_9_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_9_RedirectTarget = $B_9_RedirectTarget.Substring(5)			
+				$B_9_Redirect_Call_Priority = $B_9_Redirect.Substring(22,1)
+				$B_9_Redirect = $B_9_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_9_Redirect -EQ "FILE" )
 		{
@@ -5818,21 +5982,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_Star_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_Star_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_Star_Redirect.length -gt 21 )
 			{
-				switch ( $B_Star_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_Star_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_Star_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_Star_RedirectTarget = $B_Star_RedirectTarget.Substring(5)			
+				$B_Star_Redirect_Call_Priority = $B_Star_Redirect.Substring(22,1)
+				$B_Star_Redirect = $B_Star_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_Star_Redirect -EQ "FILE" )
 		{
@@ -5904,21 +6065,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $B_Pound_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $B_Pound_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $B_Pound_Redirect.length -gt 21 )
 			{
-				switch ( $B_Pound_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$B_Pound_Redirect = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$B_Pound_Redirect = "ConfigurationEndpoint"
-							}						
-				}
-				$B_Pound_RedirectTarget = $B_Pound_RedirectTarget.Substring(5)			
+				$B_Pound_Redirect_Call_Priority = $B_Pound_Redirect.Substring(22,1)
+				$B_Pound_Redirect = $B_Pound_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $B_Pound_Redirect -EQ "FILE" )
 		{
@@ -6013,21 +6171,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_GreetingRoutingTarget -ne "ERROR" )
+		}
+
+		if ( $A_GreetingRouting -match "ConfigurationEndpoint" )
+        {
+			if ( $A_GreetingRouting.length -gt 21 )
 			{
-				switch ( $A_GreetingRoutingTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_GreetingRouting = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$A_GreetingRouting = "ConfigurationEndpoint"
-							}						
-				}
-				$A_GreetingRoutingTarget = $A_GreetingRoutingTarget.Substring(5)
+				$A_GreetingRouting_Call_Priority = $A_GreetingRouting.Substring(22,1)
+				$A_GreetingRouting = $A_GreetingRouting.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 		
 		if ( $A_GreetingRoutingTarget -eq "ERROR" )
 		{
@@ -6081,21 +6236,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_0_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_0_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_0_Redirect.length -gt 21 )
 			{
-				switch ( $A_0_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_0_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_0_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_0_RedirectTarget = $A_0_RedirectTarget.Substring(5)			
+				$A_0_Redirect_Call_Priority = $A_0_Redirect.Substring(22,1)
+				$A_0_Redirect = $A_0_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_0_Redirect -EQ "FILE" )
 		{
@@ -6162,21 +6314,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_1_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_1_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_1_Redirect.length -gt 21 )
 			{
-				switch ( $A_1_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_1_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_1_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_1_RedirectTarget = $A_1_RedirectTarget.Substring(5)			
+				$A_1_Redirect_Call_Priority = $A_1_Redirect.Substring(22,1)
+				$A_1_Redirect = $A_1_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_1_Redirect -EQ "FILE" )
 		{
@@ -6249,21 +6398,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_2_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_2_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_2_Redirect.length -gt 21 )
 			{
-				switch ( $A_2_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_2_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_2_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_2_RedirectTarget = $A_2_RedirectTarget.Substring(5)			
+				$A_2_Redirect_Call_Priority = $A_2_Redirect.Substring(22,1)
+				$A_2_Redirect = $A_2_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_2_Redirect -EQ "FILE" )
 		{
@@ -6335,21 +6481,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_3_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_3_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_3_Redirect.length -gt 21 )
 			{
-				switch ( $A_3_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_3_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_3_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_3_RedirectTarget = $A_3_RedirectTarget.Substring(5)			
+				$A_3_Redirect_Call_Priority = $A_3_Redirect.Substring(22,1)
+				$A_3_Redirect = $A_3_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_3_Redirect -EQ "FILE" )
 		{
@@ -6421,21 +6564,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_4_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_4_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_4_Redirect.length -gt 21 )
 			{
-				switch ( $A_4_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_4_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_4_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_4_RedirectTarget = $A_4_RedirectTarget.Substring(5)			
+				$A_4_Redirect_Call_Priority = $A_4_Redirect.Substring(22,1)
+				$A_4_Redirect = $A_4_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_4_Redirect -EQ "FILE" )
 		{
@@ -6472,74 +6612,71 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 
 
 		# Afer Hours - Option 5
-        $A_6_VoiceCommand = $PSAAConfig.A_5_VoiceCommand[$i]
-        $A_6_Redirect = $PSAAConfig.A_5_Redirect[$i]
-        $A_6_RedirectTarget = $PSAAConfig.A_5_RedirectTarget[$i]
+        $A_5_VoiceCommand = $PSAAConfig.A_5_VoiceCommand[$i]
+        $A_5_Redirect = $PSAAConfig.A_5_Redirect[$i]
+        $A_5_RedirectTarget = $PSAAConfig.A_5_RedirectTarget[$i]
 		
-        if ( $A_6_Redirect -match "SharedVoicemail" )
+        if ( $A_5_Redirect -match "SharedVoicemail" )
         {
-            if ( $A_6_Redirect.Substring(16,1) -eq 0 )
+            if ( $A_5_Redirect.Substring(16,1) -eq 0 )
             {
-                $A_6_SharedVoicemailTranscription = $false
+                $A_5_SharedVoicemailTranscription = $false
             }
             else
             {
-                $A_6_SharedVoicemailTranscription = $true
+                $A_5_SharedVoicemailTranscription = $true
             }
-            if ( $A_6_Redirect.Substring(18,1) -eq 0 )
+            if ( $A_5_Redirect.Substring(18,1) -eq 0 )
             {
-                $A_6_SharedVoicemailSuppress = $false
+                $A_5_SharedVoicemailSuppress = $false
             }
             else
             {
-                $A_6_SharedVoicemailSuppress = $true
+                $A_5_SharedVoicemailSuppress = $true
             }
 
-            $A_6_Redirect = $A_6_Redirect.Substring(0,15)
+            $A_5_Redirect = $A_5_Redirect.Substring(0,15)
         }
 
-		if ( $A_6_Redirect -match "ApplicationEndpoint" )
+		if ( $A_5_Redirect -match "ApplicationEndpoint" )
         {
-			if ( $A_6_Redirect.length -gt 19 )
+			if ( $A_5_Redirect.length -gt 19 )
 			{
-				$A_6_Redirect_Call_Priority = $A_6_Redirect.Substring(20,1)
-				$A_6_Redirect = $A_6_Redirect.Substring(0,19)
+				$A_5_Redirect_Call_Priority = $A_5_Redirect.Substring(20,1)
+				$A_5_Redirect = $A_5_Redirect.Substring(0,19)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_6_RedirectTarget -ne "ERROR" )
-			{
-				switch ( $A_6_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_6_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_6_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_6_RedirectTarget = $A_6_RedirectTarget.Substring(5)			
-			}
-        }
+		}
 
-		if ( $A_6_Redirect -EQ "FILE" )
+		if ( $A_5_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_5_Redirect.length -gt 21 )
+			{
+				$A_5_Redirect_Call_Priority = $A_5_Redirect.Substring(22,1)
+				$A_5_Redirect = $A_5_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
+			}
+		}
+
+		if ( $A_5_Redirect -EQ "FILE" )
 		{
-			$FileExists = CheckFileExists $A_6_RedirectTarget
+			$FileExists = CheckFileExists $A_5_RedirectTarget
 			
 			if ( ! $FileExists )
 			{
-				$A_6_Redirect_Comment = "ERROR: $A_6_RedirectTarget does not exist"
+				$A_5_Redirect_Comment = "ERROR: $A_5_RedirectTarget does not exist"
 				$StopProcessing = $true
 				$VerboseStopProcessing = $true
 			}
 		}
 
-		if ( $A_6_Redirect -eq "Operator" )
+		if ( $A_5_Redirect -eq "Operator" )
 		{
 			if ( $A_Operator_Redirect )
 			{
-				$A_6_Redirect_Comment = "ERROR: Only one operator transfer allowed"
+				$A_5_Redirect_Comment = "ERROR: Only one operator transfer allowed"
 				$StopProcessing = $true
 				$VerboseStopProcessing = $true
 			}
@@ -6549,9 +6686,9 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 			}
 		}
 
-		if ( $A_6_RedirectTarget -eq "ERROR" )
+		if ( $A_5_RedirectTarget -eq "ERROR" )
 		{
-			$A_6_Redirect_Comment = "ERROR: Check A_5_RedirectTarget on Config-AfterHoursMenu"
+			$A_5_Redirect_Comment = "ERROR: Check A_5_RedirectTarget on Config-AfterHoursMenu"
 			$StopProcessing = $true
 			$VerboseStopProcessing = $true
 		}
@@ -6593,21 +6730,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_6_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_6_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_6_Redirect.length -gt 21 )
 			{
-				switch ( $A_6_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_6_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_6_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_6_RedirectTarget = $A_6_RedirectTarget.Substring(5)			
+				$A_6_Redirect_Call_Priority = $A_6_Redirect.Substring(22,1)
+				$A_6_Redirect = $A_6_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_6_Redirect -EQ "FILE" )
 		{
@@ -6679,21 +6813,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_7_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_7_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_7_Redirect.length -gt 21 )
 			{
-				switch ( $A_7_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_7_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_7_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_7_RedirectTarget = $A_7_RedirectTarget.Substring(5)			
+				$A_7_Redirect_Call_Priority = $A_7_Redirect.Substring(22,1)
+				$A_7_Redirect = $A_7_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_7_Redirect -EQ "FILE" )
 		{
@@ -6765,21 +6896,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_8_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_8_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_8_Redirect.length -gt 21 )
 			{
-				switch ( $A_8_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_8_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_8_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_8_RedirectTarget = $A_8_RedirectTarget.Substring(5)			
+				$A_8_Redirect_Call_Priority = $A_8_Redirect.Substring(22,1)
+				$A_8_Redirect = $A_8_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_8_Redirect -EQ "FILE" )
 		{
@@ -6851,21 +6979,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_9_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_9_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_9_Redirect.length -gt 21 )
 			{
-				switch ( $A_9_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_9_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_9_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_9_RedirectTarget = $A_9_RedirectTarget.Substring(5)			
+				$A_9_Redirect_Call_Priority = $A_9_Redirect.Substring(22,1)
+				$A_9_Redirect = $A_9_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_9_Redirect -EQ "FILE" )
 		{
@@ -6937,21 +7062,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_Star_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_Star_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_Star_Redirect.length -gt 21 )
 			{
-				switch ( $A_Star_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_Star_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_Star_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_Star_RedirectTarget = $A_Star_RedirectTarget.Substring(5)			
+				$A_Star_Redirect_Call_Priority = $A_Star_Redirect.Substring(22,1)
+				$A_Star_Redirect = $A_Star_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_Star_Redirect -EQ "FILE" )
 		{
@@ -7023,21 +7145,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $A_Pound_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $A_Pound_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $A_Pound_Redirect.length -gt 21 )
 			{
-				switch ( $A_Pound_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$A_Pound_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$A_Pound_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$A_Pound_RedirectTarget = $A_Pound_RedirectTarget.Substring(5)			
+				$A_Pound_Redirect_Call_Priority = $A_Pound_Redirect.Substring(22,1)
+				$A_Pound_Redirect = $A_Pound_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $A_Pound_Redirect -EQ "FILE" )
 		{
@@ -7132,21 +7251,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
+		}
 
-			if ( $H_GreetingRoutingTarget -ne "ERROR" )
+		if ( $H_GreetingRouting -match "ConfigurationEndpoint" )
+        {
+			if ( $H_GreetingRouting.length -gt 21 )
 			{
-				switch ( $H_GreetingRoutingTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_GreetingRouting = "ConfigurationEndpoint"
-							}
-					"[CQ]"	{
-								$H_GreetingRouting = "ConfigurationEndpoint"
-							}			
-				}
-				$H_GreetingRoutingTarget = $H_GreetingRoutingTarget.Substring(5)
+				$H_GreetingRouting_Call_Priority = $H_GreetingRouting.Substring(22,1)
+				$H_GreetingRouting = $H_GreetingRouting.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 		
 		if ( $H_GreetingRoutingTarget -eq "ERROR" )
 		{
@@ -7200,21 +7316,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_0_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_0_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_0_Redirect.length -gt 21 )
 			{
-				switch ( $H_0_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_0_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_0_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_0_RedirectTarget = $H_0_RedirectTarget.Substring(5)			
+				$H_0_Redirect_Call_Priority = $H_0_Redirect.Substring(22,1)
+				$H_0_Redirect = $H_0_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_0_Redirect -EQ "FILE" )
 		{
@@ -7281,21 +7394,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_1_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_1_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_1_Redirect.length -gt 21 )
 			{
-				switch ( $H_1_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_1_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_1_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_1_RedirectTarget = $H_1_RedirectTarget.Substring(5)			
+				$H_1_Redirect_Call_Priority = $H_1_Redirect.Substring(22,1)
+				$H_1_Redirect = $H_1_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_1_Redirect -EQ "FILE" )
 		{
@@ -7367,21 +7477,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_2_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_2_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_2_Redirect.length -gt 21 )
 			{
-				switch ( $H_2_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_2_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_2_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_2_RedirectTarget = $H_2_RedirectTarget.Substring(5)			
+				$H_2_Redirect_Call_Priority = $H_2_Redirect.Substring(22,1)
+				$H_2_Redirect = $H_2_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_2_Redirect -EQ "FILE" )
 		{
@@ -7453,21 +7560,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_3_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_3_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_3_Redirect.length -gt 21 )
 			{
-				switch ( $H_3_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_3_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_3_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_3_RedirectTarget = $H_3_RedirectTarget.Substring(5)			
+				$H_3_Redirect_Call_Priority = $H_3_Redirect.Substring(22,1)
+				$H_3_Redirect = $H_3_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_3_Redirect -EQ "FILE" )
 		{
@@ -7539,21 +7643,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_4_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_4_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_4_Redirect.length -gt 21 )
 			{
-				switch ( $H_4_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_4_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_4_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_4_RedirectTarget = $H_4_RedirectTarget.Substring(5)			
+				$H_4_Redirect_Call_Priority = $H_4_Redirect.Substring(22,1)
+				$H_4_Redirect = $H_4_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }		
+		}
 
 		if ( $H_4_Redirect -EQ "FILE" )
 		{
@@ -7625,21 +7726,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_5_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_5_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_5_Redirect.length -gt 21 )
 			{
-				switch ( $H_5_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_5_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_5_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_5_RedirectTarget = $H_5_RedirectTarget.Substring(5)			
+				$H_5_Redirect_Call_Priority = $H_5_Redirect.Substring(22,1)
+				$H_5_Redirect = $H_5_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_5_Redirect -EQ "FILE" )
 		{
@@ -7711,21 +7809,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_6_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_6_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_6_Redirect.length -gt 21 )
 			{
-				switch ( $H_6_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_6_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_6_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_6_RedirectTarget = $H_6_RedirectTarget.Substring(5)			
+				$H_6_Redirect_Call_Priority = $H_6_Redirect.Substring(22,1)
+				$H_6_Redirect = $H_6_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_6_Redirect -EQ "FILE" )
 		{
@@ -7797,21 +7892,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_7_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_7_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_7_Redirect.length -gt 21 )
 			{
-				switch ( $H_7_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_7_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_7_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_7_RedirectTarget = $H_7_RedirectTarget.Substring(5)			
+				$H_7_Redirect_Call_Priority = $H_7_Redirect.Substring(22,1)
+				$H_7_Redirect = $H_7_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_7_Redirect -EQ "FILE" )
 		{
@@ -7883,21 +7975,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_8_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_8_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_8_Redirect.length -gt 21 )
 			{
-				switch ( $H_8_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_8_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_8_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_8_RedirectTarget = $H_8_RedirectTarget.Substring(5)			
+				$H_8_Redirect_Call_Priority = $H_8_Redirect.Substring(22,1)
+				$H_8_Redirect = $H_8_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_8_Redirect -EQ "FILE" )
 		{
@@ -7969,21 +8058,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_9_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_9_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_9_Redirect.length -gt 21 )
 			{
-				switch ( $H_9_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_9_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_9_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_9_RedirectTarget = $H_9_RedirectTarget.Substring(5)			
+				$H_9_Redirect_Call_Priority = $H_9_Redirect.Substring(22,1)
+				$H_9_Redirect = $H_9_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_9_Redirect -EQ "FILE" )
 		{
@@ -8055,21 +8141,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_Star_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_Star_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_Star_Redirect.length -gt 21 )
 			{
-				switch ( $H_Star_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_Star_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_Star_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_Star_RedirectTarget = $H_Star_RedirectTarget.Substring(5)			
+				$H_Star_Redirect_Call_Priority = $H_Star_Redirect.Substring(22,1)
+				$H_Star_Redirect = $H_Star_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_Star_Redirect -EQ "FILE" )
 		{
@@ -8141,21 +8224,18 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 				
 				$CallPriority = $true
 			}
-			
-			if ( $H_Pound_RedirectTarget -ne "ERROR" )
+		}
+
+		if ( $H_Pound_Redirect -match "ConfigurationEndpoint")
+        {
+			if ( $H_Pound_Redirect.length -gt 21 )
 			{
-				switch ( $H_Pound_RedirectTarget.Substring(0,4) )
-				{
-					"[AA]"	{
-								$H_Pound_Redirect = "ConfigurationEndPoint"
-							}
-					"[CQ]"	{
-								$H_Pound_Redirect = "ConfigurationEndPoint"
-							}						
-				}
-				$H_Pound_RedirectTarget = $H_Pound_RedirectTarget.Substring(5)			
+				$H_Pound_Redirect_Call_Priority = $H_Pound_Redirect.Substring(22,1)
+				$H_Pound_Redirect = $H_Pound_Redirect.Substring(0,21)
+				
+				$CallPriority = $true
 			}
-        }
+		}
 
 		if ( $H_Pound_Redirect -EQ "FILE" )
 		{
@@ -8191,7 +8271,7 @@ for ( $i = 0; $i -lt $PSAAConfig.length; $i++)
 		}
 
 		NewAutoAttendant
-   }
+	}
 }
 
 Write-Host "Completed Auto Attendant Configuration."
