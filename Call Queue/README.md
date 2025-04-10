@@ -82,14 +82,17 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkCQsPreparation.ps1
 
+- Address known issues
 - Investigate Resource Account priority lookup when resource account type is AA
 - Investigate Teams Channel logic
 - Introduce configurable limits
 
 ### BulkCQsProvisioning.ps1
 
+- Address known issues
 - Assign a phone number to a new resource account
 
 ### BulkCQs spreadsheet
 
+- Address known issues
 - Address conditional formatting isue with the Agent01 - Agent20 fields
