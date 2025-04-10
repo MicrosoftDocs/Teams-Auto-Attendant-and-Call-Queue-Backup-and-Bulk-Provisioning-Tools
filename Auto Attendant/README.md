@@ -75,12 +75,13 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkAAsPreparation.ps1
 
-- Suppress CQ warnings
+- Address known issues
 - Get all holiday sets
 - Download Auto Attendant configurations
 
 ### BulkAAsProvisioning.ps1
 
+- Address known issues
 - Support text prompts with special characters
 - Support dial-by-name/number properly
 - Remove duplicate holiday sets
@@ -90,5 +91,6 @@ Note: At the current time these permissions are requested even if Resource Accou
 
 ### BulkAAs spreadsheet
 
+- Address known issues
 - Support dial-by-name/number properly
 - Detect/alert on same voice command being used for different menu options
