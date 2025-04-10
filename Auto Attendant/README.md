@@ -47,7 +47,7 @@ To perform resource accounts related activities, when prompted, login with an ac
 
 ### Microsoft Graph Scopes Requested
 
-The PowerShell scripts request the following Microsoft Graph scopes"
+The BulkAAsProvisioning.ps1 PowerShell scripts request the following Microsoft Graph scopes:
   - Organization.Read.All
   - User.ReadWrite.All
 
@@ -58,37 +58,37 @@ Note: At the current time these permissions are requested even if Resource Accou
 ### BulkAAsPreparation.ps1
 
 - Can only retrieve holiday schedules that are assigned to an Auto Attendant
-  - This is a system limitation and will not be addressed
 
 ### BulkAAsProvisioning.ps1
 
 - It is not possible to self-reference a Resource Account or Auto Autoattendant created in the spreadsheet
 - It is not possible to assign multiple resource accounts to an Auto Attendant
+- Special characters in text prompts may cause errors
 
 ### BulkAAs spreadsheet
 
-- Dial Scope should be a Config-Base item however it is shown on Config-BusinessHoursMenu, Config-AfterHoursMenu and, Config-HolidaysMenu.
-  - Config-BusinessHoursMenu is the only configuration that will be provisioned. Configuration on other tabs will be ignored
-  - A future version will move this to Config-Base
- 
+- It is possible to self-reference an Auto Attendant created in the spreadsheet however this will cause a failure when the BulkAAsProvisioning.ps1 script is run
+- Dial Scope is only honoured on the Config-BusinessHoursMenu tab. Configuration on other tabs will be ignored
 - It is highly likely there are some conditional formatting errors. Please report these so they can be addressed.
 
 ## Roadmap
 
 ### BulkAAsPreparation.ps1
 
-- Update to support MicrosoftTeams 6.9.0
-- Remove use of temporary spreadsheets
-- Add counters to items in verbose mode
-- Stop processing when an invalid parameter is passed
 - Suppress CQ warnings
+- Get all holiday sets
 - Download Auto Attendant configurations
 
 ### BulkAAsProvisioning.ps1
 
+- Support text prompts with special characters
+- Support dial-by-name/number properly
+- Remove duplicate holiday sets
 - Self-reference an Auto Attendant created in the spreadsheet
 - Self-reference a Resource Account created in the spreadsheet
+- Do not load Graph library if licensing resource accounts is disabled
 
 ### BulkAAs spreadsheet
 
-- Move Dial Scope to the Config-Base tab
+- Support dial-by-name/number properly
+- Detect/alert on same voice command being used for different menu options
