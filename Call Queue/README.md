@@ -45,11 +45,16 @@ To perform resource accounts related activities, when prompted, login with an ac
 
 ### Microsoft Graph Scopes Requested
 
+The BulkCQsPreparation.ps1 PowerShell script requests the folllowing Microsoft Graph scopes:
+  - Schedule.Read.All
+
+Note: This permission is requested only if Teams Schedule Groups are being downloaded.
+
 The BulkCQsProvisioning.ps1 PowerShell script requests the following Microsoft Graph scopes:
   - Organization.Read.All
   - User.ReadWrite.All
 
-Note: At the current time these permissions are requested even if Resource Account creating and licensing is bypassed. This will be addressed in a future version of the script.
+Note: These permissions are requested only if Resource Account creation and licensing is being done.
 
 ## Known Issues
 
