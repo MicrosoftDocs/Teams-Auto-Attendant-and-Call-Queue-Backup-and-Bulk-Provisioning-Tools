@@ -1,6 +1,8 @@
-# Version: 1.0.2
-# Date: 2025.04.10
+# Version: 1.0.3
+# Date: 2025.04.15
 #
+# Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Auto%20Attendant/CHANGELOG.md
+
 # PowerShell Streams
 #
 #Stream #	Description			Write Cmdlet		Variable				Default
@@ -43,50 +45,85 @@ $arguments = $arguments[0].ToLower()
 $arguments = $arguments -split ", "
 $args += $arguments
 
+#
+# setting default 
+#
+$AACount = [int]0
+$CQCount = [int]0
+
 if ( $args -ne "" )
 {
 	for ( $i = 0; $i -lt $args.length; $i++ )
 	{
 		switch ( $args[$i] )
 		{
-			"-aacount"   			{ $AACount = [int]$args[$i+1]
-									  $i++
+			"-aacount"   			{ 	if ( ( $args[$i+1] -eq $null ) -or ( !($args[$i+1] -match "^[\d\.]+$" ) ) )
+										{
+											$NoAutoAttendants = $true
+											$AACount = [int]0
+											$i++
+										}
+										else
+										{
+											$AACount = [int]$args[$i+1]
+											$i++
+										}
 									}
-			"-cqcount"   			{ $CQCount = [int]$args[$i+1] 
-									  $i++
+			"-cqcount"   			{  	if ( ( $args[$i+1] -eq $null ) -or ( !($args[$i+1] -match "^[\d\.]+$" ) ) )
+										{
+											$NoCallQueues = $true
+											$CQCount = [int]0
+											$i++
+										}
+										else
+										{
+											$CQCount = [int]$args[$i+1]
+											$i++
+										}
 									}
-			"-excelfile" 			{ $ExcelFilename = $args[$i+1]
-									  $i++
+			"-excelfile" 			{ 	$ExcelFilename = $args[$i+1]
+										$i++
 									}
-			"-help"      			{ $Help = $true }	   
-			"-noresourceaccounts" 	{ $NoResourceAccounts = $true }
-			"-noautoattendants"		{ $NoAutoAttendants = $true
-								      $NoHolidays = $true
+			"-help"      			{ 	$Help = $true }	   
+			"-noresourceaccounts" 	{ 	$NoResourceAccounts = $true }
+			"-noautoattendants"		{ 	$NoAutoAttendants = $true
+										$NoHolidays = $true
 									}
-			"-noholidays"			{ $NoHolidays = $true }
-			"-nocallqueues"			{ $NoCallQueues = $true }
-			"-nophonenumbers"		{ $NoPhoneNumbers = $true }
-			"-nousers"				{ $NoUsers = $true }
-			"-noteams"				{ $NoTeams = $true }
-			"-noopen"				{ $NoOpen = $true }
-			"-verbose"   			{ $Verbose = $true }
-			"-view"      			{ $View = $true }	  
-			Default      			{ $ArgError = $true
-									  $arg = $args[$i]
-									  Write-Host "Unknown argument passed: $arg" }   
+			"-noholidays"			{ 	$NoHolidays = $true }
+			"-nocallqueues"			{ 	$NoCallQueues = $true }
+			"-nophonenumbers"		{ 	$NoPhoneNumbers = $true }
+			"-nousers"				{ 	$NoUsers = $true }
+			"-noteams"				{ 	$NoTeams = $true }
+			"-noopen"				{ 	$NoOpen = $true }
+			"-verbose"   			{ 	$Verbose = $true }
+			"-view"      			{ 	$View = $true }	  
+			Default      			{ 	$ArgError = $true
+										$arg = $args[$i]
+									}
 		}
 	}
 }
 
 if ( $ArgError )
 {
-	Write-Host "An unknown argument was encountered. Processing has been halted." -f Red
-	Write-Host ""
+	Write-Host "An unknown argument was encountered: $arg" -f Red
 }
 
+if ( $AACount -gt 0 -and $NoAutoAttendants )
+{
+	Write-Host "Conflicting parameters. -NoAutoAttendants specified but -AACount supplied. Processing has been halted." -f Red
+	$ArgError = $true
+}
+
+if ( $CQCount -gt 0 -and $NoCallQueues )
+{
+	Write-Host "Conflicting parameters. -NoCallQueues specified but -CQCount supplied. Processing has been halted." -f Red
+	$ArgError = $true
+}
 
 if ( ( $Help ) -or ( $ArgError ) )
 {
+	Write-Host ""
 	Write-Host "The following options are avaialble:"
 	Write-Host "`t-AACount <n> - the number of Auto Attendants in tenant, only needed if greater than 100"
 	Write-Host "`t-CQCount <n> - the number of Call Queues in tenant, only needed if greater than 100"
@@ -130,7 +167,7 @@ $Range_Users = "A2:A2001"
 #
 Write-Host "Checking for MicrosoftTeams module 6.7.0 or later."
 $Version = ( (Get-InstalledModule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
-if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
+if ( (( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 )) -or (( $Version[0] -ge 6 ) -and ( $Version[2] -ge 7)) )
 {
    Write-Host "Connecting to Microsoft Teams."
    Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
@@ -186,8 +223,8 @@ else
 # ImportExcel
 #
 Write-Host "Checking for ImportExcel module 7.8.0 or later."
-$Version = ( (get-installedmodule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
-if ( ( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 ) )
+$Version = ( (Get-InstalledModule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
+if ( (( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 )) -or (( $Version[0] -ge 7 ) -and ( $Version[2] -ge 8 )) )
 {
    Write-Host "Importing ImportExcel."
    Import-Module -Name ImportExcel -MinimumVersion 7.8.0
@@ -284,7 +321,7 @@ if ( ! $NoResourceAccounts )
 				}
 
 				# request will generate a "Correlation id for this request" message when the RA is not assigned to anything, also generates error so redirecting that to null
-				$ResourceAccountPriority = ( (get-csonlineapplicationinstanceassociation -identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> $null  )
+				$ResourceAccountPriority = ( (Get-CsOnlineApplicationInstanceAssociation -identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> $null  )
 				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-CQ] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" +$ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation  + "~" + $ResourceAccountPriority )
 			}
 			$j++
@@ -313,7 +350,7 @@ if ( $View )
    $ExcelWorkSheet.Activate()
 }
 
-if ( ! $NoAutoAttendants )
+if ( ( ! $NoAutoAttendants ) -and ( $AACount -ne 0 ) )
 {
 	#
 	# Blank out existing rows
@@ -826,7 +863,7 @@ if ( $View )
    $ExcelWorkSheet.Activate()
 }
 
-if ( ! $NoCallQueues )
+if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 {
 	
 	#

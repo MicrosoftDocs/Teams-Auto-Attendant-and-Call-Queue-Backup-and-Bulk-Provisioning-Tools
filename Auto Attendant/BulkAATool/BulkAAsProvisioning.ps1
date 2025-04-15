@@ -1,5 +1,8 @@
-# Version: 1.0.2
-# Date: 2025.04.10
+# Version: 1.0.3
+# Date: 2025.04.15
+
+# Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Auto%20Attendant/CHANGELOG.md
+
 #
 # PowerShell Streams
 #
@@ -4597,11 +4600,11 @@ function NewAutoAttendant
                             $NewResourceAccountLocation = "US"
                         }
 
-                        Write-Host "`tAssigning Location ($NewResourceAccountLocation)"
-                        Update-MgUser -UserId $NewResourceAccountPrincipalName -Id $applicationInstanceID -UsageLocation $NewResourceAccountLocation
- 
                         if ( ! $NoResourceAccountLicensing )
 						{
+							Write-Host "`tAssigning Location ($NewResourceAccountLocation)"
+							Update-MgUser -UserId $NewResourceAccountPrincipalName -Id $applicationInstanceID -UsageLocation $NewResourceAccountLocation
+
                             Write-Host "`tAssigning license"
                             $skuID = (Get-MgSubscribedSKU | Where {$_.SkuPartNumber -eq "PHONESYSTEM_VIRTUALUSER"}).SkuId
                             Set-MgUserLicense -UserId $applicationInstanceID -AddLicenses @{SkuId = $skuID} -RemoveLicenses @() | Out-Null
@@ -4701,8 +4704,13 @@ for ( $i = 0; $i -lt $args.length; $i++ )
 											  $i++
 											}
 		"-help"                      		{ $Help = $true }
-		"-noresourceaccounts"        		{ $NoResourceAccounts = $true }
-		"-noresourceaccountcreation" 		{ $NoResourceAccountCreation = $true }
+		"-noresourceaccounts"        		{ $NoResourceAccounts = $true
+											  $NoResourceAccountCreation = $true
+											  $NoResourceAccountLicensing = $true
+											}
+		"-noresourceaccountcreation" 		{ $NoResourceAccountCreation = $true 
+											  $NoResourceAccountLicensing = $true
+											}
 		"-noresourceaccountlicensing"	 	{ $NoResourceAccountLicensing = $true }
 		"-noresourceaccountphonenumbers"	{ $NoResourceAccountPhoneNumbers = $true }
 		"-verbose"              	      	{ $Verbose = $true }
@@ -4715,11 +4723,11 @@ for ( $i = 0; $i -lt $args.length; $i++ )
 if ( $ArgError )
 {
 	Write-Host "An unknown argument was encountered. Processing has been halted." -f Red
-	Write-Host ""
 }
 
 if ( ( $Help ) -or ( $ArgError ) )
 {
+	Write-Host ""
 	Write-Host "The following options are avaialble:"
 	Write-Host "`t-ExcelFile - specify an alternative Excel Spreadsheet to use.  Default is BulkAAs.xlsm"
 	Write-Host "`t-Help - shows the options that are available (this help message)"
@@ -4752,7 +4760,7 @@ $MaximumFunctionCount = 32768
 #
 Write-Host "Checking for MicrosoftTeams module 6.7.0 or later."
 $Version = ( (Get-InstalledModule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
-if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
+if ( (( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 )) -or (( $Version[0] -ge 6 ) -and ( $Version[2] -ge 7)) )
 {
    Write-Host "Connecting to Microsoft Teams."
    Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
@@ -4804,69 +4812,72 @@ else
    Write-Host "Connected to Microsoft Teams."
 }
 
-#
-# Microsoft Graph
-#
-Write-Host "Checking for Microsoft.Graph module 2.24.0 or later."
-$Version = ( (get-installedmodule -Name Microsoft.Graph -MinimumVersion "2.24.0").Version 2> $null)
-if ( ( $Version.Major -ge 2 ) -and ( $Version.minor -ge 24 ) )
+if ( (! $NoResourceAccounts ) -and (! $NoResourceAccountCreation) -and (! $NoResourceAccountLicensing) )
 {
-   Write-Host "Connecting to Microsoft Graph."
+	#
+	# Microsoft Graph
+	#
+	Write-Host "Checking for Microsoft.Graph module 2.24.0 or later."
+	$Version = ( (Get-InstalledModule -Name Microsoft.Graph -MinimumVersion "2.24.0").Version 2> $null)
+	if ( (( $Version.Major -ge 2 ) -and ( $Version.minor -ge 24 )) -or (( $Version[0] -ge 2 ) -and ( ($Version[2..3] -join "") -ge 24)) )
+	{
+		Write-Host "Connecting to Microsoft Graph."
    
-   Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+		Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
 
-   try
-   { 
-      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-   } 
-   catch [System.UnauthorizedAccessException] 
-   { 
-      Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
-   }
-   try
-   { 
-      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-   } 
-   catch [System.UnauthorizedAccessException] 
-   { 
-      Write-Error "Not signed into Microsoft Graph!" 
-      exit
-   }
-   Write-Host "Connected to Microsoft Graph."
-}
-else
-{
-   Write-Host "Module Microsoft.Graph does not exist - installing."
-   Install-Module -Name Microsoft.Graph -MinimumVersion 2.24.0 -Force -AllowClobber
+	try
+	{ 
+		Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+	} 
+	catch [System.UnauthorizedAccessException] 
+	{ 
+		Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+	}
+	try
+	{ 
+		Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+	} 
+	catch [System.UnauthorizedAccessException] 
+	{ 
+		Write-Error "Not signed into Microsoft Graph!" 
+		exit
+	}
+	Write-Host "Connected to Microsoft Graph."
+	}
+	else
+	{
+		Write-Host "Module Microsoft.Graph does not exist - installing."
+		Install-Module -Name Microsoft.Graph -MinimumVersion 2.24.0 -Force -AllowClobber
 
-   Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+		Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
 
-   try
-   { 
-      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-   } 
-   catch [System.UnauthorizedAccessException] 
-   { 
-      Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
-   }
-   try
-   { 
-      Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
-   } 
-   catch [System.UnauthorizedAccessException] 
-   { 
-      Write-Error "Not signed into Microsoft Graph!" 
-      exit
-   }
-   Write-Host "Connected to Microsoft Graph."
+		try
+		{ 
+			Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+		} 
+		catch [System.UnauthorizedAccessException] 
+		{ 
+			Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+		}
+		try
+		{ 
+			Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+		} 
+		catch [System.UnauthorizedAccessException] 
+		{ 
+			Write-Error "Not signed into Microsoft Graph!" 
+			exit
+		}
+		Write-Host "Connected to Microsoft Graph."
+	}
 }
 
 #
 # ImportExcel
 #
 Write-Host "Checking for ImportExcel module 7.8.0 or later."
-$Version = ( (get-installedmodule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
-if ( ( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 ) )
+$Version = ( (Get-InstalledModule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
+if ( (( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 )) -or (( $Version[0] -ge 7 ) -and ( $Version[2] -ge 8 )) )
 {
    Write-Host "Importing ImportExcel."
    Import-Module -Name ImportExcel -MinimumVersion 7.8.0
