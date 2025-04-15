@@ -58,7 +58,7 @@ The BulkAAsProvisioning.ps1 PowerShell script requests the following Microsoft G
   - Organization.Read.All
   - User.ReadWrite.All
 
-Note: At the current time these permissions are requested even if Resource Account creating and licensing is bypassed. This will be addressed in a future version of the script.
+Note: These permissions are requested only if Resource Account creation and licensing is being done
 
 ## Known Issues
 
@@ -94,7 +94,6 @@ Note: At the current time these permissions are requested even if Resource Accou
 - Remove duplicate holiday sets
 - Self-reference an Auto Attendant created in the spreadsheet
 - Self-reference a Resource Account created in the spreadsheet
-- Do not load Graph library if licensing resource accounts is disabled
 
 ### BulkAAs spreadsheet
 
