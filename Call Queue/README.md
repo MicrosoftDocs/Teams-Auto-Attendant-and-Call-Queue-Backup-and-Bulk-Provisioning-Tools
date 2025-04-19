@@ -21,7 +21,7 @@ Missing or outdated modules will be automatically installed or updated.
 | Maximum Existing Items      | Maxium Create Items   |
 |:----------------------------|:----------------------|
 | Resource Accounts: 2000     | Call Queues: 2000     |
-| Teams/Channels: 2000        |                       |
+| Teams<ul><li>Channels: 2000</li><li>Schedule Groups: 2000</li></ul>        |                       |
 | Users: 2000                 |                       |
 | Call Queues: 2000           |                       |
 
