@@ -33,6 +33,7 @@ This step will download the existing resource account, auto attendant, call queu
 | -NoCallQueues       | Do not download existing call queue information.                                                                                           |
 | -NoUsers            | Do not download existing EV enabled users.                                                                                                 |
 | -NoTeamsChannels    | Do not download existing teams information.                                                                                                |
+| -NoTeamsScheduleGroups    | Do not download existing teams schedule groups                                                                                       |
 | -NoOpen             | Do not open the spreadsheet when the BulkCQsPreparation.ps1 script is finished.                                                            |
 | -Verbose            | Watch the spreadsheet get filled with information as the BulkAAsPreparation.psl1 script runs.<br>*Automaticaly disables*  **-NoOpen**      | 
 
@@ -107,9 +108,10 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | CallbackOfferTreatment     | The type of message that is played tp offer callback<br><ul><li>*Play an audio file:* Use an audio file for the message</li><li>*Add a greeting message:* Use TTS for the message</li></ul>Note: Only available if `IsCallbackEnabled` is *Yes*  |
 | CallbackOfferPrompt        | Name of audio file or the text message for TTS<br>Note: Only available if `IsCallbackEnabled` is *Yes*                                                   |
 | CallbackEmailNotificationTarget | The distribution list to send emails to about callbacks that timeout<br>Note: Only available if `IsCallbackEnabled` is *Yes* 
-| Team-Channel                          | The Teams Channel to assign to the queue |
+| Team-Channel               | The Teams Channel to assign to the queue |
+| Team-ScheduleGroup         | The Teams Schedule Group to the queue |
 | DistributionList01-DistributionList04 | The distribution lists of agents to assign to the queue |
-| Agent01-Agent20               | The agents to assign to the queue |
+| Agent01-Agent20            | The agents to assign to the queue |
 
 Notes: 
 1. If you're using a resource account for calling line ID purposes in Call queues, the resource account must have a Teams Phone Resource Account license and one of the following assigned:
@@ -150,7 +152,9 @@ Notes:
 |:---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | -ExcelFile filename        | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsProvisioning.ps1 file<br>Default: BulkAAs.xlsm                                         |
 | -Help                      | This help message.                                                                                                                                                                  |
+| -NoCallBack                | Do not perform any callback related stemps                                                                                                                                          |
 | -NoResourceAccounts        | Do not perform any resource account related steps. <br>*Automaticaly enables*  **-NoResourceAccountCreation**, **-NoResourceAccountLicensing**, **-NoResourceAccountPhoneNumbers**  |
 | -NoResourceAccountCreation | Do not provision any new resource accounts.<br>*Automaticaly enables*  **-NoResourceAccountLicensing**, **-NoResourceAccountPhoneNumbers**                                          |
 | -NoResourceAccountLicensing| Do not license any new resource accounts.<br>*Automaticaly enables*  **-NoResourceAccountPhoneNumbers**                                                                             |
+| -NoResourceAccountPhoneNumbers | Do not assign a phone number to a new resource account
 | -Verbose                   | Detailed output.                                                                                                                                                                    |
