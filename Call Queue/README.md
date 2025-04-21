@@ -12,7 +12,7 @@
 ## Required PowerShell Modules
 Missing or outdated modules will be automatically installed or updated.
 
-- MicrosoftTeams - 6.7.0 or later
+- MicrosoftTeams - 7.0.0 or later
 - Microsoft.Graph - 2.24.0
 - ImportExcel - 7.8.0
 
@@ -71,7 +71,7 @@ Note: These permissions are requested only if Resource Account creation and lice
 ### BulkCQs spreadsheet
 
 - **Config-CallQueue** tab
-  - There is a conditional formatting issue that results in the Agent01 - Agent20 fields being incorrectly highlighted in red. This can be ignored at this time.
+  - No known issues.
 
 - **Existing-CallQueue** tab
   - While all the resource accounts assigned to the call queue are downloaded, only the first one is shown under ***ResourceAccountName***
@@ -100,4 +100,3 @@ Note: These permissions are requested only if Resource Account creation and lice
 ### BulkCQs spreadsheet
 
 - Address known issues
-- Address conditional formatting isue with the Agent01 - Agent20 fields
