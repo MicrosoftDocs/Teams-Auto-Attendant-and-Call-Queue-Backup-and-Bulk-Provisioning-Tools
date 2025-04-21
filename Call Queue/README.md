@@ -21,9 +21,11 @@ Missing or outdated modules will be automatically installed or updated.
 | Maximum Existing Items      | Maxium Create Items   |
 |:----------------------------|:----------------------|
 | Resource Accounts: 2000     | Call Queues: 2000     |
+| Auto Attendants: 2000       |                       |
+| Call Queues: 2000           |                       |
+| Phone Numbers: 2000         |                       |
 | Teams<ul><li>Channels: 2000</li><li>Schedule Groups: 2000</li></ul>        |                       |
 | Users: 2000                 |                       |
-| Call Queues: 2000           |                       |
 
 Existing Items limits can be increased/removed by updating the spreadsheet accordingly.
 
@@ -32,7 +34,7 @@ Existing Items limits can be increased/removed by updating the spreadsheet accor
 Only update information on the following spreadsheet tabs:
   - Config-CallQueue
 
-Changing any of the grey shaded areas on these or any other tabs may result in warnings, failures, inaccurate backups, or provisioning.
+Changing any of the grey shaded areas on these or any other tabs may result in warnings, failures, inaccurate backups, or provisioning errors.
 
 ## Requirements
 
@@ -71,7 +73,7 @@ Note: These permissions are requested only if Resource Account creation and lice
 ### BulkCQs spreadsheet
 
 - **Config-CallQueue** tab
-  - No known issues.
+  - No known issues
 
 - **Existing-CallQueue** tab
   - While all the resource accounts assigned to the call queue are downloaded, only the first one is shown under ***ResourceAccountName***
