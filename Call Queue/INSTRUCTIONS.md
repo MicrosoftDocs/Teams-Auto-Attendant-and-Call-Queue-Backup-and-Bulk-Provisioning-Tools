@@ -132,10 +132,10 @@ Notes:
         - Phone number assignment is optional when using Direct Routing.
 
 >[!IMPORTANT]
-> Fields that require data entry will be highlighted in red and will switch to green after valid data entry.
-> Fields that become, or remain, highlighted in red after entering data indicate errors.
-> Fields in yellow indicate that the default value will be used unless something different is selected which results in the field turning green.
-> Blank fields in green are optional and do not require data entry.
+> - Fields that require data entry will be highlighted in red and will switch to green after valid data entry.
+> - Fields that become, or remain, highlighted in red after entering data indicate errors.
+> - Fields in yellow indicate that the default value will be used unless something different is selected which results in the field turning green.
+> - Blank fields in green are optional and do not require data entry.
 >
 > **Fields in red must be correcting before running the provisioning script.**
 >
