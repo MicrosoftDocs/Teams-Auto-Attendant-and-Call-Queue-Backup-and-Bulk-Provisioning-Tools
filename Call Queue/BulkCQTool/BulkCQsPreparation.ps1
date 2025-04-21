@@ -1,5 +1,8 @@
-# Version: 1.0.2
-# Date: 2025.04.10
+# Version: 1.0.3
+# Date: 2025.04.21
+
+# Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Call%20Queue/CHANGELOG.md
+
 #
 # PowerShell Streams
 #
@@ -84,36 +87,60 @@ $arguments = $arguments[0].ToLower()
 $arguments = $arguments -split ", "
 $args += $arguments
 
+#
+# setting default 
+#
+$AACount = [int]0
+$CQCount = [int]0
+
 if ( $args -ne "" )
 {
 	for ( $i = 0; $i -lt $args.length; $i++ )
 	{
 		switch ( $args[$i] )
 		{
-			"-aacount"   			{ $AACount = [int]$args[$i+1]
-									  $i++
-									}
-			"-cqcount"   			{ $CQCount = [int]$args[$i+1]
-									  $i++
-									}
-			"-download"				{ $Download = $true }
-			"-excelfile" 			{ $ExcelFilename = $args[$i+1]
-									  $i++
-									}
-			"-help"   				{ $Help = $true }
-			"-noautoattendants"		{ $NoAutoAttendants = $true }
-			"-nocallqueues"			{ $NoCallQueues = $true }
-			"-nophonenumbers"		{ $NoPhoneNumbers = $true }
-			"-noresourceaccounts"	{ $NoResourceAccounts = $true }
-			"-noteamschannels"		{ $NoTeamsChannels = $true }
-			"-nousers"				{ $NoUsers = $true }
-			"-noopen"               { $NoOpen = $true}
-			"-verbose"   			{ $Verbose = $true }
-			"-view"      			{ $View = $true }	  
-			Default      			{ $ArgError = $true
-									  $arg = $args[$i]
-									  Write-Warning  "Unknown argument passed: $arg" 
-									}
+			"-aacount"   				{ 	if ( ( $args[$i+1] -eq $null ) -or ( !($args[$i+1] -match "^[\d\.]+$" ) ) )
+											{
+												$NoAutoAttendants = $true
+												$AACount = [int]0
+												$i++
+											}
+											else
+											{
+												$AACount = [int]$args[$i+1]
+												$i++
+											}
+										}
+			"-cqcount"   				{ 	if ( ( $args[$i+1] -eq $null ) -or ( !($args[$i+1] -match "^[\d\.]+$" ) ) )
+											{
+												$NoCallQueues = $true
+												$CQCount = [int]0
+												$i++
+											}
+											else
+											{
+												$CQCount = [int]$args[$i+1]
+												$i++
+											}
+										}
+			"-download"					{ 	$Download = $true }
+			"-excelfile" 				{ 	$ExcelFilename = $args[$i+1]
+											$i++
+										}
+			"-help"   					{ 	$Help = $true }
+			"-noautoattendants"			{ 	$NoAutoAttendants = $true }
+			"-nocallqueues"				{ 	$NoCallQueues = $true }
+			"-nophonenumbers"			{ 	$NoPhoneNumbers = $true }
+			"-noresourceaccounts"		{ 	$NoResourceAccounts = $true }
+			"-noteamschannels"			{ 	$NoTeamsChannels = $true }
+			"-noteamsschedulegroups" 	{ 	$NoTeamsScheduleGroups = $true }
+			"-nousers"					{ 	$NoUsers = $true }
+			"-noopen"               	{ 	$NoOpen = $true}
+			"-verbose"   				{ 	$Verbose = $true }
+			"-view"      				{ 	$View = $true }	  
+			Default      				{ 	$ArgError = $true
+											$arg = $args[$i]
+										}
 		}
 	}
 	
@@ -131,16 +158,28 @@ if ( $args -ne "" )
 
 if ( $ArgError )
 {
-	Write-Host "An unknown argument was encountered. Processing has been halted." -f Red
-	Write-Host ""
+	Write-Host "An unknown argument was encountered: $arg" -f Red
 }
 
+if ( $AACount -gt 0 -and $NoAutoAttendants )
+{
+	Write-Host "Conflicting parameters. -NoAutoAttendants specified but -AACount supplied. Processing has been halted." -f Red
+	$ArgError = $true
+}
+
+if ( $CQCount -gt 0 -and $NoCallQueues )
+{
+	Write-Host "Conflicting parameters. -NoCallQueues specified but -CQCount supplied. Processing has been halted." -f Red
+	$ArgError = $true
+}
 
 if ( ( $Help ) -or ( $ArgError ) )
 {
 	Write-Host "The following options are avaialble:"
 	Write-Host "`t-AACount <n> - the number of Auto Attendants in tenant, only needed if greater than 100"
+	Write-Host "`t`tWill default to 0 if "
 	Write-Host "`t-CQCount <n> - the number of Call Queues in tenant, only needed if greater than 100"
+	Write-Host "`t`tWill default to 0"
 	Write-Host "`t-Download - download all Call Queue configuration, including audio file. WARNING - may take a long time"
 	Write-Host "`t-ExcelFile - the Excel file to use.  Default is BulkCQs.xlsm"
 	Write-Host "`t-Help - shows the options that are available (this help message)"	
@@ -149,6 +188,7 @@ if ( ( $Help ) -or ( $ArgError ) )
 	Write-Host "`t-NoPhoneNumbers - do not download Voice Apps phone numbers"
 	Write-Host "`t-NoResourceAccounts - do not download existing resource account information"
 	Write-Host "`t-NoTeamsChannels - do not download existing Teams channels information"
+	Write-Host "`t-NoTeamsScheduleGroups - do not download existing Teams schedule group information"
 	Write-Host "`t-NoUsers - do not download existing EV enabled user information"	
 	Write-Host "`t-NoOpen - do not open spreadsheet when finished"
 	Write-Host "`t-Verbose - provides extra messaging during the process"
@@ -166,6 +206,13 @@ $MaximumVariableCount = 10000
 $MaximumFunctionCount = 32768
 
 #
+# Module Min Supported Versions
+#
+$MicrosoftTeamsMinVersion = [version]"7.0.0"
+$MicrosoftGraphMinVersion = [version]"2.24.0"
+$ImportExcelMinVersion = [version]"7.8.0"
+
+#
 # Set range variables
 #
 $Range_ResourceAccounts = "A2:A2001"
@@ -174,6 +221,7 @@ $Range_CallQueues = "A2:A2001"
 $Range_CallQueueDownload = "A3:ZZ2002"
 $Range_PhoneNumbers = "A2:A2001"
 $Range_TeamsChannels = "A2:A2001"
+$Range_TeamsScheduleGroups = "A2:A2001"
 $Range_Users = "A2:A2001"
 
 #
@@ -181,13 +229,22 @@ $Range_Users = "A2:A2001"
 #
 # MicrosoftTeams
 #
-Write-Host "Checking for MicrosoftTeams module 6.7.0 or later."
-$Version = ( (Get-InstalledModule -Name MicrosoftTeams -MinimumVersion "6.7.0").Version 2> $null )
-if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
+Write-Host "Checking for MicrosoftTeams module $MicrosoftTeamsMinVersion or later."
+$Version = ( (Get-InstalledModule -Name MicrosoftTeams -MinimumVersion "$MicrosoftTeamsMinVersion").Version 2> $null )
+
+if ( $Version -match "-preview" )
 {
-   Write-Host "Connecting to Microsoft Teams."
-   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
-   
+	$Version = $Version.Replace("-preview", "")
+}
+
+$Version = [version]$Version
+
+Write-Host "`tMicrosoftTeams Version: $Version"
+if ( $Version -ge $MicrosoftTeamsMinVersion )
+{
+   Write-Host "`tConnecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion $MicrosoftTeamsMinVersion
+
    try
    { 
       Get-CsTenant -ErrorAction Stop | Out-Null
@@ -202,18 +259,18 @@ if ( ( $Version.Major -ge 6 ) -and ( $Version.minor -ge 7 ) )
    } 
    catch [System.UnauthorizedAccessException] 
    { 
-      Write-Error "Not signed into Microsoft Teams!" 
+      Write-Error "`tNot signed into Microsoft Teams!" 
       exit
    }
-   Write-Host "Connected to Microsoft Teams."
+   Write-Host "`tConnected to Microsoft Teams."
 }
 else
 {
-   Write-Host "Module MicrosoftTeams does not exist - installing."
-   Install-Module -Name MicrosoftTeams -MinimumVersion 6.7.0 -Force -AllowClobber
+   Write-Host "The MicrosoftTeams module is not installed or does not meet the minimum requirements - installing."
+   Install-Module -Name MicrosoftTeams -MinimumVersion $MicrosoftTeamsMinVersion -Force -AllowClobber
 
-   Write-Host "Connecting to Microsoft Teams."
-   Import-Module -Name MicrosoftTeams -MinimumVersion 6.7.0
+   Write-Host "`tConnecting to Microsoft Teams."
+   Import-Module -Name MicrosoftTeams -MinimumVersion $MicrosoftTeamsMinVersion
    
    try
    { 
@@ -229,29 +286,104 @@ else
    } 
    catch [System.UnauthorizedAccessException] 
    { 
-      Write-Error "Not signed into Microsoft Teams!" 
+      Write-Error "`tNot signed into Microsoft Teams!" 
       exit
    }
-   Write-Host "Connected to Microsoft Teams."
+   Write-Host "`tConnected to Microsoft Teams."
+}
+
+if ( ! $NoTeamsScheduleGroups )
+{
+	Write-Host "Checking for Microsoft.Graph module $MicrosoftGraphMinVersion or later."
+	$Version = ( (Get-InstalledModule -Name Microsoft.Graph -MinimumVersion "$MicrosoftGraphMinVersion").Version 2> $null)
+	
+	if ( $Version -match "-preview" )
+	{
+		$Version = $Version.Replace("-preview", "")
+	}
+
+	$Version = [version]$Version
+
+	Write-Host "`tMicrosoft.Graph Version: $Version"
+	if ( $Version -ge $MicrosoftGraphMinVersion )
+	{
+		Write-Host "`tConnecting to Microsoft Graph."
+   
+		Connect-MgGraph -Scopes "Schedule.Read.All" -NoWelcome | Out-Null
+		
+		try
+		{ 
+			Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+		} 
+		catch [System.UnauthorizedAccessException] 
+		{ 
+			Connect-MgGraph -Scopes "Schedule.Read.All" -NoWelcome | Out-Null
+		}
+		try
+		{ 
+			Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+		} 
+		catch [System.UnauthorizedAccessException] 
+		{ 
+			Write-Error "`tNot signed into Microsoft Graph!" 
+			exit
+		}
+		Write-Host "`tConnected to Microsoft Graph."
+	}
+	else
+	{
+		Write-Host "The Microsoft.Graph module is not installed or does not meet the minimum requirements - installing."
+		Install-Module -Name Microsoft.Graph -MinimumVersion $MicrosoftGraphMinVersion -Force -AllowClobber
+
+		Connect-MgGraph -Scopes "Schedue.Read.All" -NoWelcome | Out-Null
+
+		try
+		{ 
+			Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+		} 
+		catch [System.UnauthorizedAccessException] 
+		{ 
+			Connect-MgGraph -Scopes "Organization.Read.All", "User.ReadWrite.All" -NoWelcome | Out-Null
+		}
+		try
+		{ 
+			Get-MgSubscribedSKU -ErrorAction Stop | Out-Null
+		} 
+		catch [System.UnauthorizedAccessException] 
+		{ 
+			Write-Error "`tNot signed into Microsoft Graph!" 
+			exit
+		}
+		Write-Host "`tConnected to Microsoft Graph."
+	}
 }
 
 #
 # ImportExcel
 #
-Write-Host "Checking for ImportExcel module 7.8.0 or later."
-$Version = ( (Get-InstalledModule -Name ImportExcel -MinimumVersion "7.8.0").Version 2> $null )
-if ( ( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 ) )
+Write-Host "Checking for ImportExcel module $ImportExcelMinVersion or later."
+$Version = ( (Get-InstalledModule -Name ImportExcel -MinimumVersion "$ImportExcelMinVersion").Version 2> $null )
+
+if ( $Version -match "-preview" )
 {
-   Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
+	$Version = $Version.Replace("-preview", "")
+}
+
+$Version = [version]$Version
+
+Write-Host "`tImportExcel Version: $Version"
+if ( $Version -ge $ImportExcelMinVersion )
+{
+   Write-Host "`tImporting ImportExcel."
+   Import-Module -Name ImportExcel -MinimumVersion $ImportExcelMinVersion
 }
 else
 {
-   Write-Host "Module ImportExcel - installing."
-   Install-Module -Name ImportExcel -MinimumVersion 7.8.0 -Force -AllowClobber
+   Write-Host "The ImportExcel module is not installed or does not meet the minimum requirements - installing."
+   Install-Module -Name ImportExcel -MinimumVersion $ImportExcelMinVersion -Force -AllowClobber
    
-   Write-Host "Importing ImportExcel."
-   Import-Module -Name ImportExcel -MinimumVersion 7.8.0
+   Write-Host "`tImporting ImportExcel."
+   Import-Module -Name ImportExcel -MinimumVersion $ImportExcelMinVersion
 }
 
 #
@@ -365,7 +497,7 @@ if ( $View )
    $ExcelWorkSheet.Activate()
 }
 
-if ( ! $NoAutoAttendants )
+if ( ( ! $NoAutoAttendants ) -and ( $AACount -ne 0 ) )
 {
 	#
 	# Blank out existing
@@ -412,7 +544,7 @@ if ( ! $NoAutoAttendants )
 			}
 		}
 			
-		$AutoAttendants = @(Get-CsAutoAttendant -Skip $j -First 100)
+		$AutoAttendants = @(Get-CsAutoAttendant -Skip $j -First $First)
 
 		for ($k=0; $k -lt  $AutoAttendants.length; $k++)
 		{
@@ -434,7 +566,7 @@ else
 #
 # Call Queues
 #
-if ( ! $NoCallQueues )
+if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 {
 	Write-Host "Getting list of Call Queues."
 
@@ -476,7 +608,7 @@ if ( ! $NoCallQueues )
 			}
 		}
 
-		$CallQueues = @(Get-CsCallQueue -Skip $j -First 100 3> $null )
+		$CallQueues = @(Get-CsCallQueue -Skip $j -First $First 3> $null )
 		
 		#
 		# Blank out existing rows
@@ -1061,6 +1193,101 @@ else
 {
 	Write-Host "Downloading Teams and Channels skipped."	
 }	
+
+#
+# Team Schedule Groups
+#
+$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("TeamsScheduleGroups")
+
+if ( $View )
+{
+   $ExcelWorkSheet.Activate()
+}
+
+if ( ! $NoTeamsScheduleGroups )
+{
+	#
+	# Blank out existing rows
+	#
+	$ExcelWorkSheet.Range($Range_TeamsScheduleGroups).Value = ""
+
+	Write-Host "Geting list of existing Teams Schedule Groups."
+	
+	if ( $NoTeamsChannels )
+	{
+		$Teams = @(Get-Team | Sort-Object DisplayName)
+	}
+
+	$row = 1
+	for ($i=0; $i -lt $Teams.length; $i++)
+	{
+		if ( $Verbose )
+		{
+			Write-Host ( "`t({0,4}) Processing Team : {1,-50}" -f ($i + 1), $Teams.DisplayName[$i] )
+		}
+		
+		$TeamsScheduleGroups = @(Get-MgTeamScheduleSchedulingGroup -TeamId $Teams.GroupId[$i] 2> $null | Sort-Object DisplayName)
+
+		switch ( $TeamsScheduleGroups.length )
+		{
+			0		{ 	if ( $Verbose ) 
+						{
+							Write-Host "`t`tScheduling Group: None"
+						}
+					}
+				
+			1		{	if ( $Verbose )
+						{
+							Write-Host "`t`tScheduling Group: " $TeamsScheduleGroups.DisplayName
+						}
+						$ExcelWorkSheet.Cells.Item($row,1) = ($Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsScheduleGroups.Id + "~" + $TeamsScheduleGroups.DisplayName)
+					}
+				
+			Default	{	for ($j=0; $j -lt $TeamsScheduleGroups.length; $j++)
+						{
+							if ( $Verbose )
+							{
+								Write-Host "`t`tScheduling Group: " $TeamsScheduleGroups.DisplayName[$j]
+							}
+							
+							$row += 1
+							$ExcelWorkSheet.Cells.Item($row,1) = ($Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsScheduleGroups.Id[$j] + "~" + $TeamsScheduleGroups.DisplayName[$j])
+						}
+					}
+		}
+	}
+}
+else
+{
+	Write-Host "Downloading Teams and Schedule Groups skipped."	
+}	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #
 # Users
