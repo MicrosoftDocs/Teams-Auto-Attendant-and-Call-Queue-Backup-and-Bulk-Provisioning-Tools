@@ -26,5 +26,5 @@ Notes:
 
 | Date       | Version | Supported | Description                                               |
 |:-----------|:-------|:---------:|:-----------------------------|
-| 2025.04.21 | 1.0.1  | Yes       | Microsoft Shifts support, updated data validation and conditional formatting method, started support for variable ranges   |
+| 2025.04.21 | 1.0.1  | Yes       | - Microsoft Shifts support *(VoiceApps preview only)*<br>- Updated data validation and conditional formatting method<br>- Started support for variable ranges   |
 | 2025.01.23 | 1.0.0  | No        | Initial release              |
