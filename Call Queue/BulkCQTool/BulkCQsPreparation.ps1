@@ -1085,7 +1085,6 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 				}
 
 				$RowOffset = $k + $j + 2
-				write-host $RowOffset
 				$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues.Identity[$k]).ApplicationInstances 3> $null )
 				$ExcelWorkSheet.Cells.Item($RowOffset,1) = ($CallQueues.Name[$k] + "~" + $CallQueues.Identity[$k] + "~" + ($AssignedResourceAccounts -join ","))
 			}
