@@ -1,5 +1,5 @@
-# Version: 1.0.3
-# Date: 2025.04.21
+# Version: 1.0.4
+# Date: 2025.04.22
 
 # Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Call%20Queue/CHANGELOG.md
 
@@ -266,7 +266,7 @@ if ( $Version -ge $MicrosoftTeamsMinVersion )
 }
 else
 {
-   Write-Host "The MicrosoftTeams module is not installed or does not meet the minimum requirements - installing."
+   Write-Host "`tThe MicrosoftTeams module is not installed or does not meet the minimum requirements - installing."
    Install-Module -Name MicrosoftTeams -MinimumVersion $MicrosoftTeamsMinVersion -Force -AllowClobber
 
    Write-Host "`tConnecting to Microsoft Teams."
@@ -568,6 +568,30 @@ else
 #
 if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 {
+	#
+	# Blank out existing rows
+	#
+	$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
+		
+	if ( $View )
+	{
+		$ExcelWorkSheet.Activate()
+	}
+		
+	$ExcelWorkSheet.Range($Range_CallQueues).Value = ""
+
+	if ( $Download )
+	{
+		$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueuesDownload")
+
+		if ( $View )
+		{
+			$ExcelWorkSheet.Activate()
+		}
+			
+		$ExcelWorkSheet.Range($Range_CallQueueDownload).Value = ""
+	}
+
 	Write-Host "Getting list of Call Queues."
 
 	if ( $CQCount -gt 0 )
@@ -609,30 +633,6 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 		}
 
 		$CallQueues = @(Get-CsCallQueue -Skip $j -First $First 3> $null )
-		
-		#
-		# Blank out existing rows
-		#
-		$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
-		
-		if ( $View )
-		{
-			$ExcelWorkSheet.Activate()
-		}
-		
-		$ExcelWorkSheet.Range($Range_CallQueues).Value = ""
-
-		if ( $Download )
-		{
-			$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueuesDownload")
-
-			if ( $View )
-			{
-				$ExcelWorkSheet.Activate()
-			}
-			
-			$ExcelWorkSheet.Range($Range_CallQueueDownload).Value = ""
-		}
 		
 		if ( $Download )
 		{
@@ -1085,6 +1085,7 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 				}
 
 				$RowOffset = $k + $j + 2
+				write-host $RowOffset
 				$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues.Identity[$k]).ApplicationInstances 3> $null )
 				$ExcelWorkSheet.Cells.Item($RowOffset,1) = ($CallQueues.Name[$k] + "~" + $CallQueues.Identity[$k] + "~" + ($AssignedResourceAccounts -join ","))
 			}
