@@ -1,5 +1,5 @@
-# Version: 1.0.4
-# Date: 2025.04.22
+# Version: 1.0.5
+# Date: 2025.04.28
 
 # Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Call%20Queue/CHANGELOG.md
 
@@ -36,10 +36,12 @@ function AudioFileExport
 	Param
 	(
 		[Parameter(Mandatory=$true, Position=0)]
-		[string] $fileName,
+		[string] $fileType,
 		[Parameter(Mandatory=$true, Position=1)]
-		[string] $fileID,
+		[string] $fileName,
 		[Parameter(Mandatory=$true, Position=2)]
+		[string] $fileID,
+		[Parameter(Mandatory=$true, Position=3)]
 		[string] $CQID
 	)
 
@@ -61,11 +63,17 @@ function AudioFileExport
 	
 	$currentDIR = $callQueueDIR + "\" + $fileID + "_" + $fileName
 
-	Write-Host "`t`tDownloading filename: " $fileName
-	$content = (Export-CsOnlineAudioFile -ApplicationId "HuntGroup" -Identity $fileID)
-	[System.IO.File]::WriteAllBytes($currentDIR, $content)	
-		
-    return
+	Write-Host "`t`t`tDownloading $fileType filename: " $fileName
+	$content = (Export-CsOnlineAudioFile -ApplicationId "HuntGroup" -Identity $fileID 2> $null)
+	if ( $content.length -ne 0 )
+	{
+		[System.IO.File]::WriteAllBytes($currentDIR, $content)
+		return $true
+	}
+	else
+	{
+		return $false
+	}
 }
 
 #
@@ -130,6 +138,7 @@ if ( $args -ne "" )
 			"-help"   					{ 	$Help = $true }
 			"-noautoattendants"			{ 	$NoAutoAttendants = $true }
 			"-nocallqueues"				{ 	$NoCallQueues = $true }
+			"-nocr4cqtemplates"			{	$NoCR4CQTemplates = $true }
 			"-nophonenumbers"			{ 	$NoPhoneNumbers = $true }
 			"-noresourceaccounts"		{ 	$NoResourceAccounts = $true }
 			"-noteamschannels"			{ 	$NoTeamsChannels = $true }
@@ -146,13 +155,25 @@ if ( $args -ne "" )
 	
 	if ( $Download )
 	{
-		$NoAutoAttendants = $false
+#		$NoAutoAttendants = $false
 		$NoCallQueues = $false
-		$NoPhoneNumbers = $false
-		$NoResourceAccounts = $false
-		$NoTeamsChannels = $false
-		$NoUsers = $false
+#		$NoPhoneNumbers = $false
+#		$NoResourceAccounts = $false
+#		$NoTeamsChannels = $false
+#		$NoTeamsScheduleGroups = $false
+#		$NoUsers = $false
+#		$NoCR4CQTemplates = $false
 		$Verbose = $true
+	}
+	
+	if ( (! $NoAutoAttendants) -and $AACount -eq 0 )
+	{
+		$AACount = 100
+	}
+	
+	if ( (! $NoCallQueues) -and $CQCount -eq 0 )
+	{
+		$CQCount = 100
 	}
 }
 
@@ -177,18 +198,17 @@ if ( ( $Help ) -or ( $ArgError ) )
 {
 	Write-Host "The following options are avaialble:"
 	Write-Host "`t-AACount <n> - the number of Auto Attendants in tenant, only needed if greater than 100"
-	Write-Host "`t`tWill default to 0 if "
 	Write-Host "`t-CQCount <n> - the number of Call Queues in tenant, only needed if greater than 100"
-	Write-Host "`t`tWill default to 0"
 	Write-Host "`t-Download - download all Call Queue configuration, including audio file. WARNING - may take a long time"
 	Write-Host "`t-ExcelFile - the Excel file to use.  Default is BulkCQs.xlsm"
 	Write-Host "`t-Help - shows the options that are available (this help message)"	
 	Write-Host "`t-NoAutoAttendants - do not download existing auto attendant information"
 	Write-Host "`t-NoCallQueues - do not download existing call queue information"
+	Write-Host "`t-NoCR4CQTemplates - do not download existing compliance recording templates"
 	Write-Host "`t-NoPhoneNumbers - do not download Voice Apps phone numbers"
 	Write-Host "`t-NoResourceAccounts - do not download existing resource account information"
 	Write-Host "`t-NoTeamsChannels - do not download existing Teams channels information"
-	Write-Host "`t-NoTeamsScheduleGroups - do not download existing Teams schedule group information"
+	Write-Host "`t-NoTeamsScheduleGroups - do not download existing Teams schedule group information (removes requirement for Graph access)"
 	Write-Host "`t-NoUsers - do not download existing EV enabled user information"	
 	Write-Host "`t-NoOpen - do not open spreadsheet when finished"
 	Write-Host "`t-Verbose - provides extra messaging during the process"
@@ -223,6 +243,7 @@ $Range_PhoneNumbers = "A2:A2001"
 $Range_TeamsChannels = "A2:A2001"
 $Range_TeamsScheduleGroups = "A2:A2001"
 $Range_Users = "A2:A2001"
+$Range_CR4CQ = "A2:A51"
 
 #
 # Check that minimum verion of required modules are installed - install if not
@@ -332,7 +353,7 @@ if ( ! $NoTeamsScheduleGroups )
 	}
 	else
 	{
-		Write-Host "The Microsoft.Graph module is not installed or does not meet the minimum requirements - installing."
+		Write-Host "`tThe Microsoft.Graph module is not installed or does not meet the minimum requirements - installing."
 		Install-Module -Name Microsoft.Graph -MinimumVersion $MicrosoftGraphMinVersion -Force -AllowClobber
 
 		Connect-MgGraph -Scopes "Schedue.Read.All" -NoWelcome | Out-Null
@@ -379,7 +400,7 @@ if ( $Version -ge $ImportExcelMinVersion )
 }
 else
 {
-   Write-Host "The ImportExcel module is not installed or does not meet the minimum requirements - installing."
+   Write-Host "`tThe ImportExcel module is not installed or does not meet the minimum requirements - installing."
    Install-Module -Name ImportExcel -MinimumVersion $ImportExcelMinVersion -Force -AllowClobber
    
    Write-Host "`tImporting ImportExcel."
@@ -406,8 +427,29 @@ if ( !( Test-Path -Path $ExcelFullPathFilename ) )
 	exit
 }
 
-$ExcelObj = New-Object -comobject Excel.Application
-$ExcelWorkBook = $ExcelObj.Workbooks.Open($ExcelFullPathFilename)
+#
+# Check if file is already open
+#
+$ExcelFileOpen =(Get-CimInstance Win32_Process -Filter "CommandLine like '%$ExcelFileName%'").ProcessId
+
+if ( $ExcelFileOpen.length -eq 0 )
+{
+	$ExcelObj = New-Object -comobject Excel.Application
+	$ExcelWorkBook = $ExcelObj.Workbooks.Open($ExcelFullPathFilename)
+}
+else
+{
+	Write-Host "The $ExcelFileName appears to be open already. Please close the file and try again." -f Red
+	exit
+}
+
+#
+# Turn off AutoSave & Calculation
+#
+$AutoSave = $ExcelWorkBook.AutoSaveOn
+$AutoCalc = $ExcelWorkBook.Parent.Calculation
+$ExcelWorkBook.AutoSaveOn = $false
+$ExcelWorkBook.Parent.Calculation = -4135
 
 if ( $View )
 {
@@ -441,7 +483,7 @@ if ( ! $NoResourceAccounts )
 		#
 		# Make sure resource account is not Deleted
 		#
-		$ResourceAccountUserDetails = (Get-CsOnlineUser -Identity $ResourceAccounts.ObjectId[$i])
+		$ResourceAccountUserDetails = (Get-CsOnlineUser -Identity $ResourceAccounts[$i].ObjectId)
 		
 		if ( $ResourceAccountUserDetails.SoftDeletionTimeStamp.length -eq 0 )
 		{
@@ -450,26 +492,26 @@ if ( ! $NoResourceAccounts )
 				$ResourceAccountUserDetails.UsageLocation = "US"
 			}
 
-			if ( $ResourceAccounts.ApplicationId[$i] -eq "ce933385-9390-45d1-9512-c8d228074e07" )
+			if ( $ResourceAccounts[$i].ApplicationId -eq "ce933385-9390-45d1-9512-c8d228074e07" )
 			{
 				if ( $Verbose )
 				{
-					Write-Host ( "`t({0,4}) [RA-AA] Resource Account : {1,-50}" -f ($i + 1), $ResourceAccounts.DisplayName[$i] )
+					Write-Host ( "`t({0,4}/{1,4}) [RA-AA] Resource Account : {2,-50}" -f ($i + 1), $ResourceAccounts.length, $ResourceAccounts[$i].DisplayName )
 				}
 
-				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-AA] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" + $ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation )
+				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-AA] - " + $ResourceAccounts[$i].DisplayName + "~" + $ResourceAccounts[$i].ObjectId + "~" + $ResourceAccounts[$i].PhoneNumber + "~" + $ResourceAccountUserDetails.UsageLocation )
 
 			}
 			else
 			{
 				if ( $Verbose )
 				{
-					Write-Host ( "`t({0,4}) [RA-CQ] Resource Account : {1,-50}" -f ($i + 1), $ResourceAccounts.DisplayName[$i] )
+					Write-Host ( "`t({0,4}/{1,4}) [RA-CQ] Resource Account : {2,-50}" -f ($i + 1), $ResourceAccounts.length, $ResourceAccounts[$i].DisplayName )
 				}
 
 				# request will generate a "Correlation id for this request" message when the RA is not assigned to anything, also generates error so redirecting that to null
-				$ResourceAccountPriority = ( (Get-CsOnlineApplicationInstanceAssociation -Identity $ResourceAccounts.ObjectId[$i]).CallPriority 2> $null  )
-				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-CQ] - " + $ResourceAccounts.DisplayName[$i] + "~" + $ResourceAccounts.ObjectId[$i] + "~" +$ResourceAccounts.PhoneNumber[$i] + "~" + $ResourceAccountUserDetails.UsageLocation  + "~" + $ResourceAccountPriority )
+				$ResourceAccountPriority = ( (Get-CsOnlineApplicationInstanceAssociation -Identity $ResourceAccounts[$i].ObjectId).CallPriority 2> $null  )
+				$ExcelWorkSheet.Cells.Item($j,1) = ("[RA-CQ] - " + $ResourceAccounts[$i].DisplayName + "~" + $ResourceAccounts[$i].ObjectId + "~" +$ResourceAccounts[$i].PhoneNumber + "~" + $ResourceAccountUserDetails.UsageLocation  + "~" + $ResourceAccountPriority )
 			}
 			$j++
 		}
@@ -477,7 +519,7 @@ if ( ! $NoResourceAccounts )
 		{
 			if ( $Verbose )
 			{
-				Write-Host "`tResource Account Not Added (Soft Deleted): " $ResourceAccounts.DisplayName[$i]
+				Write-Host "`tResource Account Not Added (Soft Deleted): " $ResourceAccounts[$i].DisplayName
 			}
 		}
 	}
@@ -523,13 +565,13 @@ if ( ( ! $NoAutoAttendants ) -and ( $AACount -ne 0 ) )
 		{
 			$First = $AACount
 		}
-		elseif ( $j -le ( $AACount - $j ) )
+		elseif ( ( $AACount - $j ) -le 100 )
 		{
-			$First = 100
+			$First =  $AACount - $j
 		}
 		else
 		{
-			$First = $AACount % 100
+			$First = 100
 		}
 		
 		if ( $Verbose )
@@ -543,19 +585,20 @@ if ( ( ! $NoAutoAttendants ) -and ( $AACount -ne 0 ) )
 				Write-Host "`tRetrieving list of auto attendants $($j+1) to $($j+$First) of $AACount"
 			}
 		}
-			
-		$AutoAttendants = @(Get-CsAutoAttendant -Skip $j -First $First)
+		
+		$AutoAttendants += @(Get-CsAutoAttendant -Skip $j -First $First)
+	}
 
-		for ($k=0; $k -lt  $AutoAttendants.length; $k++)
+	$RowOffset = 1
+	for ($i=0; $i -lt $AutoAttendants.length; $i++)
+	{
+		if ( $Verbose )
 		{
-			if ( $Verbose )
-			{
-				Write-Host ( "`t({0,4}) Auto Attendant : {1,-50}" -f ($k + $j + 1), $AutoAttendants.Name[$k] )
-			}
-
-			$Row = $k + $j + 2
-			$ExcelWorkSheet.Cells.Item($Row,1) = ($AutoAttendants.Name[$k] + "~" + $AutoAttendants.Identity[$k])
+			Write-Host ( "`t({0,4}/{1,4}) Auto Attendant : {2,-50}" -f ($i + 1), $AACount, $AutoAttendants[$i].Name )
 		}
+
+		$RowOffset += 1
+		$ExcelWorkSheet.Cells.Item($RowOffset, 1) = ($AutoAttendants[$i].Name + "~" + $AutoAttendants[$i].Identity)
 	}
 }
 else
@@ -592,8 +635,6 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 		$ExcelWorkSheet.Range($Range_CallQueueDownload).Value = ""
 	}
 
-	Write-Host "Getting list of Call Queues."
-
 	if ( $CQCount -gt 0 )
 	{
 		$loops = [int] [Math]::Truncate($CQCount / 100) + 1
@@ -603,6 +644,9 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 		$loops = 1
 	}
 
+	Write-Host "Getting list of Call Queues."
+	
+	$CallQueues = @()
 	for ( $i = 0; $i -lt $loops; $i++ )
 	{
 		$j = $i * 100
@@ -611,15 +655,15 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 		{
 			$First = $CQCount
 		}
-		elseif ( $j -le ( $CQCount - $j ) )
+		elseif ( ( $CQCount - $j ) -le 100 )
 		{
-			$First = 100
+			$First =  $CQCount - $j
 		}
 		else
 		{
-			$First = $CQCount % 100
+			$First = 100
 		}
-
+		
 		if ( $Verbose )
 		{
 			if ( $First -eq 100 )
@@ -632,32 +676,36 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 			}
 		}
 
-		$CallQueues = @(Get-CsCallQueue -Skip $j -First $First 3> $null )
-		
-		if ( $Download )
+		$CallQueues += @(Get-CsCallQueue -Skip $j -First $First 3> $null )
+	}
+	
+	if ( $Download )
+	{
+		$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueuesDownload")
+
+		if ( $View )
 		{
-			for ($k=0; $k -lt  $CallQueues.length; $k++)
-			{
-				$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueuesDownload")
+			$ExcelWorkSheet.Activate()
+		}
 
-				if ( $View )
-				{
-					$ExcelWorkSheet.Activate()
-				}
+		Write-Host "Processing list of Call Queues for Download."		
 
-				$RowOffset = $k + $j + 3
+		$RowOffset = 2
+		for ( $i = 0; $i -lt $CallQueues.length; $i++ )
+		{
+				$RowOffset += 1
 				$ColumnOffset = 1
 				
-				$CQ = (Get-CsCallQueue -Identity $CallQueues.Identity[$k] 3> $null)
-			
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.Name
+				$CQ = $CallQueues[$i]
+				
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.Identity
-
+				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.Name
+				
 				if ( $Verbose )
 				{
-					Write-Host ( "`t({0,4}) Downloading Call Queue : {1,-50}" -f ($k + $j + 1), $CQ.Name )
+					Write-Host ( "`t({0,4}/{1,4}) Processing Call Queue : {2,-50}" -f ($i + 1), $CQCount, $CQ.Name )
 				}
-				
+			
 				switch ( $CQ.RoutingMethod )
 				{
 					"Attendant"		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Attendant routing"}
@@ -666,236 +714,699 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 					"LongestIdle" 	{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Longest idle"}
 					default  		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.RoutingMethod }
 				}
-				
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.AllowOptOut
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ConferenceMode
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.PresenceBasedRouting
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.AgentAlertTime
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.LanguageId
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WelcomeMusicFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WelcomeMusicResourceId
 
-				if ( $CQ.WelcomeMusicResourceId.length -gt 0 )
+				if ( $CQ.AllowOptOut.length -ne 0 )
 				{
-					AudioFileExport $CQ.WelcomeMusicFileName $CQ.WelcomeMusicResourceId $CQ.Identity
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.AllowOptOut
+				}
+				else
+				{
+					$ColumnOffset++
 				}
 				
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WelcomeTextToSpeechPrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.UseDefaultMusicOnHold
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.MusicOnHoldFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.MusicOnHoldResourceId
-
-				if ( $CQ.MusicOnHoldResourceId.length -gt 0 )
+				if ( $CQ.ConferenceMode.length -ne 0 )
 				{
-					AudioFileExport $CQ.MusicOnHoldFileName $CQ.MusicOnHoldResourceId $CQ.Identity
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ConferenceMode
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.PresenceBasedRouting.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.PresenceBasedRouting
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.AgentAlertTime.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.AgentAlertTime
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.LanguageId.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.LanguageId
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( ( $CQ.WelcomeMusicFileName.length -ne 0 ) -and ( $CQ.WelcomeMusicResourceId.length -ne 0 ) )
+				{
+					if ( AudioFileExport "WelcomeMusic" $CQ.WelcomeMusicFileName $CQ.WelcomeMusicResourceId $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WelcomeMusicFileName
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WelcomeMusicResourceId
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.WelcomeMusicFileName
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.WelcomeMusicResourceId
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+				
+				if ( $CQ.WelcomeTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WelcomeTextToSpeechPrompt
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+				
+				if ( $CQ.UseDefaultMusicOnHold.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.UseDefaultMusicOnHold
+				}
+				else
+				{
+					$ColumnOffset++
 				}
 
-				
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ServiceLevelThresholdResponseTimeInSecond
+				if ( ( $CQ.MusicOnHoldFileName.length -ne 0 ) -and ( $CQ.MusicOnHoldResourceId.length -ne 0 ) )
+				{
+					if ( AudioFileExport "MusicOnHold" $CQ.MusicOnHoldFileName $CQ.MusicOnHoldResourceId $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.MusicOnHoldFileName
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.MusicOnHoldResourceId
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.MusicOnHoldFileName
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.MusicOnHoldResourceId
+					}
+				}
+				else
+				{
+					 $ColumnOffset += 2
+				}
 
+				if ( $CQ.ServiceLevelThresholdResponseTimeInSecond.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ServiceLevelThresholdResponseTimeInSecond
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+
+				#
 				# Overflow
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowThreshold
-				
-				switch ( $CQ.OverflowAction	)
+				#
+				if ( $CQ.OverflowThreshold.length -ne 0 )
 				{
-					"DisconnectWithBusy" 	{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Disconnect (Default)" }
-					"Forward" 				{ 	switch ( $CQ.OverflowActionTarget.Type )
-												{
-													"User"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Person in organization" }  
-													"ConfigurationEndPoint" 	{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
-													"ApplicationEndPoint" 		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
-													"Phone"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - External phone number" }
-												}												
-											} 
-					"Voicemail"				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail Personal" }
-					"SharedVoicemail" 		{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail (shared)" }
-					default  				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowAction }
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowThreshold
+				}
+				else
+				{
+					$ColumnOffset++
 				}
 				
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowActionTarget.Id
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowActionCallPriority
+				if ( $CQ.OverflowAction.length -ne 0 )
+				{
+					switch ( $CQ.OverflowAction	)
+					{
+						"DisconnectWithBusy" 	{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Disconnect (Default)" }
+						"Forward" 				{ 	switch ( $CQ.OverflowActionTarget.Type )
+													{
+														"User"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Person in organization" }  
+														"ConfigurationEndPoint" 	{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
+														"ApplicationEndPoint" 		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
+														"Phone"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - External phone number" }
+													}												
+												} 
+						"Voicemail"				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail Personal" }
+						"SharedVoicemail" 		{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail (shared)" }
+						default  				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowAction }
+					}
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+
+				if ( $CQ.OverflowActionTarget.Id.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowActionTarget.Id
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+
+				if ( $CQ.OverflowActionCallPriority.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowActionCallPriority
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
 				
 				# Overflow Shared Voicemail
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowSharedVoicemailTextToSpeechPrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowSharedVoicemailAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowSharedVoicemailAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableOverflowSharedVoicemailTranscription
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableOverflowSharedVoicemailSystemPromptSuppression
+				if ( $CQ.OverflowSharedVoicemailTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowSharedVoicemailTextToSpeechPrompt
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+				
+				if ( ( $CQ.OverflowSharedVoicemailAudioFilePrompt.length -ne 0 ) -and ( $CQ.OverflowSharedVoicemailAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "OverflowSharedVoicemail" $CQ.OverflowSharedVoicemailAudioFilePromptFileName $CQ.OverflowSharedVoicemailAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowSharedVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowSharedVoicemailAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowSharedVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowSharedVoicemailAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
 
-				if ( $CQ.OverflowSharedVoicemailAudioFilePrompt.length -gt 0 )
+				if ( $CQ.EnableOverflowSharedVoicemailTranscription.length -ne 0 )
 				{
-					AudioFileExport $CQ.OverflowSharedVoicemailAudioFilePromptFileName $CQ.OverflowSharedVoicemailAudioFilePrompt $CQ.Identity
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableOverflowSharedVoicemailTranscription
+				}
+				else
+				{
+					$ColumnOffset++
 				}
 				
+				if ( $CQ.EnableOverflowSharedVoicemailSystemPromptSuppression.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableOverflowSharedVoicemailSystemPromptSuppression
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+
+
 				# Overflow Disconnect
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowDisconnectAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowDisconnectAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowDisconnectTextToSpeechPrompt
-				
-				if ( $CQ.OverflowDisconnectAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.OverflowDisconnectAudioFilePrompt.length -ne 0 ) -and ($CQ.OverflowDisconnectAudioFilePromptFileName.length -ne 0) )
 				{
-					AudioFileExport $CQ.OverflowDisconnectAudioFilePromptFileName $CQ.OverflowDisconnectAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "OverflowDisconnect" $CQ.OverflowDisconnectAudioFilePromptFileName $CQ.OverflowDisconnectAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowDisconnectAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowDisconnectAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowDisconnectAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowDisconnectAudioFilePromptFileName
+					}
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.OverflowDisconnectTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowDisconnectTextToSpeechPrompt
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+				
 				
 				# Overflow Redirect - Person
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPersonAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPersonAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPersonTextToSpeechPrompt
-				
-				if ( $CQ.OverflowRedirectPersonAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.OverflowRedirectPersonAudioFilePrompt.length -ne 0 ) -and ( $CQ.OverflowRedirectPersonAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.OverflowRedirectPersonAudioFilePromptFileName $CQ.OverflowRedirectPersonAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "OverflowRedirectPerson" $CQ.OverflowRedirectPersonAudioFilePromptFileName $CQ.OverflowRedirectPersonAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPersonAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPersonAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectPersonAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectPersonAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
 				}
 				
+				if ( $CQ.OverflowRedirectPersonTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPersonTextToSpeechPrompt
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+				
+
 				# Overflow Redirect - Voice App
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoiceAppAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoiceAppAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoiceAppTextToSpeechPrompt
-				
-				if ( $CQ.OverflowRedirectVoiceAppAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.OverflowRedirectVoiceAppAudioFilePrompt.length -ne 0 ) -and ( $CQ.OverflowRedirectVoiceAppAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.OverflowRedirectVoiceAppAudioFilePromptFileName $CQ.OverflowRedirectVoiceAppAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "OverflowRedirectVoiceApp" $CQ.OverflowRedirectVoiceAppAudioFilePromptFileName $CQ.OverflowRedirectVoiceAppAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoiceAppAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoiceAppAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectVoiceAppAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectVoiceAppAudioFilePromptFileName
+					}
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.OverflowRedirectVoiceAppTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoiceAppTextToSpeechPrompt
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+
 				
 				# Overflow Redirect - Phone Number
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPhoneNumberAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPhoneNumberAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPhoneNumberTextToSpeechPrompt
-				
-				if ( $CQ.OverflowRedirectPhoneNumberAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.OverflowRedirectPhoneNumberAudioFilePrompt.length -ne 0 ) -and ( $CQ.OverflowRedirectPhoneNumberAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.OverflowRedirectPhoneNumberAudioFilePromptFileName $CQ.OverflowRedirectPhoneNumberAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "OverflowRedirectPhoneNumber" $CQ.OverflowRedirectPhoneNumberAudioFilePromptFileName $CQ.OverflowRedirectPhoneNumberAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPhoneNumberAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPhoneNumberAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectPhoneNumberAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectPhoneNumberAudioFilePromptFileName
+					}
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.OverflowRedirectPhoneNumberTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectPhoneNumberTextToSpeechPrompt
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
+								
 				
 				# Overflow Redirect - Voicemail
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoicemailAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoicemailAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoicemailTextToSpeechPrompt
-
-				if ( $CQ.OverflowRedirectVoicemailAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.OverflowRedirectVoicemailAudioFilePrompt.length -ne 0 ) -and ( $CQ.OverflowRedirectVoicemailAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.OverflowRedirectVoicemailAudioFilePromptFileName $CQ.OverflowRedirectVoicemailAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "OverflowRedirectVoicemail" $CQ.OverflowRedirectVoicemailAudioFilePromptFileName $CQ.OverflowRedirectVoicemailAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoicemailAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.OverflowRedirectVoicemailAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
 				}
 
+				if ( $CQ.OverflowRedirectVoicemailTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OverflowRedirectVoicemailTextToSpeechPrompt
+				}
+				else
+				{
+					 $ColumnOffset++
+				}
 				
+
+				
+				#
 				# Timeout
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeOutThreshold
-				
-				switch ( $CQ.TimeoutAction	)
+				#
+				if ( $CQ.TimeOutThreshold.length -ne 0 )
 				{
-					"Disconnect" 	{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Disconnect (Default)" }
-					"Forward" 		{ 	switch ( $CQ.TimeoutActionTarget.Type )
-										{
-											"User"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Person in organization" }  
-											"ConfigurationEndPoint" 	{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
-											"ApplicationEndPoint" 		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
-											"Phone"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - External phone number" }
-										}												
-									} 
-					"Voicemail"				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail Personal" }
-					"SharedVoicemail" 		{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail (shared)" }
-					default  				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutAction }
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeOutThreshold
+				}
+				else
+				{
+					$ColumnOffset++
 				}
 				
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutActionTarget.Id
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutActionCallPriority
+				if ( $CQ.TimeoutAction.length -ne 0 )
+				{
+					switch ( $CQ.TimeoutAction	)
+					{
+						"Disconnect" 	{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Disconnect (Default)" }
+						"Forward" 		{ 	switch ( $CQ.TimeoutActionTarget.Type )
+											{
+												"User"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Person in organization" }  
+												"ConfigurationEndPoint" 	{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
+												"ApplicationEndPoint" 		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
+												"Phone"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - External phone number" }
+											}												
+										} 
+						"Voicemail"				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail Personal" }
+						"SharedVoicemail" 		{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail (shared)" }
+						default  				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutAction }
+					}
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.TimeoutActionTarget.Id.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutActionTarget.Id
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.TimeoutActionCallPriority.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutActionCallPriority
+				}
+				else
+				{
+					$ColumnOffset++
+				}
 				
 				# Timeout Shared Voicemail
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutSharedVoicemailTextToSpeechPrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutSharedVoicemailAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutSharedVoicemailAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableTimeoutSharedVoicemailTranscription
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableTimeoutSharedVoicemailSystemPromptSuppression
-				
-				if ( $CQ.TimeoutSharedVoicemailAudioFilePrompt.length -gt 0 )
+				if ( $CQ.TimeoutSharedVoicemailTextToSpeechPrompt.length -ne 0 )
 				{
-					AudioFileExport $CQ.TimeoutSharedVoicemailAudioFilePromptFileName $CQ.TimeoutSharedVoicemailAudioFilePrompt $CQ.Identity
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutSharedVoicemailTextToSpeechPrompt
 				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( ( $CQ.TimeoutSharedVoicemailAudioFilePrompt.length -ne 0 ) -and ( $CQ.TimeoutSharedVoicemailAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "TimeoutSharedVoicemail" $CQ.TimeoutSharedVoicemailAudioFilePromptFileName $CQ.TimeoutSharedVoicemailAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutSharedVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutSharedVoicemailAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutSharedVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutSharedVoicemailAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+				
+				if ( $CQ.EnableTimeoutSharedVoicemailTranscription.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableTimeoutSharedVoicemailTranscription
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.EnableTimeoutSharedVoicemailSystemPromptSuppression.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableTimeoutSharedVoicemailSystemPromptSuppression
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
 				
 				# Timeout Disconnect
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutDisconnectAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutDisconnectAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutDisconnectTextToSpeechPrompt
-				
-				if ( $CQ.TimeoutDisconnectAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.TimeoutDisconnectAudioFilePrompt.length -ne 0 ) -and ( $CQ.TimeoutDisconnectAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.TimeoutDisconnectAudioFilePromptFileName $CQ.TimeoutDisconnectAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "TimeoutDisconnect" $CQ.TimeoutDisconnectAudioFilePromptFileName $CQ.TimeoutDisconnectAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutDisconnectAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutDisconnectAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutDisconnectAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutDisconnectAudioFilePromptFileName
+					}						
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+				
+				if ( $CQ.TimeoutDisconnectTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutDisconnectTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
 				
 				# Timeout Redirect - Person
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPersonAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPersonAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPersonTextToSpeechPrompt
-				
-				if ( $CQ.TimeoutRedirectPersonAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.TimeoutRedirectPersonAudioFilePrompt.length -ne 0 ) -and ( $CQ.TimeoutRedirectPersonAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.TimeoutRedirectPersonAudioFilePromptFileName $CQ.TimeoutRedirectPersonAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "TimeoutRedirectPerson" $CQ.TimeoutRedirectPersonAudioFilePromptFileName $CQ.TimeoutRedirectPersonAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPersonAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPersonAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectPersonAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectPersonAudioFilePromptFileName
+					}						
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.TimeoutRedirectPersonTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPersonTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
 				
 				# Timeout Redirect - Voice App
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoiceAppAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoiceAppAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoiceAppTextToSpeechPrompt
-				
-				if ( $CQ.TimeoutRedirectVoiceAppAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.TimeoutRedirectVoiceAppAudioFilePrompt.length -ne 0 ) -and ( $CQ.TimeoutRedirectVoiceAppAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.TimeoutRedirectVoiceAppAudioFilePromptFileName $CQ.TimeoutRedirectVoiceAppAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "TimeoutRedirectVoiceApp" $CQ.TimeoutRedirectVoiceAppAudioFilePromptFileName $CQ.TimeoutRedirectVoiceAppAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoiceAppAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoiceAppAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectVoiceAppAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectVoiceAppAudioFilePromptFileName
+					}
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.TimeoutRedirectVoiceAppTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoiceAppTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
 				
 				# Timeout Redirect - Phone Number
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPhoneNumberAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPhoneNumberAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPhoneNumberTextToSpeechPrompt
-				
-				if ( $CQ.TimeoutRedirectPhoneNumberAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.TimeoutRedirectPhoneNumberAudioFilePrompt.length -ne 0 ) -and ( $CQ.TimeoutRedirectPhoneNumberAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.TimeoutRedirectPhoneNumberAudioFilePromptFileName $CQ.TimeoutRedirectPhoneNumberAudioFilePrompt $CQ.Identity
+					if ( AudioFileExport "TimeoutRedirectPhoneNumber" $CQ.TimeoutRedirectPhoneNumberAudioFilePromptFileName $CQ.TimeoutRedirectPhoneNumberAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPhoneNumberAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPhoneNumberAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectPhoneNumberAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectPhoneNumberAudioFilePromptFileName
+					}
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+				
+				if ( $CQ.TimeoutRedirectPhoneNumberTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectPhoneNumberTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
 				
 				# Timeout Redirect - Voicemail
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoicemailAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoicemailAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoicemailTextToSpeechPrompt
+				if ( ( $CQ.TimeoutRedirectVoicemailAudioFilePrompt.length -ne 0 ) -and ( $CQ.TimeoutRedirectVoicemailAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "TimeoutRedirectVoicemail" $CQ.TimeoutRedirectVoicemailAudioFilePromptFileName $CQ.TimeoutRedirectVoicemailAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoicemailAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.TimeoutRedirectVoicemailAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+				
+				if ( $CQ.TimeoutRedirectVoicemailTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutRedirectVoicemailTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
 
-				if ( $CQ.TimeoutRedirectVoicemailAudioFilePrompt.length -gt 0 )
-				{
-					AudioFileExport $CQ.TimeoutRedirectVoicemailAudioFilePromptFileName $CQ.TimeoutRedirectVoicemailAudioFilePrompt $CQ.Identity
-				}
 				
 				
+				#
 				# NoAgent
-				switch ( $CQ.NoAgentAction	)
+				#
+				if ( $CQ.NoAgentAction.length -ne 0 )
 				{
-					"Queue" 				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Queue call (Default)" }
-					"Disconnect" 			{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Disconnect" }
-					"Forward" 				{ 	switch ( $CQ.NoAgentActionTarget.Type )
-												{
-													"User"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Person in organization" }  
-													"ConfigurationEndPoint" 	{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
-													"ApplicationEndPoint" 		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
-													"Phone"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - External phone number" }
+					switch ( $CQ.NoAgentAction	)
+					{
+						"Queue" 				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Queue call (Default)" }
+						"Disconnect" 			{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Disconnect" }
+						"Forward" 				{ 	switch ( $CQ.NoAgentActionTarget.Type )
+													{
+														"User"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Person in organization" }  
+														"ConfigurationEndPoint" 	{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
+														"ApplicationEndPoint" 		{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voice app" }  
+														"Phone"						{ $ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - External phone number" }
+													}
 												}
-											}
-					"Voicemail"				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail Personal" }
-					"SharedVoicemail" 		{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail (shared)" }
-					default  				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutAction }
+						"Voicemail"				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail Personal" }
+						"SharedVoicemail" 		{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Redirect - Voicemail (shared)" }
+						default  				{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TimeoutAction }
+					}
+				}
+				else
+				{
+					$ColumnOffset++
 				}
 				
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentActionTarget.Id
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentActionCallPriority
+				if ( $CQ.NoAgentActionTarget.Id.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentActionTarget.Id
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.NoAgentActionCallPriority.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentActionCallPriority
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
 				
 				# No Agent Shared Voicemail
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentSharedVoicemailTextToSpeechPrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentSharedVoicemailAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentSharedVoicemailAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableNoAgentSharedVoicemailTranscription
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableNoAgentSharedVoicemailSystemPromptSuppression
-				
-				if ( $CQ.NoAgentSharedVoicemailAudioFilePrompt.length -gt 0 )
+				if ( $CQ.NoAgentSharedVoicemailTextToSpeechPrompt.length -ne 0 )
 				{
-					AudioFileExport $CQ.NoAgentSharedVoicemailAudioFilePromptFileName $CQ.NoAgentSharedVoicemailAudioFilePrompt $CQ.Identity
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentSharedVoicemailTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
 				}
 				
+				if ( ( $CQ.NoAgentSharedVoicemailAudioFilePrompt.length -ne 0 ) -and ( $CQ.NoAgentSharedVoicemailAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "NoAgentSharedVoicemail" $CQ.NoAgentSharedVoicemailAudioFilePromptFileName $CQ.NoAgentSharedVoicemailAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentSharedVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentSharedVoicemailAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentSharedVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentSharedVoicemailAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+				
+				if ( $CQ.EnableNoAgentSharedVoicemailTranscription.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableNoAgentSharedVoicemailTranscription
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.EnableNoAgentSharedVoicemailSystemPromptSuppression.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.EnableNoAgentSharedVoicemailSystemPromptSuppression
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+								
 				switch ( $CQ.NoAgentApplyTo	)
 				{
 					"NewCalls" 	{ 	$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "New Calls" }
@@ -903,88 +1414,327 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 				}
 
 				# No Agent Disconnect
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentDisconnectAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentDisconnectAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentDisconnectTextToSpeechPrompt
-
-				if ( $CQ.NoAgentDisconnectAudioFilePrompt.length -gt 0 )
+				if ( ( $CQ.NoAgentDisconnectAudioFilePrompt.length -ne 0 ) -and ( $CQ.NoAgentDisconnectAudioFilePromptFileName.length -ne 0 ) )
 				{
-					AudioFileExport $CQ.NoAgentDisconnectAudioFilePromptFileName $CQ.NoAgentDisconnectAudioFilePrompt $CQ.Identity
-				}
-				
-				# No Agent Redirect - Person
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPersonAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPersonAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPersonTextToSpeechPrompt
-				
-				if ( $CQ.NoAgentRedirectPersonAudioFilePrompt.length -gt 0 )
-				{
-					AudioFileExport $CQ.NoAgentRedirectPersonAudioFilePromptFileName $CQ.NoAgentRedirectPersonAudioFilePrompt $CQ.Identity
-				}
-				
-				# No Agent Redirect - Voice App
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoiceAppAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoiceAppAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoiceAppTextToSpeechPrompt
-
-				if ( $CQ.NoAgentRedirectVoiceAppAudioFilePrompt.length -gt 0 )
-				{
-					AudioFileExport $CQ.NoAgentRedirectVoiceAppAudioFilePromptFileName $CQ.NoAgentRedirectVoiceAppAudioFilePrompt $CQ.Identity
-				}
-				
-				# No Agent Redirect - Phone Number
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPhoneNumberAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPhoneNumberAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPhoneNumberTextToSpeechPrompt
-				
-				if ( $CQ.NoAgentRedirectPhoneNumberAudioFilePrompt.length -gt 0 )
-				{
-					AudioFileExport $CQ.NoAgentRedirectPhoneNumberAudioFilePromptFileName $CQ.NoAgentRedirectPhoneNumberAudioFilePrompt $CQ.Identity
-				}
-				
-				# No Agent Redirect - Voicemail
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoicemailAudioFilePrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoicemailAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoicemailTextToSpeechPrompt
-
-				if ( $CQ.NoAgentRedirectVoicemailAudioFilePrompt.length -gt 0 )
-				{
-					AudioFileExport $CQ.NoAgentRedirectVoicemailAudioFilePromptFileName $CQ.NoAgentRedirectVoicemailAudioFilePrompt $CQ.Identity
-				}
-
-
-				# Callback
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.IsCallbackEnabled
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackRequestDtmf
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WaitTimeBeforeOfferingCallbackInSecond
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NumberOfCallsInQueueBeforeOfferingCallback
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallToAgentRatioThresholdBeforeOfferingCallback
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackOfferAudioFilePromptResourceId
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackOfferAudioFilePromptFileName
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackOfferTextToSpeechPrompt
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackEmailNotificationTarget.Id
-
-				if ( $CQ.CallbackOfferAudioFilePromptResourceId.length -gt 0 )
-				{
-					AudioFileExport $CQ.CallbackOfferAudioFilePromptFileName $CQ.CallbackOfferAudioFilePromptResourceId $CQ.Identity
-				}
-
-				
-				# Agents
-				if ( $CQ.Agents.length -gt 0 )
-				{
-					for ($l=0; $l -lt $CQ.Agents.length; $l++)
+					if ( AudioFileExport "NoAgentDisconnect" $CQ.NoAgentDisconnectAudioFilePromptFileName $CQ.NoAgentDisconnectAudioFilePrompt $CQ.Identity )
 					{
-						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset + $l) = $CQ.Agents[$l].ObjectId
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentDisconnectAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentDisconnectAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentDisconnectAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentDisconnectAudioFilePromptFileName
 					}
 				}
+				else
+				{
+					$ColumnOffset += 2
+				}
 				
-				# Channel
-				$ColumnOffset += 20
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ChannelId
-				
+				if ( $CQ.NoAgentDisconnectTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentDisconnectTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
 
-				# Authorized Users
+				
+				# No Agent Redirect - Person
+				if ( ( $CQ.NoAgentRedirectPersonAudioFilePrompt.length -ne 0 ) -and ( $CQ.NoAgentRedirectPersonAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "NoAgentRedirectPerson" $CQ.NoAgentRedirectPersonAudioFilePromptFileName $CQ.NoAgentRedirectPersonAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPersonAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPersonAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectPersonAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectPersonAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.NoAgentRedirectPersonTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPersonTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				
+				# No Agent Redirect - Voice App
+				if ( ( $CQ.NoAgentRedirectVoiceAppAudioFilePrompt.length -ne 0 ) -and ( $CQ.NoAgentRedirectVoiceAppAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "NoAgentRedirectVoiceApp" $CQ.NoAgentRedirectVoiceAppAudioFilePromptFileName $CQ.NoAgentRedirectVoiceAppAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoiceAppAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoiceAppAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectVoiceAppAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectVoiceAppAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.NoAgentRedirectVoiceAppTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoiceAppTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+
+				
+				# No Agent Redirect - Phone Number
+				if ( ( $CQ.NoAgentRedirectPhoneNumberAudioFilePrompt.length -ne 0 ) -and ( $CQ.NoAgentRedirectPhoneNumberAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "NoAgentRedirectPhoneNumber" $CQ.NoAgentRedirectPhoneNumberAudioFilePromptFileName $CQ.NoAgentRedirectPhoneNumberAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPhoneNumberAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPhoneNumberAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectPhoneNumberAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectPhoneNumberAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.NoAgentRedirectPhoneNumberTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectPhoneNumberTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				
+				# No Agent Redirect - Voicemail
+				if ( ( $CQ.NoAgentRedirectVoicemailAudioFilePrompt.length -ne 0 ) -and ( $CQ.NoAgentRedirectVoicemailAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "NoAgentRedirectVoicemail" $CQ.NoAgentRedirectVoicemailAudioFilePromptFileName $CQ.NoAgentRedirectVoicemailAudioFilePrompt $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoicemailAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectVoicemailAudioFilePrompt
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.NoAgentRedirectVoicemailAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+
+				if ( $CQ.NoAgentRedirectVoicemailTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NoAgentRedirectVoicemailTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+
+
+
+				#
+				# Callback
+				#
+				if ( $CQ.IsCallbackEnabled.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.IsCallbackEnabled
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.CallbackRequestDtmf.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackRequestDtmf
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.WaitTimeBeforeOfferingCallbackInSecond.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.WaitTimeBeforeOfferingCallbackInSecond
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.NumberOfCallsInQueueBeforeOfferingCallback.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.NumberOfCallsInQueueBeforeOfferingCallback
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.CallToAgentRatioThresholdBeforeOfferingCallback.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallToAgentRatioThresholdBeforeOfferingCallback
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( ( $CQ.CallbackOfferAudioFilePromptResourceId.length -ne 0 ) -and ( $CQ.CallbackOfferAudioFilePromptFileName.length -ne 0 ) )
+				{
+					if ( AudioFileExport "CallbackOffer" $CQ.CallbackOfferAudioFilePromptFileName $CQ.CallbackOfferAudioFilePromptResourceId $CQ.Identity )
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackOfferAudioFilePromptResourceId
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackOfferAudioFilePromptFileName
+					}
+					else
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.CallbackOfferAudioFilePromptResourceId
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "ERROR-" + $CQ.CallbackOfferAudioFilePromptFileName
+					}
+				}
+				else
+				{
+					$ColumnOffset += 2
+				}
+				
+				if ( $CQ.CallbackOfferTextToSpeechPrompt.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackOfferTextToSpeechPrompt
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.CallbackEmailNotificationTarget.Id.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CallbackEmailNotificationTarget.Id
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+
+				
+				#
+				# Channel
+				#
+				if ( $CQ.ChannelId.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ChannelId
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+
+
+				#
+				# Schedule Group 
+				#
+				if ( $CQ.ShiftsTeamId.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ShiftsTeamId
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.ShiftsSchedulingGroupId.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ShiftsSchedulingGroupId
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+
+
+				#
+				# Compliance Recording For Call Queues
+				#
+				if ( $CQ.ComplianceRecordingForCallQueueTemplateId.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ComplianceRecordingForCallQueueTemplateId
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.CustomAudioFileAnnouncementForCR.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CustomAudioFileAnnouncementForCR
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "FILENAME01"
+				
+				if ( $CQ.TextAnnouncementForCR.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TextAnnouncementForCR
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				if ( $CQ.CustomAudioFileAnnouncementForCRFailure.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.CustomAudioFileAnnouncementForCRFailure 
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "FILENAME02"
+				
+				if ( $CQ.TextAnnouncementForCRFailure.length -ne 0 )
+				{
+					$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.TextAnnouncementForCRFailure
+				}
+				else
+				{
+					$ColumnOffset++
+				}
+				
+				
+				#
+				# Authorized Users (AuthorizedUsers is array)
+				#
 				if ( $CQ.AuthorizedUsers.length -gt 0 )
 				{
 					for ($l=0; $l -lt $CQ.AuthorizedUsers.length; $l++)
@@ -992,9 +1742,12 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset + $l) = $CQ.AuthorizedUsers[$l].Guid
 					}
 				}
-				
-				# Hidden Authorized Users
 				$ColumnOffset += 15
+				
+				
+				#
+				# Hidden Authorized Users (HideAuthorizedUsers is array)
+				#
 				if ( $CQ.HideAuthorizedUsers.length -gt 0 )
 				{
 					for ($l=0; $l -lt $CQ.HideAuthorizedUsers.length; $l++)
@@ -1002,16 +1755,16 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset + $l) = $CQ.HideAuthorizedUsers[$l].Guid
 					}
 				}
-
+				$ColumnOffset += 15
+				
 
 				# Numbers in lists
-				$ColumnOffset += 15
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.DistributionLists.length
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.ApplicationInstances.length
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.OboResourceAccounts.length
+				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = $CQ.Agents.length
 				
 				# Spare Numbers in Lists
-				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Spare 04"
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Spare 05"
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Spare 06"
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Spare 07"
@@ -1023,7 +1776,7 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Spare 13"
 				$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset++) = "Spare 14"
 				
-				# Distributions Lists
+				# Distributions Lists (DistributionLists is array)
 				if ( $CQ.DistributionLists.length -gt 0 )
 				{
 					for ($l=0; $l -lt 4; $l++)
@@ -1032,7 +1785,7 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 					}
 				}
 				
-				# Resource Accounts
+				# Resource Accounts (ApplicationInstances is array)
 				$ColumnOffset += $CQ.DistributionLists.length
 				
 				if ( $CQ.ApplicationInstances.length -gt 0 )
@@ -1043,7 +1796,7 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 					}
 				}
 				
-				# Obo Resource Accounts
+				# Obo Resource Accounts (OboResourceAccounts is array)
 				$ColumnOffset += $CQ.ApplicationInstances.length
 
 				if ( $CQ.OboResourceAccounts.length -gt 0 )
@@ -1054,41 +1807,40 @@ if ( ( ! $NoCallQueues ) -and ( $CQCount -ne 0 ) )
 					}
 				}
 				
-				#
-				# Write out CallQueue information
-				$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
-		
-				if ( $View )
-				{
-					$ExcelWorkSheet.Activate()
-				}
 				
-				$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues.Identity[$k]).ApplicationInstances 3> $null )
-				$ExcelWorkSheet.Cells.Item($RowOffset - 1,1) = ($CallQueues.Name[$k] + "~" + $CallQueues.Identity[$k] + "~" + ($AssignedResourceAccounts -join ","))
-			}
-		} # Download
-
-		if ( ! $Download )
-		{
-			$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
-		
-			if ( $View )
-			{
-				$ExcelWorkSheet.Activate()
-			}
-
-			for ($k=0; $k -lt  $CallQueues.length; $k++)
-			{
-				if ( $Verbose )
+				# Agents (Agents is array)
+				$ColumnOffset += $CQ.OboResourceAccounts.length
+				
+				if ( $CQ.Agents.length -gt 0 )
 				{
-					Write-Host ( "`t({0,4}) Call Queue : {1,-50}" -f ($k + $j + 1), $CallQueues.Name[$k] )
+					for ($l=0; $l -lt $CQ.Agents.length; $l++)
+					{
+						$ExcelWorkSheet.Cells.Item($RowOffset, $ColumnOffset + $l) = $CQ.Agents[$l].ObjectId
+					}
 				}
+		} # CQ Loop
+	} # Download
 
-				$RowOffset = $k + $j + 2
-				$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues.Identity[$k]).ApplicationInstances 3> $null )
-				$ExcelWorkSheet.Cells.Item($RowOffset,1) = ($CallQueues.Name[$k] + "~" + $CallQueues.Identity[$k] + "~" + ($AssignedResourceAccounts -join ","))
-			}
+	$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CallQueues")
+		
+	if ( $View )
+	{
+		$ExcelWorkSheet.Activate()
+	}
+
+	Write-Host "Processing list of Call Queues."
+
+	$RowOffset = 1
+	for ($k=0; $k -lt  $CallQueues.length; $k++)
+	{
+		if ( $Verbose )
+		{
+			Write-Host ( "`t({0,4}/{1,4}) Call Queue : {2,-50}" -f ($k + 1), $CQCount, $CallQueues[$k].Name )
 		}
+
+		$RowOffset += 1
+		$AssignedResourceAccounts = ( (Get-CsCallQueue -Identity $CallQueues[$k].Identity).ApplicationInstances 3> $null )
+		$ExcelWorkSheet.Cells.Item($RowOffset,1) = ($CallQueues[$k].Name + "~" + $CallQueues[$k].Identity + "~" + ($AssignedResourceAccounts -join ","))
 	}
 }
 else
@@ -1121,10 +1873,10 @@ if ( ! $NoPhoneNumbers )
 	{
 		if ( $Verbose )
 		{
-			Write-Host ( "`t({0,4}) Phone Number : {1,-50}" -f ($i + 1), $PhoneNumbers.TelephoneNumber[$i] )
+			Write-Host ( "`t({0,4}/{1,4}) Phone Number : {2,-50}" -f ($i + 1), $PhoneNumbers.length, $PhoneNumbers[$i].TelephoneNumber )
 		}
 
-		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($PhoneNumbers.TelephoneNumber[$i] + "~" + $PhoneNumbers.NumberType[$i] + "~" + $PhoneNumbers.IsoSubdivision[$i] + "~" + $PhoneNumbers.IsoCountryCode[$i])
+		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($PhoneNumbers[$i].TelephoneNumber + "~" + $PhoneNumbers[$i].NumberType + "~" + $PhoneNumbers[$i].IsoSubdivision + "~" + $PhoneNumbers[$i].IsoCountryCode)
 	}
 }
 else
@@ -1153,39 +1905,30 @@ if ( ! $NoTeamsChannels )
 
 	$Teams = @(Get-Team | Sort-Object DisplayName)
 
-	$row = 1
+	$RowOffset = 1
 	for ($i=0; $i -lt $Teams.length; $i++)
 	{
-		$TeamsChannels = @(Get-TeamChannel -GroupId $Teams.GroupId[$i] | Where {$_.MembershipType -EQ "Standard"} | Sort-Object DisplayName)
-
+		$TeamsChannels = @(Get-TeamChannel -GroupId $Teams[$i].GroupId | Where {$_.MembershipType -EQ "Standard"} | Sort-Object DisplayName)
+		
 		if ( $Verbose )
 		{
-			Write-Host ( "`t({0,4}) Processing Team : {1,-50}" -f ($i + 1), $Teams.DisplayName[$i] )
-
-			if ( $TeamsChannels.length -eq 1 )
-			{
-				Write-Host "`t`tChannel: " $TeamsChannels.DisplayName
-			}
-			else
-			{
-				Write-Host "`t`tChannel: " $TeamsChannels.DisplayName[$j]
-			}
+			Write-Host ( "`t({0,4}/{1,4}) Processing Team : {2,-50}" -f ($i + 1), $Teams.length, $Teams[$i].DisplayName )
 		}
 
 		for ($j=0; $j -lt $TeamsChannels.length; $j++)
 		{
-			$row += 1
-			if ( $TeamsChannels.length -eq 1 )
+			if ( $Verbose )
 			{
-				# Write-Host ([string]$row + " : " + $Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsChannels.Id + "~" + $TeamsChannels.DisplayName)
-				$ExcelWorkSheet.Cells.Item($row,1) = ($Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsChannels.Id + "~" + $TeamsChannels.DisplayName)
+				Write-Host "`t`t`tChannel: " $TeamsChannels[$j].DisplayName
+			}
+			
+			$RowOffset += 1
+#			$ExcelWorkSheet.Cells.Item($RowOffset, 1) = ($Teams[$i].GroupId + "~" + $Teams[$i].DisplayName + "~" + $TeamsChannels[$j].Id + "~" + $TeamsChannels[$j].DisplayName)
 
-			}
-			else
-			{
-				# Write-Host ([string]$row + " : " + $Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsChannels.Id[$j] + "~" + $TeamsChannels.DisplayName[$j])
-				$ExcelWorkSheet.Cells.Item($row,1) = ($Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsChannels.Id[$j] + "~" + $TeamsChannels.DisplayName[$j])
-			}
+
+			$ExcelWorkSheet.Cells.Item($RowOffset, 1) = ($Teams[$i].DisplayName + "~[" +$Teams[$i].DisplayName + "] - " + $TeamsChannels[$j].DisplayName + "~" + $Teams[$i].GroupId + "~" + $TeamsChannels[$j].Id + "~" + $TeamsChannels[$j].DisplayName)
+
+
 		}
 	}
 }
@@ -1218,42 +1961,25 @@ if ( ! $NoTeamsScheduleGroups )
 		$Teams = @(Get-Team | Sort-Object DisplayName)
 	}
 
-	$row = 1
+	$RowOffset = 1
 	for ($i=0; $i -lt $Teams.length; $i++)
 	{
+		$TeamsScheduleGroups = @(Get-MgTeamScheduleSchedulingGroup -TeamId $Teams[$i].GroupId 2> $null | Sort-Object DisplayName)
+		
 		if ( $Verbose )
 		{
-			Write-Host ( "`t({0,4}) Processing Team : {1,-50}" -f ($i + 1), $Teams.DisplayName[$i] )
+			Write-Host ( "`t({0,4}/{1,4}) Processing Team : {2,-50}" -f ($i + 1), $Teams.length, $Teams[$i].DisplayName )
 		}
 		
-		$TeamsScheduleGroups = @(Get-MgTeamScheduleSchedulingGroup -TeamId $Teams.GroupId[$i] 2> $null | Sort-Object DisplayName)
-
-		switch ( $TeamsScheduleGroups.length )
+		for ($j=0; $j -lt $TeamsScheduleGroups.length; $j++)
 		{
-			0		{ 	if ( $Verbose ) 
-						{
-							Write-Host "`t`tScheduling Group: None"
-						}
-					}
-				
-			1		{	if ( $Verbose )
-						{
-							Write-Host "`t`tScheduling Group: " $TeamsScheduleGroups.DisplayName
-						}
-						$ExcelWorkSheet.Cells.Item($row,1) = ($Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsScheduleGroups.Id + "~" + $TeamsScheduleGroups.DisplayName)
-					}
-				
-			Default	{	for ($j=0; $j -lt $TeamsScheduleGroups.length; $j++)
-						{
-							if ( $Verbose )
-							{
-								Write-Host "`t`tScheduling Group: " $TeamsScheduleGroups.DisplayName[$j]
-							}
+			if ( $Verbose )
+			{
+				Write-Host "`t`t`tScheduling Group: " $TeamsScheduleGroups[$j].DisplayName
+			}
 							
-							$row += 1
-							$ExcelWorkSheet.Cells.Item($row,1) = ($Teams.GroupId[$i] + "~" + $Teams.DisplayName[$i] + "~" + $TeamsScheduleGroups.Id[$j] + "~" + $TeamsScheduleGroups.DisplayName[$j])
-						}
-					}
+			$RowOffset += 1
+			$ExcelWorkSheet.Cells.Item($RowOffset, 1) = ($Teams[$i].DisplayName + "~[" +$Teams[$i].DisplayName + "] - " + $TeamsScheduleGroups[$j].DisplayName + "~" + $Teams[$i].GroupId + "~" + $TeamsScheduleGroups[$j].Id + "~" + $TeamsScheduleGroups[$j].DisplayName)
 		}
 	}
 }
@@ -1261,33 +1987,6 @@ else
 {
 	Write-Host "Downloading Teams and Schedule Groups skipped."	
 }	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #
 # Users
@@ -1314,15 +2013,51 @@ if ( ! $NoUsers )
 	{
 		if ( $Verbose )
 		{
-			Write-Host ( "`t({0,4}) User : {1,-50}" -f ($i + 1), $Users.UserPrincipalName[$i] )
+			Write-Host ( "`t({0,4}/{1,4}) User : {2,-50}" -f ($i + 1), $Users.length, $Users[$i].UserPrincipalName )
 		}
 
-		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($Users.UserPrincipalName[$i] + "~" + $Users.Identity[$i])
+		$ExcelWorkSheet.Cells.Item($i + 2,1) = ( (($Users[$i].UserPrincipalName -split "@")[0]) + "~" + $Users[$i].UserPrincipalName + "~" + $Users[$i].Identity)
 	}
 }
 else
 {
 	Write-Host "Downloading Users skipped."	
+}
+
+#
+# CR4CQ Templates
+#
+$ExcelWorkSheet = $ExcelWorkBook.Sheets.Item("CR4CQ")
+
+if ( $View )
+{
+   $ExcelWorkSheet.Activate()
+}
+
+if ( ! $NoCR4CQTemplates )
+{
+	#
+	# Blank out existing rows
+	#
+	$ExcelWorkSheet.Range($Range_CR4CQ).Value = ""
+
+	Write-Host "Getting list of compliance recording for call queue templates."
+
+	$CR4CQTemplates = @(Get-CsComplianceRecordingForCallQueueTemplate)
+
+	for ( $i = 0; $i -lt $CR4CQTemplates.length; $i++)
+	{
+		if ( $Verbose )
+		{
+			Write-Host ( "`t({0,4}/{1,4}) CR4CQ Template : {2,-50}" -f ($i + 1), $CR4CQTemplates.length, $CR4CQTemplates[$i].Name )
+		}
+
+		$ExcelWorkSheet.Cells.Item($i + 2,1) = ($CR4CQTemplates[$i].Name + "~" + $CR4CQTemplates[$i].Id + "~" + $CR4CQTemplates[$i].Description + "~" + $CR4CQTemplates[$i].BotId + "~" + $CR4CQTemplates[$i].RequiredBeforeCall + "~" + $CR4CQTemplates[$i].RequiredDuringCall + "~" + $CR4CQTemplates[$i].ConcurrentInvitationCount + "~" + $CR4CQTemplates[$i].PairedApplication)
+	}
+}
+else
+{
+	Write-Host "Downloading CR4CQ Templates skipped."	
 }
 
 #
@@ -1334,6 +2069,11 @@ if ( $View )
    $ExcelWorkSheet.Activate()
 }
 
+#
+# Restore AutoSave
+#
+$ExcelWorkBook.AutoSaveOn = $AutoSave
+$ExcelWorkBook.Parent.Calculation = $AutoCalc
 $ExcelWorkBook.Save()
 $ExcelWorkBook.Close($true)
 $ExcelObj.Quit()
@@ -1347,7 +2087,7 @@ if ( Test-Path -Path ".\`$null" )
 if ( ! $NoOpen )
 {
 	Write-Host "Preparation complete.  Opening $ExcelFilename.  "
-	Write-Host "Please complete the configuration, save and exit the spreadsheet and then run the BulkCQsConfig script."
+	Write-Host "Please complete the configuration, save and exit the spreadsheet and then run the BulkCQsProvisioning script."
 	Write-Host -NoNewLine "Press any key to continue..."
 	$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
 

@@ -1,5 +1,5 @@
-# Version: 1.0.3
-# Date: 2025.04.21
+# Version: 1.0.4
+# Date: 2025.04.28
 #
 
 # Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Call%20Queue/CHANGELOG.md
@@ -64,6 +64,13 @@ function VerboseOutput
    Write-Host "`tOutboundCLID : $OboResourceAccountIDs"
    Write-Host "`tLanguage : $Language"
    Write-Host "`tServiceLevelThreshold : $ServiceLevelThreshold"
+   
+   Write-Host "`tComplianceRecordingTemplateIDs : $ComplianceRecordingTemplateIDs"
+   Write-Host "`tCR4CQGreetingOption : $CR4CQGreetingOption"
+   Write-Host "`tCR4CQGreeting : $CR4CQGreeting"
+   Write-Host "`tCR4CQFailureGreetingOption : $CR4CQFailureGreetingOption"
+   Write-Host "`tCR4CQFailureGreeting : $CR4CQFailureGreeting"
+   
    Write-Host "`tGreetingOption : $GreetingOption"
    Write-Host "`tGreeting : $Greeting"
    Write-Host "`tMusicOnHoldOption : $MusicOnHoldOption"
@@ -169,8 +176,40 @@ function NewCallQueue
       $command += "-ServiceLevelThresholdResponseTimeInSecond $ServiceLevelThreshold "
    }
 
+   #
+   #  Compliance Recording Template
+   #  Default: NONE (set in spreadsheet)
+   #
+   if ( $ComplianceRecordingTemplateIDs.length -gt 0 )
+   {
+      $command += "-ComplianceRecordingForCallQueueTemplateId @($ComplianceRecordingTemplateIDs) "
+	  
+	  if ( $CR4CQGreetingOption -eq "FILE" )
+	  {
+		$audioFileID = AudioFileImport $CR4CQGreeting
 
+		$command += "-CustomAudioFileAnnouncementForCR $audioFileID "
+	  }
+		  
+	  if ( $CR4CQGreetingOption -eq "TEXT" )
+	  {
+		$command += "-TextAnnouncementForCR $CR4CQGreeting "
+	  }
+	  
+  	  if ( $CR4CQFailureGreetingOption -eq "FILE" )
+	  {
+		$audioFileID = AudioFileImport $CR4CQFailureGreeting
 
+		$command += "-CustomAudioFileAnnouncementForCRFailure $audioFileID "
+	  }
+		  
+	  if ( $CR4CQFailureGreetingOption -eq "TEXT" )
+	  {
+		$command += "-TextAnnouncementForCRFailure $CR4CQFailureGreeting "
+	  }
+
+   }
+   
    #
    #  Welcome Greeting   
    #  Default: None (set in spreadsheet)
@@ -827,6 +866,7 @@ function NewCallQueue
 			{
 				Write-Host "Assigning Resource Account"
 				# New-CsOnlineApplicationInstanceAssociation -Identities @($ExistingResourceAccountName) -ConfigurationID $callQueueID -ConfigurationType CallQueue | Out-Null
+				# MicrosoftTeams
 				New-CsOnlineApplicationInstanceAssociation -Identities @($ExistingResourceAccountName) -ConfigurationID $CallQueue.Identity -ConfigurationType CallQueue | Out-Null
 			}
 			else
@@ -841,7 +881,7 @@ function NewCallQueue
 						}
 
 						Write-Host "Creating Resource Account ($NewResourceAccountPrincipalName)"
-						
+						# MicrosoftTeams
 						New-CsOnlineApplicationInstance -UserPrincipalName $NewResourceAccountPrincipalName -DisplayName $NewResourceAccountDisplayName -ApplicationID "11cd3e2e-fccb-42ad-ad00-878b93575e07" | Out-Null
 			
 						$j = 1
@@ -868,10 +908,13 @@ function NewCallQueue
 						if ( ! $NoResourceAccountLicensing )
 						{
 							Write-Host "`tAssigning Location"
+							# Module: Microsoft.Graph.Users
 							Update-MgUser -UserId $NewResourceAccountPrincipalName -Id $applicationInstanceID -UsageLocation $NewResourceAccountLocation
 
 							Write-Host "`tAttempting to license Resource Account"
+							# Module: Microsoft.Graph.Identity.DirectoryManagement
 							$skuID = (Get-MgSubscribedSKU | Where {$_.SkuPartNumber -eq "PHONESYSTEM_VIRTUALUSER"}).SkuId
+							# Module: Microsoft.Graph.Users.Actions
 							Set-MgUserLicense -UserId $applicationInstanceID -AddLicenses @{SkuId = $skuID} -RemoveLicenses @() | Out-Null
 						}
 						else
@@ -883,11 +926,13 @@ function NewCallQueue
 						if ( $NewResourceAccountPriority -ne "" )
 						{
 							# New-CsOnlineApplicationInstanceAssociation -Identities @($applicationInstanceID) -ConfigurationID $callQueueID -ConfigurationType CallQueue -CallPriority $NewResourceAccountPriority| Out-Null
+							# Module: MicrosoftTeams	
 							New-CsOnlineApplicationInstanceAssociation -Identities @($applicationInstanceID) -ConfigurationID $CallQueue.Identity -ConfigurationType CallQueue -CallPriority $NewResourceAccountPriority| Out-Null
 						}
 						else
 						{
 							# New-CsOnlineApplicationInstanceAssociation -Identities @($applicationInstanceID) -ConfigurationID $callQueueID -ConfigurationType CallQueue | Out-Null
+							# Module: MicrosoftTeams
 							New-CsOnlineApplicationInstanceAssociation -Identities @($applicationInstanceID) -ConfigurationID $CallQueue.Identity -ConfigurationType CallQueue | Out-Null
 						}
 					}
@@ -1050,7 +1095,6 @@ if ( $Version -match "-preview" )
 $Version = [version]$Version
 
 Write-Host "`tMicrosoftTeams Version: $Version"
-# if ( (( $Version.Major -ge 6 ) -and ( $Version.minor -ge 9 )) -or (( $Version[0] -eq 6 ) -and ( $Version[2] -ge 9) -and ( $Version[4] -ge 1)) )
 if ( $Version -ge $MicrosoftTeamsMinVersion )
 {
    Write-Host "`tConnecting to Microsoft Teams."
@@ -1104,7 +1148,7 @@ else
 }
 
 
-if ( (! $NoResourceAccounts ) -and (! $NoResourceAccountCreation) -and (! $NoResourceAccountLicensing) )
+if ( (! $NoResourceAccounts ) -or (! $NoResourceAccountCreation) -or (! $NoResourceAccountLicensing) )
 {
 	Write-Host "Checking for Microsoft.Graph module $MicrosoftGraphMinVersion or later."
 	$Version = ( (Get-InstalledModule -Name Microsoft.Graph -MinimumVersion "$MicrosoftGraphMinVersion").Version 2> $null)
@@ -1117,7 +1161,6 @@ if ( (! $NoResourceAccounts ) -and (! $NoResourceAccountCreation) -and (! $NoRes
 	$Version = [version]$Version
 	
 	Write-Host "`tMicrosoft.Graph Version: $Version"
-	#if ( (( $Version.Major -ge 2 ) -and ( $Version.minor -ge 24 )) -or (( $Version[0] -ge 2 ) -and ( ($Version[2..3] -join "") -ge 24)) )
 	if ( $Version -ge $MicrosoftGraphMinVersion )
 	{
 	   Write-Host "`tConnecting to Microsoft Graph."
@@ -1183,7 +1226,6 @@ if ( $Version -match "-preview" )
 $Version = [version]$Version
 
 Write-Host "`tImportExcel Version: $Version"
-#if ( (( $Version.Major -ge 7 ) -and ( $Version.minor -ge 8 )) -or (( $Version[0] -ge 7 ) -and ( $Version[2] -ge 8 )) )
 if ( $Version -ge $ImportExcelMinVersion )
 {
    Write-Host "`tImporting ImportExcel."
@@ -1240,249 +1282,277 @@ $PSCQConfig = @(Import-csv -Path $ExcelCSVFilename)
 
 for ($i=0; $i -lt  $PSCQConfig.length; $i++)
 {
-   $Action = $PSCQConfig.Action[$i]
+   $Action = $PSCQConfig[$i].Action
    if ( $Action -eq "New" )
    {
-      $Name   = '"' + $PSCQConfig.Name[$i] + '"'
-      $ExistingResourceAccountName = $PSCQConfig.ExistingResourceAccountName[$i]
-      $NewResourceAccountPrincipalName = $PSCQConfig.NewResourceAccountPrincipalName[$i]
-      $NewResourceAccountDisplayName = $PSCQConfig.NewResourceAccountDisplayName[$i]
-      $NewResourceAccountLocation = $PSCQConfig.NewResourceAccountLocation[$i]
-	  $NewResourceAccountPriority = $PSCQConfig.NewResourceAccountPriority[$i]
+      $Name   = '"' + $PSCQConfig[$i].Name + '"'
+      $ExistingResourceAccountName = $PSCQConfig[$i].ExistingResourceAccountName
+      $NewResourceAccountPrincipalName = $PSCQConfig[$i].NewResourceAccountPrincipalName
+      $NewResourceAccountDisplayName = $PSCQConfig[$i].NewResourceAccountDisplayName
+      $NewResourceAccountLocation = $PSCQConfig[$i].NewResourceAccountLocation
+	  $NewResourceAccountPriority = $PSCQConfig[$i].NewResourceAccountPriority
 
       $OutboundCLID = @()
-      if ( $PSCQConfig.OutboundCLID01[$i] -ne "" )
+      if ( $PSCQConfig[$i].OutboundCLID01 -ne "" )
       {
-         $OutboundCLID += '"' + $PSCQConfig.OutboundCLID01[$i] + '"'
+         $OutboundCLID += '"' + $PSCQConfig[$i].OutboundCLID01 + '"'
       }
 
-      if ( $PSCQConfig.OutboundCLID02[$i] -ne "" )
+      if ( $PSCQConfig[$i].OutboundCLID02 -ne "" )
       {
-         $OutboundCLID += '"' + $PSCQConfig.OutboundCLID02[$i] + '"'
+         $OutboundCLID += '"' + $PSCQConfig[$i].OutboundCLID02 + '"'
       }
 
-      if ( $PSCQConfig.OutboundCLID03[$i] -ne "" )
+      if ( $PSCQConfig[$i].OutboundCLID03 -ne "" )
       {
-         $OutboundCLID += '"' + $PSCQConfig.OutboundCLID03[$i] + '"'
+         $OutboundCLID += '"' + $PSCQConfig[$i].OutboundCLID03 + '"'
       }
 
-      if ( $PSCQConfig.OutboundCLID04[$i] -ne "" )
+      if ( $PSCQConfig[$i].OutboundCLID04 -ne "" )
       {
-         $OutboundCLID += '"' + $PSCQConfig.OutboundCLID04[$i] + '"'
+         $OutboundCLID += '"' + $PSCQConfig[$i].OutboundCLID04 + '"'
       }
       $OboResourceAccountIDs = $OutboundCLID -join ","
 
-      $Language = $PSCQConfig.Language[$i]
-      $ServiceLevelThreshold = $PSCQConfig.ServiceLevelThreshold[$i]
+      $Language = $PSCQConfig[$i].Language
+      $ServiceLevelThreshold = $PSCQConfig[$i].ServiceLevelThreshold
+	  
+	  $ComplianceRecordingTemplate = @()
+	  if ( $PSCQConfig[$i].CR4CQ01 -ne "NOTENABLED" )
+	  {
+		  $ComplianceRecordingTemplate += '"' + $PSCQConfig[$i].CR4CQ01 + '"'
+	  }
+	  
+	  if ( $PSCQConfig[$i].CR4CQ02 -ne "NOTENABLED" )
+	  {
+		  $ComplianceRecordingTemplate += '"' + $PSCQConfig[$i].CR4CQ02 + '"'
+	  }
+	  $ComplianceRecordingTemplateIDs = $ComplianceRecordingTemplate -join ","
+	  
+	  $CR4CQGreetingOption = $PSCQConfig[$i].CR4CQGreetingOption
+      switch ( $CR4CQGreetingOption )
+      {
+         "FILE"  { $CR4CQGreeting = $PSCQConfig[$i].CR4CQGreeting }
+         "TEXT"  { $CR4CQGreeting = '"' + $PSCQConfig[$i].CR4CQGreeting + '"' }
+         Default { $CR4CQGreeting = "" }
+      }
 
-      $GreetingOption = $PSCQConfig.GreetingOption[$i]
+	  $CR4CQFailureGreetingOption = $PSCQConfig[$i].CR4CQFailureGreetingOption
+      switch ( $CR4CQFailureGreetingOption )
+      {
+         "FILE"  { $CR4CQFailureGreeting = $PSCQConfig[$i].CR4CQFailureGreeting }
+         "TEXT"  { $CR4CQFailureGreeting = '"' + $PSCQConfig[$i].CR4CQFailureGreeting + '"' }
+         Default { $CR4CQFailureGreeting = "" }
+      }
+	  
+      $GreetingOption = $PSCQConfig[$i].GreetingOption
       switch ( $GreetingOption )
       {
-         "FILE"  { $Greeting = $PSCQConfig.Greeting[$i] }
-         "TEXT"  { $Greeting = '"' + $PSCQConfig.Greeting[$i] + '"' }
+         "FILE"  { $Greeting = $PSCQConfig[$i].Greeting }
+         "TEXT"  { $Greeting = '"' + $PSCQConfig[$i].Greeting + '"' }
          Default { $Greeting= "" }
       }
 
-      $MusicOnHoldOption = $PSCQConfig.MusicOnHoldOption[$i]
-      $MusicOnHOld = $PSCQConfig.MusicOnHold[$i]
-      $RoutingMethod = $PSCQConfig.RoutingMethod[$i]
-      $PresenceBasedRouting = $PSCQConfig.PresenceBasedRouting[$i]
-      $AllowOptOut = $PSCQConfig.AllowOptOut[$i]
-      $AgentAlertTime = $PSCQConfig.AgentAlertTime[$i]
+      $MusicOnHoldOption = $PSCQConfig[$i].MusicOnHoldOption
+      $MusicOnHOld = $PSCQConfig[$i].MusicOnHold
+      $RoutingMethod = $PSCQConfig[$i].RoutingMethod
+      $PresenceBasedRouting = $PSCQConfig[$i].PresenceBasedRouting
+      $AllowOptOut = $PSCQConfig[$i].AllowOptOut
+      $AgentAlertTime = $PSCQConfig[$i].AgentAlertTime
 
-      $OverflowThreshold = $PSCQConfig.OverflowThreshold[$i]
-      $OverflowAction = $PSCQConfig.OverflowAction[$i]
-      $OverflowActionTarget = $PSCQConfig.OverflowActionTarget[$i]
-      $OverflowActionCallPriority = $PSCQConfig.OverflowActionCallPriority[$i]
+      $OverflowThreshold = $PSCQConfig[$i].OverflowThreshold
+      $OverflowAction = $PSCQConfig[$i].OverflowAction
+      $OverflowActionTarget = $PSCQConfig[$i].OverflowActionTarget
+      $OverflowActionCallPriority = $PSCQConfig[$i].OverflowActionCallPriority
 
-      $OverflowTreatment = $PSCQConfig.OverflowTreatment[$i]
+      $OverflowTreatment = $PSCQConfig[$i].OverflowTreatment
       switch ( $OverflowTreatment )
       {
-         "FILE"  { $OverflowTreatmentPrompt = $PSCQConfig.OverflowTreatmentPrompt[$i] }
-         "TEXT"  { $OverflowTreatmentPrompt = '"' + $PSCQConfig.OverflowTreatmentPrompt[$i] + '"' }
+         "FILE"  { $OverflowTreatmentPrompt = $PSCQConfig[$i].OverflowTreatmentPrompt }
+         "TEXT"  { $OverflowTreatmentPrompt = '"' + $PSCQConfig[$i].OverflowTreatmentPrompt + '"' }
          Default { $OverflowTreatmentPrompt = "" }
       }
 
-      $OverflowSharedVoicemailSystemPromptSuppression = $PSCQConfig.OverflowSharedVoicemailSystemPromptSuppression[$i]
-      $OverflowSharedVoicemailTranscription = $PSCQConfig.OverflowSharedVoicemailTranscription[$i]
+      $OverflowSharedVoicemailSystemPromptSuppression = $PSCQConfig[$i].OverflowSharedVoicemailSystemPromptSuppression
+      $OverflowSharedVoicemailTranscription = $PSCQConfig[$i].OverflowSharedVoicemailTranscription
 
-      $TimeoutThreshold = $PSCQConfig.TimeoutThreshold[$i]
-      $TimeoutAction = $PSCQConfig.TimeoutAction[$i]
-      $TimeoutActionTarget = $PSCQConfig.TimeoutActionTarget[$i]
-      $TimeoutActionCallPriority = $PSCQConfig.TimeoutActionCallPriority[$i]
+      $TimeoutThreshold = $PSCQConfig[$i].TimeoutThreshold
+      $TimeoutAction = $PSCQConfig[$i].TimeoutAction
+      $TimeoutActionTarget = $PSCQConfig[$i].TimeoutActionTarget
+      $TimeoutActionCallPriority = $PSCQConfig[$i].TimeoutActionCallPriority
 
-      $TimeoutTreatment = $PSCQConfig.TimeoutTreatment[$i]
+      $TimeoutTreatment = $PSCQConfig[$i].TimeoutTreatment
       switch ( $TimeoutTreatment )
       {
-         "FILE"  { $TimeoutTreatmentPrompt = $PSCQConfig.TimeoutTreatmentPrompt[$i] }
-         "TEXT"  { $TimeoutTreatmentPrompt = '"' + $PSCQConfig.TimeoutTreatmentPrompt[$i] + '"' }
+         "FILE"  { $TimeoutTreatmentPrompt = $PSCQConfig[$i].TimeoutTreatmentPrompt }
+         "TEXT"  { $TimeoutTreatmentPrompt = '"' + $PSCQConfig[$i].TimeoutTreatmentPrompt + '"' }
          Default { $TimeoutTreatmentPrompt = "" }
       }
 
-      $TimeoutSharedVoicemailSystemPromptSuppression = $PSCQConfig.TimeoutSharedVoicemailSystemPromptSuppression[$i]
-      $TimeoutSharedVoicemailTranscription = $PSCQConfig.TimeoutSharedVoicemailTranscription[$i]
+      $TimeoutSharedVoicemailSystemPromptSuppression = $PSCQConfig[$i].TimeoutSharedVoicemailSystemPromptSuppression
+      $TimeoutSharedVoicemailTranscription = $PSCQConfig[$i].TimeoutSharedVoicemailTranscription
 
-      $NoAgentNewCallsOnly = $PSCQConfig.NoAgentNewCallsOnly[$i]
-      $NoAgentAction = $PSCQConfig.NoAgentAction[$i]
-      $NoAgentActionTarget = $PSCQConfig.NoAgentActionTarget[$i]
-      $NoAgentActionCallPriority = $PSCQConfig.NoAgentActionCallPriority[$i]
+      $NoAgentNewCallsOnly = $PSCQConfig[$i].NoAgentNewCallsOnly
+      $NoAgentAction = $PSCQConfig[$i].NoAgentAction
+      $NoAgentActionTarget = $PSCQConfig[$i].NoAgentActionTarget
+      $NoAgentActionCallPriority = $PSCQConfig[$i].NoAgentActionCallPriority
 
-      $NoAgentTreatment = $PSCQConfig.NoAgentTreatment[$i]
+      $NoAgentTreatment = $PSCQConfig[$i].NoAgentTreatment
       switch ( $NoAgentTreatment )
       {
-         "FILE"  { $NoAgentTreatmentPrompt = $PSCQConfig.NoAgentTreatmentPrompt[$i] }
-         "TEXT"  { $NoAgentTreatmentPrompt = '"' + $PSCQConfig.NoAgentTreatmentPrompt[$i] + '"' }
+         "FILE"  { $NoAgentTreatmentPrompt = $PSCQConfig[$i].NoAgentTreatmentPrompt }
+         "TEXT"  { $NoAgentTreatmentPrompt = '"' + $PSCQConfig[$i].NoAgentTreatmentPrompt + '"' }
          Default { $NoAgentTreatmentPrompt = "" }
       }
 
-      $NoAgentSharedVoicemailSystemPromptSuppression = $PSCQConfig.NoAgentSharedVoicemailSystemPromptSuppression[$i]
-      $NoAgentSharedVoicemailTranscription = $PSCQConfig.NoAgentSharedVoicemailTranscription[$i]
+      $NoAgentSharedVoicemailSystemPromptSuppression = $PSCQConfig[$i].NoAgentSharedVoicemailSystemPromptSuppression
+      $NoAgentSharedVoicemailTranscription = $PSCQConfig[$i].NoAgentSharedVoicemailTranscription
 
-      $IsCallbackEnabled = $PSCQConfig.IsCallbackEnabled[$i]
-      $CallbackRequestDTMF = $PSCQConfig.CallbackRequestDTMF[$i]
-      $WaitTimeBeforeOfferingCallbackInSecond = $PSCQConfig.WaitTimeBeforeOfferingCallbackInSecond[$i]
-      $NumberOfCallsInQueueBeforeOfferingCallback = $PSCQConfig.NumberOfCallsInQueueBeforeOfferingCallback[$i]
-      $CallToAgentRatioThresholdBeforeOfferingCallback = $PSCQConfig.CallToAgentRatioThresholdBeforeOfferingCallback[$i]
+      $IsCallbackEnabled = $PSCQConfig[$i].IsCallbackEnabled
+      $CallbackRequestDTMF = $PSCQConfig[$i].CallbackRequestDTMF
+      $WaitTimeBeforeOfferingCallbackInSecond = $PSCQConfig[$i].WaitTimeBeforeOfferingCallbackInSecond
+      $NumberOfCallsInQueueBeforeOfferingCallback = $PSCQConfig[$i].NumberOfCallsInQueueBeforeOfferingCallback
+      $CallToAgentRatioThresholdBeforeOfferingCallback = $PSCQConfig[$i].CallToAgentRatioThresholdBeforeOfferingCallback
 
-      $CallbackOfferTreatment = $PSCQConfig.CallbackOfferTreatment[$i]
+      $CallbackOfferTreatment = $PSCQConfig[$i].CallbackOfferTreatment
       switch ( $CallbackOfferTreatment )
       {
-         "FILE"  { $CallbackOfferPrompt = $PSCQConfig.CallbackOfferPrompt[$i] }
-         "TEXT"  { $CallbackOfferPrompt = '"' + $PSCQConfig.CallbackOfferPrompt[$i] + '"' }
+         "FILE"  { $CallbackOfferPrompt = $PSCQConfig[$i].CallbackOfferPrompt }
+         "TEXT"  { $CallbackOfferPrompt = '"' + $PSCQConfig[$i].CallbackOfferPrompt + '"' }
          Default { $CallbackOfferTreatment = "" }
       }
 
-      if ( $PSCQConfig.CallbackEmailNotificationTarget[$i] -ne "" )
+      if ( $PSCQConfig[$i].CallbackEmailNotificationTarget -ne "" )
       {
-         $CallbackEmailNotificationTarget = [System.GUID]::Parse($PSCQConfig.CallbackEmailNotificationTarget[$i])
+         $CallbackEmailNotificationTarget = [System.GUID]::Parse($PSCQConfig[$i].CallbackEmailNotificationTarget)
       }
 
-      $TeamGroupID = $PSCQConfig.TeamGroupID[$i]
-      $TeamChannelID = $PSCQConfig.TeamChannelID[$i]
-      $TeamChannelName = $PSCQConfig.TeamChannelName[$i]
+      $TeamGroupID = $PSCQConfig[$i].TeamGroupID
+      $TeamChannelID = $PSCQConfig[$i].TeamChannelID
+      $TeamChannelName = $PSCQConfig[$i].TeamChannelName
 
       $DL = @()
-      if ( $PSCQConfig.DistributionList01[$i] -ne "" )
+      if ( $PSCQConfig[$i].DistributionList01 -ne "" )
       {
-         $DL += '"' + $PSCQConfig.DistributionList01[$i] + '"'
+         $DL += '"' + $PSCQConfig[$i].DistributionList01 + '"'
       }
 
-      if ( $PSCQConfig.DistributionList02[$i] -ne "" )
+      if ( $PSCQConfig[$i].DistributionList02 -ne "" )
       {
-         $DL += '"' + $PSCQConfig.DistributionList02[$i] + '"'
+         $DL += '"' + $PSCQConfig[$i].DistributionList02 + '"'
       }
 
-      if ( $PSCQConfig.DistributionList03[$i] -ne "" )
+      if ( $PSCQConfig[$i].DistributionList03 -ne "" )
       {
-         $DL += '"' + $PSCQConfig.DistributionList03[$i] + '"'
+         $DL += '"' + $PSCQConfig[$i].DistributionList03 + '"'
       }
 
-      if ( $PSCQConfig.DistributionList04[$i] -ne "" )
+      if ( $PSCQConfig[$i].DistributionList04 -ne "" )
       {
-         $DL += '"' + $PSCQConfig.DistributionList04[$i] + '"'
+         $DL += '"' + $PSCQConfig[$i].DistributionList04 + '"'
       }
       $DistributionLists = $DL -join ","
 
 
       $Agents = @()
-      if ( $PSCQConfig.Agent01[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent01 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent01[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent01 + '"'
       }
 
-      if ( $PSCQConfig.Agent02[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent02 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent02[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent02 + '"'
       }
 
-      if ( $PSCQConfig.Agent03[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent03 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent03[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent03 + '"'
       }
 
-      if ( $PSCQConfig.Agent04[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent04 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent04[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent04 + '"'
       }
 
-      if ( $PSCQConfig.Agent05[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent05 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent05[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent05 + '"'
       }
 
-      if ( $PSCQConfig.Agent06[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent06 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent06[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent06 + '"'
       }
 
-      if ( $PSCQConfig.Agent07[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent07 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent07[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent07 + '"'
       }
 
-      if ( $PSCQConfig.Agent08[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent08 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent08[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent08 + '"'
       }
 
-      if ( $PSCQConfig.Agent09[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent09 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent09[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent09 + '"'
       }
 
-      if ( $PSCQConfig.Agent10[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent10 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent10[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent10 + '"'
       }
 
-      if ( $PSCQConfig.Agent11[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent11 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent11[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent11 + '"'
       }
 
-      if ( $PSCQConfig.Agent12[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent12 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent12[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent12 + '"'
       }
 
-      if ( $PSCQConfig.Agent13[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent13 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent13[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent13 + '"'
       }
 
-      if ( $PSCQConfig.Agent14[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent14 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent14[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent14 + '"'
       }
 
-      if ( $PSCQConfig.Agent15[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent15 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent15[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent15 + '"'
       }
 
-      if ( $PSCQConfig.Agent16[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent16 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent16[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent16 + '"'
       }
 
-      if ( $PSCQConfig.Agent17[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent17 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent17[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent17 + '"'
       }
 
-      if ( $PSCQConfig.Agent18[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent18 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent18[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent18 + '"'
       }
 
-      if ( $PSCQConfig.Agent19[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent19 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent19[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent19 + '"'
       }
 
-      if ( $PSCQConfig.Agent20[$i] -ne "" )
+      if ( $PSCQConfig[$i].Agent20 -ne "" )
       {
-         $Agents += '"' + $PSCQConfig.Agent20[$i] + '"'
+         $Agents += '"' + $PSCQConfig[$i].Agent20 + '"'
       }
       $Users = $Agents -join ","
 
