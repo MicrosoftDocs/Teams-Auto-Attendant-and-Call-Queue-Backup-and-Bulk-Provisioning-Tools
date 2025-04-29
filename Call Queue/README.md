@@ -62,8 +62,7 @@ Note: These permissions are requested only if Resource Account creation and lice
 
 ### BulkCQsPreparation.ps1
 
-- Download option
-  - Possible issue when there are more than 20 agents in the call queue.
+- No known issues
 
 ### BulkCQsProvisioning.ps1
 
@@ -79,9 +78,7 @@ Note: These permissions are requested only if Resource Account creation and lice
   - While all the resource accounts assigned to the call queue are downloaded, only the first one is shown under ***ResourceAccountName***
   - While all the on-behalf-of outbound dialing numbers assigned to the call queue are downloaded, only the first 4 are shown under ***OutboundCLID01*** through ***OutboundCLID04***
   - The filenames for the audio prompts are actually hyperlinks even though they are not shown this way in Excel. Clicking on the filename will play the respective file.
-  - Once the ***Show All Existing Queues*** option is set to **No** and values in the ***Action*** or ***CallQueueName*** cells have been changed, switching the ***Show All Existing Queues*** option back to **Yes** will not affect the cells that have been manually changed as the formula in these cells has been replaced.
-    - This is an issue with Excel.
-    - Manually copy the formulas from unaffected cells.
+  - Columns with yellow headers are currently not working correctly
 
 - It is highly likely there are some conditional formatting errors. Please report these so they can be addressed.
 
@@ -91,7 +88,6 @@ Note: These permissions are requested only if Resource Account creation and lice
 
 - Address known issues
 - Investigate Resource Account priority lookup when resource account type is AA
-- Investigate Teams Channel logic
 - Introduce configurable limits
 
 ### BulkCQsProvisioning.ps1
