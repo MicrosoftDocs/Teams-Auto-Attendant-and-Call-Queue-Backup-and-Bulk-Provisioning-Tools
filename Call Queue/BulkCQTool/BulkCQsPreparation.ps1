@@ -155,14 +155,14 @@ if ( $args -ne "" )
 	
 	if ( $Download )
 	{
-#		$NoAutoAttendants = $false
+		$NoAutoAttendants = $false
 		$NoCallQueues = $false
-#		$NoPhoneNumbers = $false
-#		$NoResourceAccounts = $false
-#		$NoTeamsChannels = $false
-#		$NoTeamsScheduleGroups = $false
-#		$NoUsers = $false
-#		$NoCR4CQTemplates = $false
+		$NoPhoneNumbers = $false
+		$NoResourceAccounts = $false
+		$NoTeamsChannels = $false
+		$NoTeamsScheduleGroups = $false
+		$NoUsers = $false
+		$NoCR4CQTemplates = $false
 		$Verbose = $true
 	}
 	
