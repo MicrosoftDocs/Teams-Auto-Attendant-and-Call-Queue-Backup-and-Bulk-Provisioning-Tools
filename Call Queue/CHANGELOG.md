@@ -34,9 +34,10 @@ Notes
 
 | Date       | Version | Supported | Description                                               |
 |:-----------|:-------|:---------:|:-----------------------------|
-| 2025.04.28 | 1.0.2  | Yes       | - Compliance Recording For Call Queues<sup>1</sup> |
+| 2025.05.22 | 1.0.3  | Yes       | - Call Priorities support                          |
+| 2025.04.28 | 1.0.2  | No        | - Compliance Recording For Call Queues<sup>1</sup> |
 | 2025.04.21 | 1.0.1  | No        | - Microsoft Shifts<sup>1</sup><br>- Updated data validation and conditional formatting method<br>- Started support for variable ranges   |
-| 2025.01.23 | 1.0.0  | No        | Initial release              |
+| 2025.01.23 | 1.0.0  | No        | Initial release                                    |
 
 Notes:
 1. VoiceApps preview customers only
