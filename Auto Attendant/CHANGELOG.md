@@ -24,6 +24,7 @@
 
 | Date       | Version | Supported | Description                                               |
 |:-----------|:-------|:---------:|:-----------------------------|
-| 2025.04.10 | 1.0.2  | Yes       | - Support for Voice app & Resource account routing options to match TAC<br>- Multiple bug fixes |
-|            | 1.0.0  | N/A       | Internal testing release     |
+| 2025.05.22 | 1.0.3  | Yes       | - Call priorities support    |
+| 2025.04.10 | 1.0.2  | No        | - Support for Voice app & Resource account routing options to match TAC<br>- Multiple bug fixes |
+|            | 1.0.1  | N/A       | Internal testing release     |
 | 2025.01.23 | 1.0.0  | No        | Initial release              |
