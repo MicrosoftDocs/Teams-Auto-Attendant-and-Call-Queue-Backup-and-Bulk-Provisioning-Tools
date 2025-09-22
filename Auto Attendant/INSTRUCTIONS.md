@@ -6,24 +6,21 @@ Alternatively, from the main **Code** page, select *<> Code* and *Download ZIP* 
 
 # Preparation Instructions
 
-This step will download the existing resource account, auto attendant, call queue, Teams channels and, user configurations in the tenant so they can be referenced when provisioning new auto attendants.
-
-1. Login to Teams Admin Center and get the number of Auto Attendants and Call Queues configured in your tenant:
-
-   ![Screenshot showing the Teams Admin Center summary table headers for Auto Attendants and Call Queues.](/media/TAC-Number-AA-CQ.png)
+This step will download the existing auto attendants, call queues, hoildays, phone numbers, resource accounts, Teams channels and, user configurations in the tenant so they can be referenced when provisioning new auto attendants.
 
 1. Open a PowerShell 5.x window
    - Issue the command: $PsVersionTable.PSVersion if not sure
-1. In the PowerShell window, run the "BulkAAsPreparation.ps1" script.	
+1. In the PowerShell window, run the "BulkAAsPreparation.ps1" script with any of the optional parameters below.	
    - This will prepare and open the BulkAAs spreadsheet.
-   - If your tenant has more than 100 Auto Attendants or Call Queues use the -AACount or -CQCount options as outlined below.
+   
 
 ## BulkAAsPreparation.ps1 command line options
 
 | Option              | Description                                        |
 |:--------------------|----------------------------------------------------|
-| -AACount n          | Replace n with the number of Auto Attendants from Step 1. <br>*Only use when the number of Auto Attendants is greater than 100.*           |         
-| -CQCount n          | Replace n with the number of Call Queues from Step 1. <br>*Only use when the number of Call Queues is greater than 100*                    |
+| -AACount n          | All Auto Attendants are processed by default.  Use `-AACount n` to restrict the processing to the first n Auto Attendants                  |         
+| -CQCount n          | All Call Queues are processed by default.  Use -CQCount n` to restrict the processing to the first n Call Queues                           |
+| -Download           | Download all Auto Attendant configuration, including audio files.                                                                          |
 | -ExcelFile filename | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsPreparation.ps1 file<br>Default: BulkAAs.xlsm |
 | -Help               | This help message.                                                                                                                         |
 | -NoResourceAccounts | Do not download existing resource account information.                                                                                     |
