@@ -62,9 +62,9 @@ Note: These permissions are requested only if Resource Account creation and lice
 
 ## Known Issues
 
-### BulkAAsPreparation.ps1
+### BulkAAsPreparation.ps1 - v1.0.4
 
-- Can only retrieve holiday schedules that are assigned to an Auto Attendant
+- No known issues
 
 ### BulkAAsProvisioning.ps1
 
@@ -83,8 +83,7 @@ Note: These permissions are requested only if Resource Account creation and lice
 ### BulkAAsPreparation.ps1
 
 - Address known issues
-- Get all holiday sets
-- Download Auto Attendant configurations
+- Download Auto Attendant configurations - delivered 2025.09.22 with v1.0.4
 
 ### BulkAAsProvisioning.ps1
 
