@@ -18,20 +18,21 @@ This step will download the existing auto attendants, call queues, hoildays, pho
 
 | Option              | Description                                        |
 |:--------------------|----------------------------------------------------|
-| -AACount n          | All Auto Attendants are processed by default.  Use `-AACount n` to restrict the processing to the first n Auto Attendants                  |         
-| -CQCount n          | All Call Queues are processed by default.  Use -CQCount n` to restrict the processing to the first n Call Queues                           |
+| -AACount n          | All Auto Attendants are processed by default.  Use `-AACount n` to restrict the processing to the first `n` Auto Attendants                |         
+| -CQCount n          | All Call Queues are processed by default.  Use `-CQCount n` to restrict the processing to the first `n` Call Queues                        |
 | -Download           | Download all Auto Attendant configuration, including audio files.                                                                          |
 | -ExcelFile filename | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsPreparation.ps1 file<br>Default: BulkAAs.xlsm |
 | -Help               | This help message.                                                                                                                         |
-| -NoResourceAccounts | Do not download existing resource account information.                                                                                     |
+| -NoResourceAccounts | Do not download existing resource account information. <br>*Ignored if **-Download** specified*                                            |
 | -NoAutoAttendants   | Do not download existing auto attendant information. <br>*Automaticaly enables*  **-NoHolidays**                                           |
-| -NoHolidays         | Do not download existing auto attendant holiday information.                                                                               |
-| -NoCallQueues       | Do not download existing call queue information.                                                                                           |
-| -NoPhoneNumbers     | Do not download existing voice application phone numbers.                                                                                  |
-| -NoUsers            | Do not download existing EV enabled users.                                                                                                 |
-| -NoTeams            | Do not download existing teams information.                                                                                                |
+| -NoHolidays         | Do not download existing auto attendant holiday information. <br>*Ignored if **-Download** specified*                                      |
+| -NoCallQueues       | Do not download existing call queue information. <br>*Ignored if **-Download** specified*                                                  |
+| -NoPhoneNumbers     | Do not download existing voice application phone numbers. <br>*Ignored if **-Download** specified*                                         |
+| -NoUsers            | Do not download existing EV enabled users. <br>*Ignored if **-Download** specified*                                                        |
+| -NoTeams            | Do not download existing teams information. <br>*Ignored if **-Download** specified*                                                       |
 | -NoOpen             | Do not open the spreadsheet when the BulkAAsPreparation.ps1 script is finished.                                                            |
-| -Verbose            | Watch the spreadsheet get filled with information as the BulkAAsPreparation.psl1 script runs.<br>*Automaticaly disables*  **-NoOpen**      | 
+| -Verbose            | Displays extra information as the BulkAAsPreparation.ps1 script runs.                                                                      |
+| -View               | Watch the spreadsheet get filled with information as the BulkAAsPreparation.ps1 script runs.<br>*Automaticaly disables*  **-NoOpen**       | 
 
 # Provisioning Instructions
 
