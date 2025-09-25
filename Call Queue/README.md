@@ -45,14 +45,14 @@ Open the PowerShell window as an administrator.
 
 To perform resource accounts related activities, when prompted, login with an account that has the necessary permissions:  [Manage resource accounts for service numbers - Microsoft Teams | Microsoft Learn](https://learn.microsoft.com/microsoftteams/manage-resource-accounts#assign-permissions-for-managing-a-resource-account)
 
-### Microsoft Graph Scopes Requested
+## Microsoft Graph Scopes Requested
 
-The BulkCQsPreparation.ps1 PowerShell script requests the folllowing Microsoft Graph scopes:
+### BulkCQsPreparation.ps1
   - Schedule.Read.All
 
 Note: This permission is requested only if Teams Schedule Groups are being downloaded.
 
-The BulkCQsProvisioning.ps1 PowerShell script requests the following Microsoft Graph scopes:
+### BulkCQsProvisioning.ps1
   - Organization.Read.All
   - User.ReadWrite.All
 
@@ -73,12 +73,6 @@ Note: These permissions are requested only if Resource Account creation and lice
 
 - **Config-CallQueue** tab
   - No known issues
-
-- **Existing-CallQueue** tab
-  - While all the resource accounts assigned to the call queue are downloaded, only the first one is shown under ***ResourceAccountName***
-  - While all the on-behalf-of outbound dialing numbers assigned to the call queue are downloaded, only the first 4 are shown under ***OutboundCLID01*** through ***OutboundCLID04***
-  - The filenames for the audio prompts are actually hyperlinks even though they are not shown this way in Excel. Clicking on the filename will play the respective file.
-  - Columns with yellow headers are currently not working correctly
 
 - It is highly likely there are some conditional formatting errors. Please report these so they can be addressed.
 
