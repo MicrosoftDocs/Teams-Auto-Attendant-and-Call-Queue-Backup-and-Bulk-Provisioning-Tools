@@ -9,7 +9,7 @@
   
 | Date       | Version | Supported | Description                                               |
 |:-----------|:--------|:---------:|:----------------------------------------------------------|
-| 2025.09.25 | 1.0.6   | Yes       | - Version checking for BulkCQs.xlsm<br>-Changed how -AACount, -CQCount work<br>-Scrolling in view mode |
+| 2025.09.25 | 1.0.6   | Yes       | - Version checking for BulkCQs.xlsm<br>- Changed how -AACount, -CQCount work<br>- Scrolling in view mode |
 | 2025.04.28 | 1.0.5   | Yes       | - Compliance Recording for Call Queues<sup>2</sup><br>- Changed Teams-Channels/Teams-SchedulingGroups retrieval and Excel logic<br>- Corrected all array references<br>-Streamlined data retrieval for AAs, CQs and CQ download<br>- Audio file being downloaded now shown with -Verbose<br>- Check if Excel file already open<br>- Turn auto save and auto calculation off and restore at end |
 | 2025.04.22 | 1.0.4   | No        | - Fixed bug that resulted in erasing downloaded call queue information |
 | 2025.04.21 | 1.0.3   | No        | - Microsoft Shifts<br>- Fixed issue with -AACount, -CQCount when < 100<br>- Conflicting parameters now stop processing<br>- Updated method for checking version of PowerShell modules<br>- Disconnect from Microsoft.Graph before reconnect<br>- Updated Help as Callback is no GA<br>- Updated output formatting |
