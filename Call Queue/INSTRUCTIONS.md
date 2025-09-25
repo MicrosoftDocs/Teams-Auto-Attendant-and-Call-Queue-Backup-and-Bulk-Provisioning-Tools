@@ -8,10 +8,6 @@ Alternatively, from the main **Code** page, select *<> Code* and *Download ZIP* 
 
 This step will download the existing resource account, auto attendant, call queue, Teams channels, and user configurations in the tenant so they can be referenced when provisioning new call queues.
 
-1. Login to Teams Admin Center and get the number of Auto Attendants and Call Queues configured in your tenant:
-
-   ![Screenshot showing the Teams Admin Center summary table headers for Auto Attendants and Call Queues.](/media/TAC-Number-AA-CQ.png)
-
 1. Open a PowerShell 5.x window
    - Issue the command: $PsVersionTable.PSVersion if not sure
    - "Run as administrator" is suggested as the script will try to install the [required PowerShell modules](./README.md#required-powershell-modules) if they aren't present.
@@ -23,23 +19,24 @@ This step will download the existing resource account, auto attendant, call queu
 
 | Option              | Description                                                                                                                                |
 |:--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| -AACount n          | Replace n with the number of Auto Attendants from Step 1. <br>*Only use when the number of Auto Attendants is greater than 100.*           |         
-| -CQCount n          | Replace n with the number of Call Queues from Step 1. <br>*Only use when the number of Call Queues is greater than 100*                    |
+| -AACount n          | All Auto Attendants are processed by default. Use `-AACount n` to restrict the processing to the first `n` Auto Attendants                 |         
+| -CQCount n          | All Call Queues are processed by default. Use `-CQCount n` to restrict the processing to the first `n` Call Queues                         |
 | -Download           | Download all Call Queue data, including audio files.                                                                                       |
-| -ExcelFile filename | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkAAsPreparation.ps1 file<br>Default: BulkCQs.xlsm |
+| -ExcelFile filename | Specify an alternative Excel spreadsheet to use. Must be in the same directory as the BulkCQsPreparation.ps1 file<br>Default: BulkCQs.xlsm |
 | -Help               | This help message.                                                                                                                         |
 | -NoResourceAccounts | Do not download existing resource account information.                                                                                     |
-| -NoAutoAttendants   | Do not download existing auto attendant information.                                                                                       |
-| -NoCallQueues       | Do not download existing call queue information.                                                                                           |
-| -NoUsers            | Do not download existing EV enabled users.                                                                                                 |
-| -NoTeamsChannels    | Do not download existing teams information.                                                                                                |
-| -NoTeamsScheduleGroups    | Do not download existing teams schedule groups                                                                                       |
+| -NoAutoAttendants   | Do not download existing auto attendant information.<br>*Ignored if **-Download** specified*                                               |
+| -NoCallQueues       | Do not download existing call queue information.<br>*Ignored if **-Download** specified*                                                   |
+| -NoUsers            | Do not download existing EV enabled users.<br>*Ignored if **-Download** specified*                                                         |
+| -NoTeamsChannels    | Do not download existing teams information.<br>*Ignored if **-Download** specified*                                                        |
+| -NoTeamsScheduleGroups    | Do not download existing teams schedule groups. <br>*Ignored if **-Download** specified*                                             |
 | -NoOpen             | Do not open the spreadsheet when the BulkCQsPreparation.ps1 script is finished.                                                            |
-| -Verbose            | Watch the spreadsheet get filled with information as the BulkAAsPreparation.psl1 script runs.<br>*Automaticaly disables*  **-NoOpen**      | 
+| -Verbose            | Watch the spreadsheet get filled with information as the BulkAAsPreparation.psl1 script runs.<br>*Automaticaly disables*  **-NoOpen**      |
+| -View               | Watch the spreadsheet get filled with information as the BulkCQsPreparation.ps1 script runs.                                               |
 
 ## -Download notes
 
-- All prompt downloads for a call queue will be in the AudioFiles directory, in a sub-directories by the call queue ID. This is due to the fact that call queue names are not unique.
+- All prompt downloads for a call queue will be in the AudioFiles directory, in sub-directories by call queue name, prefixed with the call queue id and underscore. This is due to the fact that call queue names are not unique.
 - All audio file names will be prefixed with the unique file id and underscore. This is due to the fact that the same file name used within the same call queue may not actually have the same content.
 
 # Preparing The Spreadsheet
