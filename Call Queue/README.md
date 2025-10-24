@@ -12,7 +12,7 @@
 ## Required PowerShell Modules
 Missing or outdated modules will be automatically installed or updated.
 
-- MicrosoftTeams - 7.0.0 or later
+- MicrosoftTeams - 7.1.0 or later
 - Microsoft.Graph - 2.24.0 or later
 - ImportExcel - 7.8.0
 
