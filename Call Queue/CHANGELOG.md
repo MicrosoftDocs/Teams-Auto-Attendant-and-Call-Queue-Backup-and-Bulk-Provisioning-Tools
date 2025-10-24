@@ -45,8 +45,9 @@ Notes
 | Date       | Version | Supported | Description                                       |
 |:-----------|:-------|:---------:|:---------------------------------------------------|
 | 2025.09.25 | 1.0.6  | Yes       | - Reordered tabs                                   |
-| 2025.08.18 | 1.0.4  | Yes       | - Microsoft Shifts General Availability            |
-| 2025.05.22 | 1.0.3  | Yes       | - Call Priorities support                          |
+|            | 1.0.5  | N/A       | Internal testing release                           |
+| 2025.08.18 | 1.0.4  | No        | - Microsoft Shifts General Availability            |
+| 2025.05.22 | 1.0.3  | No        | - Call Priorities support                          |
 | 2025.04.28 | 1.0.2  | No        | - Compliance Recording For Call Queues<sup>1</sup> |
 | 2025.04.21 | 1.0.1  | No        | - Microsoft Shifts<br>- Updated data validation and conditional formatting method<br>- Started support for variable ranges   |
 | 2025.01.23 | 1.0.0  | No        | Initial release                                    |
