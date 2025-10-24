@@ -102,7 +102,7 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | TimeoutTreatmentPrompt          | Name of audio file or the text message for TTS.                                                   |
 | TimeoutSharedVoicemailSystemPromptSuppression | Supress the system greeting message for shared voicemail.<br>Note: Only available when `TimeoutAction` is *Redirect - Voicemail (shared)*    |
 | TimeoutSharedVoicemailTranscription | Enable voicemail transcription for shared voicemail.<br>Note: Only available when `TimeoutAction` is *Redirect - Voicemail (shared)*    |
-| NoAgentsApplyTo                 | The No agents configuration applies to.<br><ul><li>*All calls (Default):* Calls already in queue and new calls arriving to the queue</li><li>*New calls:* Only new calls that arrive once the No Agents condition occurs, existing calls in queue remain in queue |
+| NoAgentsApplyTo                 | The [No agents](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-exception-handling#no-agents-optedlogged-in-set-how-to-handle-calls-when-no-agents-are-optedlogged-into-the-queue) configuration applies to.<br><ul><li>*All calls (Default):* Calls already in queue and new calls arriving to the queue</li><li>*New calls:* Only new calls that arrive once the No Agents condition occurs, existing calls in queue remain in queue |
 | NoAgentAction                    | Action to take once the No Agents condition occurs.<br><ul><li>*Queue call (Default):* The No Agents treatment is ignored and calls are queued<ul><li>*Disconnect:* Disconnected</li><li>*Redirect - Person in organization:* Redirected to a Teams user in the tenant</li><li>*Redirect - Voice app:* Redirected to another Auto Attendant or Call Queue through a resource account or directly<sup>2</sup></li><li>*Redirect - External phone number:* Redirected to the PSTN<sup>3</sup></li><li>*Redirect - Voicemail personal:* Redirected to a Teams user's voicemail</li><li>*Redirect - Voicemail (shared):* Redirected to a shared voicemail</li></ul> |
 | NoAgentActionTarget             | The target of the `NoAgentAction`.<br>Note:<br>1. Only available if `NoAgentAction` is not *Disconnect (Default)*<br>2. When `NoAgentAction` is *Redirect - External phone number* the values here will be:<br><ul><li>*Calling Plan:* Microsoft numbers are being used</li><li>*Direct Routing:* Direct Routing is being used</li><li>*Operator Connect:* Operator Connect numbers are being used</li></ul>                                                       |
 | NoAgentActionTargetCountry      | The country calls will be routed to.<br>Note: Only available if `NoAgentAction` is *Redirect - External phone number* and `NoAgentActionTarget` is *Calling Plan*   |
@@ -112,7 +112,7 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | NoAgentTreatmentPrompt          | Name of audio file or the text message for TTS.                                               |
 | NoAgentSharedVoicemailSystemPromptSuppression | Supress the system greeting message for shared voicemail.<br>Note: Only available when `NoAgentAction` is *Redirect - Voicemail (shared)*    |
 | NoAgentSharedVoicemailTranscription | Enable voicemail transcription for shared voicemail.<br>Note: Only available when `NoAgentAction` is *Redirect - Voicemail (shared)*    |
-| IsCallbackEnabled                   | <ul><li>*Yes:* Callback is enabled.</li><li>*No:* Default: Callback is not enabled |
+| IsCallbackEnabled                   | Is [Callback](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=callback#step-5-callback-1) enabled.<ul><li>*Yes:* Callback is enabled.</li><li>*No:* Default: Callback is not enabled |
 | CallbackRequestDTMF                 | The key a caller need to press to request a callback. This should match what callers are told in the `CallbackOfferPrompt`.<br>Note: Only available if `IsCallbackEnabled` is *Yes*   |
 | WaitTimeBeforeOfferingCallbackInSecond | The number of seconds a caller must want before becoming *eligibe* for callback.<br>Note: Only available if `IsCallbackEnabled` is *Yes*  |
 | NumberOfCallsInQueueBeforeOfferingCallback | The number of calls that must be in queue before new callers become *eligibe* for callback.<br>Note: Only available if `IsCallbackEnabled` is *Yes*  |
@@ -120,10 +120,10 @@ Open the BulkCQs.xlsm, and enable macros if they have been disabled.
 | CallbackOfferTreatment     | The type of message that is played tp offer callback.<br><ul><li>*Play an audio file:* Use an audio file for the message</li><li>*Add a greeting message:* Use TTS for the message</li></ul>Note: Only available if `IsCallbackEnabled` is *Yes*  |
 | CallbackOfferPrompt        | Name of audio file or the text message for TTS.<br>Note: Only available if `IsCallbackEnabled` is *Yes*   |
 | CallbackEmailNotificationTarget | The distribution list to send emails to about callbacks that timeout.<br>Note: Only available if `IsCallbackEnabled` is *Yes* 
-| Team-Channel               | The Teams Channel to assign to the queue. |
-| Team-ScheduleGroup         | The Teams Schedule Group to the queue. |
-| DistributionList01-DistributionList04 | The distribution lists of agents to assign to the queue. |
-| Agent01-Agent20            | The agents to assign to the queue. |
+| Team-Channel               | The [Teams Channel](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-answering#teams-channel) to assign to the queue. |
+| Team-ScheduleGroup         | The [Teams Schedule Group](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-answering#shifts) to the queue. |
+| DistributionList01-DistributionList04 | The [distribution lists](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-answering#users-and-groups) of agents to assign to the queue. |
+| Agent01-Agent20            | The [agents](https://learn.microsoft.com/microsoftteams/create-a-phone-system-call-queue?tabs=call-answering#users-and-groups) to assign to the queue. |
 
 Notes: 
 1. If you're using a resource account for calling line ID purposes in Call queues, the resource account must have a Teams Phone Resource Account license and one of the following assigned:
