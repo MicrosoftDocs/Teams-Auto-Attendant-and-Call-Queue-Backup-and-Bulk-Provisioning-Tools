@@ -5,7 +5,7 @@
 ### Supported PowerShell Modules
 - MicrosoftTeams: Min: 7.0.0
 - ImportExcel:Min: 7.8.0
-- Microsoft.Graph<sup>1</sup>Min: 2.24.0
+- Microsoft.Graph<sup>1</sup>:Min: 2.24.0
   
 | Date       | Version | Supported | Description                                               |
 |:-----------|:--------|:---------:|:----------------------------------------------------------|
@@ -23,6 +23,11 @@ Notes:
 
 ## BulkCQsProvisioning.ps1
 
+### Supported PowerShell Modules
+- MicrosoftTeams: Min: 7.0.0
+- ImportExcel:Min: 7.8.0
+- Microsoft.Graph<sup>1</sup>:Min: 2.24.0
+
 | Date       | Version | Supported | Supported PowerShell Modules | Description                                               |
 |:-----------|:-------|:---------:|:-----------------------------|:----------------------------------------------------------|
 | 2025.04.28 | 1.0.4  | Yes       | MicrosoftTeams:<ul><li>Min: 7.0.0</li></ul>ImportExcel:<ul><li>Min: 7.8.0</li></ul>Microsoft.Graph:<ul><li>Min: 2.24.0</li></ul> | - Compliance Recording for Call Queues<sup>2</sup> |
@@ -34,7 +39,6 @@ Notes:
 Notes
 1. Use -NoResourceAccounts or -NoResourceAccountCreation or -NoResourceAccountLicensing to avoid loading Microsoft.Graph modules
 2. VoiceApps preview customers only
-
 
 ## BulkCQs.xlsm
 
