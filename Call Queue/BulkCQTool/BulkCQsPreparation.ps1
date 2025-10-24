@@ -1,5 +1,5 @@
-# Version: 1.0.6
-# Date: 2025.09.25
+# Version: 1.0.7
+# Date: 2025.10.24
 
 #
 # Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Call%20Queue/CHANGELOG.md
@@ -225,7 +225,7 @@ function TargetIDLookup
 #
 if ( $PSVersionTable.PSVersion.Major -ne 5 )
 {
-	Write-Error "This script is only supported in PowerShell v5.x"
+	Write-Error "This script is only supported in PowerShell v5.x" -f Red
 	exit
 }
 
@@ -368,7 +368,7 @@ $MaximumFunctionCount = 32768
 #
 # Module Min Supported Versions
 #
-$MicrosoftTeamsMinVersion = [version]"7.0.0"
+$MicrosoftTeamsMinVersion = [version]"7.1.0"
 $MicrosoftGraphMinVersion = [version]"2.24.0"
 $ImportExcelMinVersion = [version]"7.8.0"
 
@@ -378,7 +378,7 @@ $ImportExcelMinVersion = [version]"7.8.0"
 $ExcelSpreadsheetRequiredVersion = "1.0.6"
 $ExcelSpreadsheetVersionSheet = "Data"
 $ExcelSpreadsheetVersionRowRef = 2
-$ExcelSpreadsheetVersionColRef = 46
+$ExcelSpreadsheetVersionColRef = 50
 
 #
 # Set range variables
@@ -463,7 +463,7 @@ else
    } 
    catch [System.UnauthorizedAccessException] 
    { 
-      Write-Error "`tNot signed into Microsoft Teams!" -f Teams
+      Write-Error "`tNot signed into Microsoft Teams!" -f Red
       exit
    }
    Write-Host "`tConnected to Microsoft Teams." -f Green
@@ -894,7 +894,7 @@ if ( ! $NoPhoneNumbers )
 
 	Write-Host "Retrieving list of existing voice application phone numbers" -f Green
 
-	$PhoneNumbers = @(Get-CsPhoneNumberAssignment -CapabilitiesContain "VoiceApplicationAssignment" -PstnAssignmentStatus "Unassigned")
+	$PhoneNumbers = @(Get-CsPhoneNumberAssignment -CapabilitiesContain "VoiceApplicationAssignment" -PstnAssignmentStatus "Unassigned" | Sort-Object TelephoneNumber)
 	
 	if ( $Verbose )
 	{
