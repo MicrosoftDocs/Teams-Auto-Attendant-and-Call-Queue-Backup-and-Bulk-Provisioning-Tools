@@ -1,5 +1,5 @@
-# Version: 1.0.7
-# Date: 2025.10.24
+# Version: 1.0.8
+# Date: 2026.03.02
 #
 
 # Changelog: https://github.com/MicrosoftDocs/Teams-Auto-Attendant-and-Call-Queue-Backup-and-Bulk-Provisioning-Tools/blob/main/Call%20Queue/CHANGELOG.md
@@ -1297,11 +1297,10 @@ $MaximumFunctionCount = 32768
 $MicrosoftTeamsMinVersion = [version]"7.1.0"
 $MicrosoftGraphMinVersion = [version]"2.24.0"
 $ImportExcelMinVersion = [version]"7.8.0"
-
 #
 # BulkCQs.xlms Required Version
 #
-$ExcelSpreadsheetRequiredVersion = "1.0.6"
+$ExcelSpreadsheetRequiredVersion = "1.0.8"
 $ExcelSpreadsheetVersionSheet = "Data"
 
 
