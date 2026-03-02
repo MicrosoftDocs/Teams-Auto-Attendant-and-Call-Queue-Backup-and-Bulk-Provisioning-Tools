@@ -9,7 +9,8 @@
   
 | Date       | Version | Supported | Description                                                            |
 |:-----------|:--------|:---------:|:-----------------------------------------------------------------------|
-| 2025.10.24 | 1.0.7   | Yes       | - Shared Call Queue History<sup>2</sup><br>- Ordered phone numbers     |
+| 2026.03.02 | 1.0.8   | Yes       | - Shared Call History and Compliance Recording for Call Queues are now generally available |
+| 2025.10.24 | 1.0.7   | No        | - Shared Call Queue History<sup>2</sup><br>- Ordered phone numbers     |
 | 2025.09.25 | 1.0.6   | No        | - Version checking for BulkCQs.xlsm<br>- Changed how -AACount, -CQCount work<br>- Scrolling in view mode |
 | 2025.04.28 | 1.0.5   | No        | - Compliance Recording for Call Queues<sup>2</sup><br>- Changed Teams-Channels/Teams-SchedulingGroups retrieval and Excel logic<br>- Corrected all array references<br>-Streamlined data retrieval for AAs, CQs and CQ download<br>- Audio file being downloaded now shown with -Verbose<br>- Check if Excel file already open<br>- Turn auto save and auto calculation off and restore at end |
 | 2025.04.22 | 1.0.4   | No        | - Fixed bug that resulted in erasing downloaded call queue information |
@@ -31,7 +32,8 @@ Notes:
 
 | Date       | Version | Supported | Supported PowerShell Modules | Description                                               |
 |:-----------|:--------|:---------:|:-----------------------------|:----------------------------------------------------------|
-| 2025.10.24 | 1.0.7   | Yes       | - Shared Call Queue History<sup>2</sup><br>- Created Shared Call History templates and Resource Accounts first<br>- Version checking for BulkCQs.xlsm |
+| 2026.03.02 | 1.0.8   | Yes       | - Shared Call Hisotry and Compliance Recording for Call Queues are now generally available |
+| 2025.10.24 | 1.0.7   | No        | - Shared Call Queue History<sup>2</sup><br>- Created Shared Call History templates and Resource Accounts first<br>- Version checking for BulkCQs.xlsm |
 |            | 1.0.6   | N/A       | Internal testing release                                                                 |
 |            | 1.0.5   | N/A       | Internal testing release                                                                 |
 | 2025.04.28 | 1.0.4   | No        | - Compliance Recording for Call Queues<sup>2</sup>                                       |
@@ -48,7 +50,8 @@ Notes
 
 | Date       | Version | Supported | Description                                       |
 |:-----------|:-------|:---------:|:---------------------------------------------------|
-| 2025.10.24 | 1.0.7  | Yes       | - Shared Call Queue History<sup>1</sup><br>        |
+| 2026.03.02 | 1.0.8  | Yes       | - Shared Call History and Compliance Recording for Call Queues support |
+| 2025.10.24 | 1.0.7  | No        | - Shared Call Queue History<sup>1</sup><br>        |
 | 2025.09.25 | 1.0.6  | No        | - Reordered tabs                                   |
 |            | 1.0.5  | N/A       | Internal testing release                           |
 | 2025.08.18 | 1.0.4  | No        | - Microsoft Shifts General Availability            |
